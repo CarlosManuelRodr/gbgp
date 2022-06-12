@@ -1,11 +1,9 @@
-#include <iostream>
+#include "doctest.h"
 #include "../include/cst_tree.h"
 using namespace std;
 
 /****************************
-*                           *
 *    Grammar declaration    *
-*                           *
 ****************************/
 
 // Types declaration.
@@ -20,7 +18,7 @@ enum class ArithmeticNonTerm
 };
 
 // Term/Nonterm declaration.
-const Terminal<ArithmeticTerm> varTerm(ArithmeticTerm::Variable, "var", { "a", "b" });
+const Terminal<ArithmeticTerm> varTerm(ArithmeticTerm::Variable, "var", { "a", "b", "c" });
 const Terminal<ArithmeticTerm> plusTerm(ArithmeticTerm::Plus, "Plus", { "+" });
 const Terminal<ArithmeticTerm> timesTerm(ArithmeticTerm::Times, "Times", { "*" });
 const Terminal<ArithmeticTerm> leftParenthesisTerm(ArithmeticTerm::LeftParenthesis, "LeftParenthesis", { "(" });
@@ -106,42 +104,9 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
 Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
 
 /****************************
-*                           *
 *       Test routines       *
-*                           *
 ****************************/
-
-/// <summary>
-/// Construct tree representing the expression "a+a*a".
-/// </summary>
-/// <returns>The ConcreteSyntaxTree corresponding to this expression.</returns>
-ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ConstructSampleExpr()
-{
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast(grammar);
-    ast.GetRoot()->generatorPR = rule1;
-    auto leftExpr = ast.AddNode(ast.GetRoot(), exprNonTerm, rule2);
-    auto middleSum = ast.AddNode(ast.GetRoot(), plusTerm);
-    auto rightTerm = ast.AddNode(ast.GetRoot(), termNonTerm, rule3);
-
-    auto leftTerm = ast.AddNode(leftExpr, termNonTerm, rule4);
-    auto leftFactor = ast.AddNode(leftTerm, factorNonTerm, rule6);
-    auto leftVar = ast.AddNode(leftFactor, varTerm, "a");
-
-
-    auto rightLeftTerm = ast.AddNode(rightTerm, termNonTerm, rule4);
-    auto rightMultiplication = ast.AddNode(rightTerm, timesTerm);
-    auto rightRightFactor = ast.AddNode(rightTerm, factorNonTerm, rule6);
-
-    auto rightLeftFactor = ast.AddNode(rightLeftTerm, factorNonTerm, rule6);
-    auto rightLeftVar = ast.AddNode(rightLeftFactor, varTerm, "a");
-
-    auto rightRightVar = ast.AddNode(rightRightFactor, varTerm, "a");
-
-    return ast;
-}
-
-
-int main()
+TEST_CASE("Testing subtree insertion")
 {
     // First tree
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1(grammar);
@@ -153,7 +118,6 @@ int main()
     auto leftTerm1 = ast1.AddNode(leftExpr1, termNonTerm, rule4);
     auto leftFactor1 = ast1.AddNode(leftTerm1, factorNonTerm, rule6);
     auto leftVar1 = ast1.AddNode(leftFactor1, varTerm, "a");
-
 
     auto rightLeftTerm1 = ast1.AddNode(rightTerm1, termNonTerm, rule4);
     auto rightMultiplication1 = ast1.AddNode(rightTerm1, timesTerm);
@@ -173,8 +137,7 @@ int main()
 
     auto leftTerm2 = ast2.AddNode(leftExpr2, termNonTerm, rule4);
     auto leftFactor2 = ast2.AddNode(leftTerm2, factorNonTerm, rule6);
-    auto leftVar2 = ast2.AddNode(leftFactor2, varTerm, "a");
-
+    auto leftVar2 = ast2.AddNode(leftFactor2, varTerm, "c");
 
     auto rightLeftTerm2 = ast2.AddNode(rightTerm2, termNonTerm, rule4);
     auto rightMultiplication2 = ast2.AddNode(rightTerm2, timesTerm);
@@ -185,27 +148,12 @@ int main()
 
     auto rightRightVar2 = ast2.AddNode(rightRightFactor2, varTerm, "b");
 
+    CHECK(ast1.SynthesizeExpression() == "a+a*a");
+    CHECK(ast2.SynthesizeExpression() == "c+b*b");
 
-    cout << ast1.SynthesizeExpression() << endl;
-    cout << ast2.SynthesizeExpression() << endl;
-
-    cout << endl;
-
-    cout << "Original" << endl;
-    ast1.PrintTree();
-
-    cout << "\nWithout subtree" << endl;
     ast1.RemoveSubtree(rightTerm1);
-    ast1.PrintTree();
-
-    cout << endl;
-
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> subtree = ast2.GetSubtree(rightTerm2);
-    subtree.PrintTree();
-
-    cout << endl;
-
     ast1.InsertSubtree(rightTerm1, subtree.GetRoot());
-    ast1.PrintTree();
-    cout << ast1.SynthesizeExpression() << endl;
+
+    CHECK(ast1.SynthesizeExpression() == "a+b*b");
 }

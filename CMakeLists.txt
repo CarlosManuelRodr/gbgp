@@ -11,6 +11,7 @@ add_executable(gbgp
         include/gbgp.h
 
         tests/doctest.h
+        tests/testing.cpp
         tests/test_subtree_insertion.cpp
 
-        main.cpp)
+        )

@@ -5,9 +5,7 @@
 #include "grammar.h"
 
 /****************************
-*                           *
 *    Node implementation    *
-*                           *
 ****************************/
 
 /// <summary>
@@ -555,7 +553,7 @@ public:
     /// Copy constructor from reference.
     /// </summary>
     /// <param name="other">Pointer to the ConcreteSyntaxTree to be copied.</param>
-    explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType>* other)
+    [[maybe_unused]] explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType>* other)
     {
         root = new TreeNode<TerminalType, NonTerminalType>(other->root);
         root->parent = nullptr;
@@ -631,7 +629,7 @@ public:
     /// <summary>
     /// Check if the tree is empty.
     /// </summary>
-    bool IsEmpty()
+    [[maybe_unused]] bool IsEmpty()
     {
         return (root->children.size() == 0);
     }
@@ -749,15 +747,15 @@ public:
             // Check that both nodes are of the same type.
             if (insertNode->nonTermInstance.id == subtreeStartNode->nonTermInstance.id)
             {
-                auto* copySubtreStartNode = new TreeNode<TerminalType, NonTerminalType>();
-                CopyTree(copySubtreStartNode, subtreeStartNode);
+                auto* copySubtreeStartNode = new TreeNode<TerminalType, NonTerminalType>();
+                CopyTree(copySubtreeStartNode, subtreeStartNode);
 
                 // Find parent and replace child reference of insertNode to subtreeStartNode.
                 for (TreeNode<TerminalType, NonTerminalType>*& child : insertNode->parent->children)
                 {
                     if (child == insertNode)
                     {
-                        child = copySubtreStartNode;
+                        child = copySubtreeStartNode;
                         child->parent = insertNode->parent;
                         break;
                     }
@@ -915,7 +913,7 @@ public:
     /// Traverses the tree in a breadth first order.
     /// </summary>
     /// <returns>List of references of the traversed nodes.</returns>
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> BreadthFirstScan()
+    [[maybe_unused]] std::vector<TreeNode<TerminalType, NonTerminalType>*> BreadthFirstScan()
     {
         /*
             Algorithm BFS(tree)
