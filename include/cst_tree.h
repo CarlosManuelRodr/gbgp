@@ -42,8 +42,8 @@ private:
                               true, false, true, false, false, false, false, false };
 
         std::string res;
-        for (int i = 0; i < 16; i++) {
-            if (dash[i]) res += "-";
+        for (bool i : dash) {
+            if (i) res += "-";
             res += v[dist(rng)];
             res += v[dist(rng)];
         }
@@ -259,10 +259,7 @@ template <typename TerminalType, typename NonTerminalType> struct Graph
     std::vector<GraphEdge<TerminalType, NonTerminalType>> edges;
     std::vector<GraphNode<TerminalType, NonTerminalType>> nodes;
 
-    Graph()
-    {
-
-    }
+    Graph() = default;
     Graph(std::vector<GraphEdge<TerminalType, NonTerminalType>> pedges, std::vector<GraphNode<TerminalType, NonTerminalType>> pnodes)
     {
 
@@ -365,7 +362,7 @@ private:
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
             if (dfspo[i]->type == TreeNodeType::Terminal && dfspo[i]->termInstance.id == id && !vector_contains_q(avoid, i))
-                return i;
+                return static_cast<int>(i);
         }
         return -1;
     }
