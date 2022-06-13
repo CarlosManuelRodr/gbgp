@@ -3,19 +3,22 @@
 using namespace std;
 
 /****************************
-*    Grammar declaration    *
+*     Types declaration     *
 ****************************/
 
-// Types declaration.
 enum class ArithmeticTerm
 {
-    NullTerm [[maybe_unused]], Variable, Plus, Times, LeftParenthesis, RightParenthesis
+    NullTerm, Variable, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
 enum class ArithmeticNonTerm
 {
-    NullNonTerm [[maybe_unused]], Expr, Term, Factor
+    NullNonTerm, Expr, Term, Factor
 };
+
+/****************************
+*    Grammar declaration    *
+****************************/
 
 // Term/Nonterm declaration.
 const Terminal<ArithmeticTerm> varTerm(ArithmeticTerm::Variable, "var", { "a", "b", "c" });
@@ -101,13 +104,13 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
         }
 );
 
-Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-
 /****************************
 *       Test routines       *
 ****************************/
 TEST_CASE("Testing subtree insertion")
 {
+    Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
+
     // First tree
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1(grammar);
     ast1.GetRoot()->generatorPR = rule1;

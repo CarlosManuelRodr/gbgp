@@ -4,11 +4,10 @@
 #include <iterator>
 #include <random>
 #include <stdexcept>
+#include "random_gen.h"
 
 /****************************
-*                           *
 *   Vector initialization   *
-*                           *
 ****************************/
 
 // Source: https://stackoverrun.com/es/q/3539074#30312659
@@ -41,25 +40,12 @@ template <typename IntType> std::vector<IntType> range(IntType stop)
 }
 
 /****************************
-*                           *
 *  Vector sets operations   *
-*                           *
 ****************************/
-
-// Source: https://stackoverflow.com/a/16421677
-template<typename Iter, typename RandomGenerator> Iter select_randomly(Iter start, Iter end, RandomGenerator& g)
-{
-    const int distance = static_cast<int>(std::distance(start, end));
-    std::uniform_int_distribution<> dis(0, distance - 1);
-    std::advance(start, dis(g));
-    return start;
-}
 
 template<typename Iter> Iter select_randomly(Iter start, Iter end)
 {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-    return select_randomly(start, end, gen);
+    return RandomGen::SelectRandomly(start, end);
 }
 
 // Source: https://stackoverflow.com/a/3487814

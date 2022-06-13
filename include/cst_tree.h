@@ -272,7 +272,7 @@ template <typename TerminalType, typename NonTerminalType> struct Graph
     }
     bool IsEmpty()
     {
-
+        return true;
     }
 };
 

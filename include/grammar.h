@@ -224,14 +224,15 @@ public:
     Grammar() = default;
     Grammar(std::initializer_list<ProductionRule<TerminalType, NonTerminalType>> productionRuleList) : grammarRules(productionRuleList) {}
     Grammar(const Grammar<TerminalType, NonTerminalType>& other) : grammarRules(other.grammarRules) {}
-    explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
+
+    [[maybe_unused]] explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
 
     NonTerminal<NonTerminalType> GetRoot()
     {
         return grammarRules.front().from;
     }
 
-    int GetProductionRuleIndex(ProductionRule<TerminalType, NonTerminalType> pr)
+    [[maybe_unused]] int GetProductionRuleIndex(ProductionRule<TerminalType, NonTerminalType> pr)
     {
         return find_index_of(grammarRules, pr);
     }
@@ -259,7 +260,7 @@ public:
         return GetRandomCompatibleRule(this->GetRoot().id);
     }
 
-    unsigned Size()
+    [[maybe_unused]] unsigned Size()
     {
         return static_cast<unsigned>(grammarRules.size());
     }

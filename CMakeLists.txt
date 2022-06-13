@@ -12,6 +12,4 @@ add_executable(gbgp
 
         tests/doctest.h
         tests/testing.cpp
-        tests/test_subtree_insertion.cpp
-
-        )
+        tests/test_subtree_insertion.cpp tests/test_random_individual.cpp include/random_gen.h)
