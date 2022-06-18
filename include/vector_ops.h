@@ -57,14 +57,14 @@ template<typename Iter> Iter select_randomly(Iter start, Iter end)
 }
 
 // Source: https://stackoverflow.com/a/3487814
-template<typename T> void delete_indexes(std::vector<T>& data, const std::vector<unsigned>& deleteIndices)
+template<typename T> void delete_indexes(std::vector<T>& data, const std::vector<unsigned>& deleteIndexes)
 {
     std::vector<bool> markedElements(data.size(), false);
     std::vector<T> tempBuffer;
-    tempBuffer.reserve(data.size() - deleteIndices.size());
+    tempBuffer.reserve(data.size() - deleteIndexes.size());
 
-    for (unsigned int deleteIndice : deleteIndices)
-        markedElements[deleteIndice] = true;
+    for (unsigned int deleteIndex : deleteIndexes)
+        markedElements[deleteIndex] = true;
 
     for (size_t i = 0; i < data.size(); i++)
     {
