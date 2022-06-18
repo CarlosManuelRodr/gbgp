@@ -205,8 +205,8 @@ private:
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
-    int FirstPositionOfID(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, NonTerminalType id,
-                          const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
+    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, NonTerminalType id,
+                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -217,15 +217,15 @@ private:
         return -1;
     }
 
-    /// Find the first position of a Terminal of type id.
+    /// Find the first position of a term of type id.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    /// \param id Identifier of the terminal.
+    /// \param id Identifier of the term.
     /// \param avoid List of positions to avoid.
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
-    int  FirstPositionOfID(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
-                           const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
+    int  FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
+                         const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -263,9 +263,9 @@ private:
         {
             if (se.type == SemanticElementType::String)
                 synthesis += se.string;
-            if (se.type == SemanticElementType::NonTerminal)
+            else if (se.type == SemanticElementType::NonTerminal)
             {
-                const int pos = FirstPositionOfID(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
                 if (pos != -1)
                 {
                     synthesis += dfspo[pos]->synthesis;
@@ -275,13 +275,12 @@ private:
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
                     errorReport += " during synthesis of node with UUID: " + dfspo[nextIndex]->uuid;
-
                     throw std::runtime_error(errorReport);
                 }
             }
-            if (se.type == SemanticElementType::Terminal)
+            else if (se.type == SemanticElementType::Terminal)
             {
-                const int pos = FirstPositionOfID(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
                 if (pos != -1)
                 {
                     synthesis += dfspo[pos]->termValue;
