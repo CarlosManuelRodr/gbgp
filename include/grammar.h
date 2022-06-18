@@ -2,9 +2,7 @@
 #include "vector_ops.h"
 
 /****************************
-*                           *
 *         Terminal          *
-*                           *
 ****************************/
 
 template <typename TerminalType> struct Terminal
@@ -41,9 +39,7 @@ template <typename TerminalType> struct Terminal
 };
 
 /****************************
-*                           *
 *        NonTerminal        *
-*                           *
 ****************************/
 
 template <typename NonTerminalType> struct NonTerminal
@@ -72,9 +68,7 @@ template <typename NonTerminalType> struct NonTerminal
 };
 
 /********************************
-*                               *
 * Production element definition *
-*                               *
 ********************************/
 
 enum class ProductionElementType
@@ -118,9 +112,7 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionElem
 };
 
 /********************************
-*                               *
 *  Semantic element definition  *
-*                               *
 ********************************/
 
 enum class SemanticElementType
@@ -168,9 +160,7 @@ template <typename TerminalType, typename NonTerminalType> struct SemanticElemen
 };
 
 /********************************
-*                               *
 *   Production rule definition  *
-*                               *
 ********************************/
 
 template <typename TerminalType, typename NonTerminalType> struct ProductionRule
@@ -210,9 +200,7 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
 
 
 /********************************
-*                               *
 *   Formal grammar container    *
-*                               *
 ********************************/
 
 template <typename TerminalType, typename NonTerminalType> class Grammar

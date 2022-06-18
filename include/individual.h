@@ -1,54 +1,73 @@
 #pragma once
 #include <limits>
+#include <functional>
 #include "cst_tree.h"
 
-template <typename TerminalType, typename NonTerminalType> class Individual
+template <typename TerminalType, typename NonTerminalType, typename ScoreType> class Individual
 {
 private:
     ConcreteSyntaxTree<TerminalType, NonTerminalType>* tree;
 
 public:
     std::string expression;
-    double score;
+    std::function<ScoreType(std::string)> evaluator;
+
+    static Individual* NewRandomIndividual(Grammar<TerminalType, NonTerminalType> grammar,
+                                           const std::function<ScoreType(std::string)>& pevaluator = nullptr,
+                                           int maxDepth = 100)
+    {
+        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>(grammar);
+        newTree->CreateRandomTreeSafe(maxDepth);
+        return new Individual(newTree, pevaluator);
+    }
 
     Individual()
     {
         tree = nullptr;
-        score = std::numeric_limits<double>::quiet_NaN();
+        evaluator = nullptr;
     }
-    Individual(const Individual<TerminalType, NonTerminalType>& other)
+    Individual(const Individual<TerminalType, NonTerminalType, ScoreType>& other)
     {
         tree = other.tree;
+        evaluator = other.evaluator;
         expression = other.expression;
-        score = other.score;
     }
-    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>& cst)
+    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>& cst,
+                        const std::function<ScoreType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
         expression = cst.SynthesizeExpression();
-        score = std::numeric_limits<double>::quiet_NaN();
+        evaluator = pevaluator;
     }
-    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>* cst)
+    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>* cst,
+                        const std::function<ScoreType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
         expression = cst->SynthesizeExpression();
-        score = std::numeric_limits<double>::quiet_NaN();
+        evaluator = pevaluator;
+    }
+    ~Individual()
+    {
+        delete tree;
     }
 
-    static Individual* NewRandomIndividual(Grammar<TerminalType, NonTerminalType> grammar, int maxDepth = -1)
+    void SetEvaluator(const std::function<ScoreType(std::string)>& pevaluator)
     {
-        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>(grammar);
-        newTree->CreateRandomTreeSafe(maxDepth);
-        return new Individual(newTree);
+        evaluator = pevaluator;
     }
 
-    bool IsEvaluated()
+    ScoreType Evaluate()
     {
-        return score != std::numeric_limits<double>::quiet_NaN();
+        return evaluator(expression);
     }
 
     ConcreteSyntaxTree<TerminalType, NonTerminalType> GetTree()
     {
         return *tree;
+    }
+
+    std::string GetExpression()
+    {
+        return expression;
     }
 };

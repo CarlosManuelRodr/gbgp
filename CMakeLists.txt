@@ -12,4 +12,9 @@ add_executable(gbgp
 
         tests/doctest.h
         tests/testing.cpp
-        tests/test_subtree_insertion.cpp tests/test_random_individual.cpp include/random_gen.h)
+        tests/test_tree_manipulation.cpp
+        tests/test_trading_grammar.cpp
+        tests/test_individual_generation.cpp
+        tests/test_memory.cpp
+
+        util/peglib.h)

@@ -203,84 +203,7 @@ public:
 };
 
 /****************************
-*                           *
-*   Graph representation    *
-*                           *
-****************************/
-
-template <typename TerminalType, typename NonTerminalType> struct GraphEdge
-{
-    int parent, child;
-
-    GraphEdge()
-    {
-        parent = -1;
-        child = -1;
-    }
-    GraphEdge(int pparent, int pchild)
-    {
-        parent = pparent;
-        child = pchild;
-    }
-};
-
-template <typename TerminalType, typename NonTerminalType> struct GraphNode
-{
-    TreeNodeType type;
-    int nodeIndex;
-    int generatorPRIndex;
-    std::string id;
-    std::string termValue;
-
-    GraphNode(TreeNode<TerminalType, NonTerminalType>* node, int index)
-    {
-        type = node->type;
-        nodeIndex = index;
-
-        if (type == TreeNodeType::NonTerminal)
-        {
-            //generatorPRIndex = node->generatorPR; TODO: Fix this
-            id = node->nonTermInstance.label;
-            termValue = "";
-        }
-        else
-        {
-            generatorPRIndex = -1;
-            id = node->termInstance.label;
-            termValue = node->termValue;
-        }
-    }
-};
-
-template <typename TerminalType, typename NonTerminalType> struct Graph
-{
-    std::vector<GraphEdge<TerminalType, NonTerminalType>> edges;
-    std::vector<GraphNode<TerminalType, NonTerminalType>> nodes;
-
-    Graph() = default;
-    Graph(std::vector<GraphEdge<TerminalType, NonTerminalType>> pedges, std::vector<GraphNode<TerminalType, NonTerminalType>> pnodes)
-    {
-
-    }
-    void Clear()
-    {
-
-    }
-    void PrintGraph()
-    {
-
-    }
-    bool IsEmpty()
-    {
-        return true;
-    }
-};
-
-
-/****************************
-*                           *
 *    CST Implementation     *
-*                           *
 ****************************/
 
 /// <summary>
@@ -339,7 +262,8 @@ private:
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && dfspo[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
+            if (dfspo[i]->type == TreeNodeType::NonTerminal &&
+                dfspo[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
                 return static_cast<int>(i);
         }
         return -1;
@@ -359,7 +283,8 @@ private:
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
-            if (dfspo[i]->type == TreeNodeType::Terminal && dfspo[i]->termInstance.id == id && !vector_contains_q(avoid, i))
+            if (dfspo[i]->type == TreeNodeType::Terminal && dfspo[i]->termInstance.id == id &&
+                !vector_contains_q(avoid, i))
                 return static_cast<int>(i);
         }
         return -1;
@@ -377,19 +302,19 @@ private:
             {
                 ProductionRule<TerminalType, NonTerminalType> rule = dfspo[i]->generatorPR;
 
-                std::string synthesization;
+                std::string synthesis;
                 std::vector<unsigned> toErase;
 
                 for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
                 {
                     if (se.type == SemanticElementType::String)
-                        synthesization += se.string;
+                        synthesis += se.string;
                     if (se.type == SemanticElementType::NonTerminal)
                     {
                         const int pos = FirstPositionOfID(dfspo, se.nonterm.id, toErase, i, rule.ElementsToSynthesize());
                         if (pos != -1)
                         {
-                            synthesization += dfspo[pos]->synthesis;
+                            synthesis += dfspo[pos]->synthesis;
                             toErase.push_back(pos);
                         }
                         else
@@ -405,14 +330,14 @@ private:
                         const int pos = FirstPositionOfID(dfspo, se.term.id, toErase, i, rule.ElementsToSynthesize());
                         if (pos != -1)
                         {
-                            synthesization += dfspo[pos]->termValue;
+                            synthesis += dfspo[pos]->termValue;
                             toErase.push_back(pos);
                         }
                         else
                             throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during synthesis");
                     }
                 }
-                dfspo[i]->synthesis = synthesization;
+                dfspo[i]->synthesis = synthesis;
                 delete_indexes(dfspo, toErase);
                 return;
             }

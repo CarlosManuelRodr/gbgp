@@ -26,7 +26,7 @@ const Terminal<TradingTerm> priceIndTerm(TradingTerm::PriceInd, "priceInd", { "O
                                                                               "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
 
 const Terminal<TradingTerm> volumeIndTerm(TradingTerm::VolumeInd, "volumeInd", { "TradingVolume" });
-const Terminal<TradingTerm> signedIndTerm(TradingTerm::SignedInd, "signedInd", { "PricePercentangeChangeOpenToClose", "ExtensionRatio" });
+const Terminal<TradingTerm> signedIndTerm(TradingTerm::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
 const Terminal<TradingTerm> unsignedIndTerm(TradingTerm::UnsignedInd, "unsignedInd", { "ClosingBias" });
 
 const NonTerminal<TradingNonTerm> conditionalNonTerm(TradingNonTerm::Conditional, "Cond");
@@ -250,4 +250,5 @@ TEST_CASE("Testing random individual generation")
     cst.CreateRandomTreeSafe(100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
+    CHECK(cst.SynthesizeExpression().size() > 0);
 }
