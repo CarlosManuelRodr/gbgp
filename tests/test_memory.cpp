@@ -114,7 +114,7 @@ TEST_CASE("Test memory allocation/deallocation")
 
     cout << "Testing CST Creation/destruction" << endl;
     auto* newTree = new ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm>(grammar);
-    newTree->CreateRandomTreeSafe();
+    newTree->CreateRandomTree();
     delete newTree;
 
     cout << "Testing Individual Creation/destruction" << endl;

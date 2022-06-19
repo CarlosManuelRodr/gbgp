@@ -151,12 +151,12 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar2 = ast2.AddNode(rightRightFactor2, varTerm, "b");
 
-    CHECK(ast1.SynthesizeExpression() == "a+a*a");
-    CHECK(ast2.SynthesizeExpression() == "c+b*b");
+    CHECK(ast1.EvaluateExpression() == "a+a*a");
+    CHECK(ast2.EvaluateExpression() == "c+b*b");
 
     ast1.RemoveSubtree(rightTerm1);
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> subtree = ast2.GetSubtree(rightTerm2);
     ast1.InsertSubtree(rightTerm1, subtree.GetRoot());
 
-    CHECK(ast1.SynthesizeExpression() == "a+b*b");
+    CHECK(ast1.EvaluateExpression() == "a+b*b");
 }

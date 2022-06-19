@@ -1,6 +1,5 @@
 #pragma once
 #include <limits>
-#include <functional>
 #include "cst_tree.h"
 
 template <typename TerminalType, typename NonTerminalType, typename ScoreType> class Individual
@@ -17,7 +16,7 @@ public:
                                            int maxDepth = 100)
     {
         auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>(grammar);
-        newTree->CreateRandomTreeSafe(maxDepth);
+        newTree->CreateRandomTree(maxDepth);
         return new Individual(newTree, pevaluator);
     }
 
@@ -36,14 +35,14 @@ public:
                         const std::function<ScoreType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
-        expression = cst.SynthesizeExpression();
+        expression = cst.EvaluateExpression();
         evaluator = pevaluator;
     }
     explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>* cst,
                         const std::function<ScoreType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
-        expression = cst->SynthesizeExpression();
+        expression = cst->EvaluateExpression();
         evaluator = pevaluator;
     }
     ~Individual()

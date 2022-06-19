@@ -18,22 +18,22 @@ enum class TradingNonTerm
 };
 
 // Term/Nonterm declaration.
-const Terminal<TradingTerm> logicOpTerm(TradingTerm::LogicOp, "logicOp", { "&&", "||" });
-const Terminal<TradingTerm> notTerm(TradingTerm::Not, "not", { "!" });
-const Terminal<TradingTerm> numOpTerm(TradingTerm::NumOp, "numOp", { ">", ">=", "<", "<=" });
-const Terminal<TradingTerm> percentileTerm(TradingTerm::Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
-const Terminal<TradingTerm> priceIndTerm(TradingTerm::PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
+const Terminal logicOpTerm(TradingTerm::LogicOp, "logicOp", { "&&", "||" });
+const Terminal notTerm(TradingTerm::Not, "not", { "!" });
+const Terminal numOpTerm(TradingTerm::NumOp, "numOp", { ">", ">=", "<", "<=" });
+const Terminal percentileTerm(TradingTerm::Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
+const Terminal priceIndTerm(TradingTerm::PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
                                                                               "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
 
-const Terminal<TradingTerm> volumeIndTerm(TradingTerm::VolumeInd, "volumeInd", { "TradingVolume" });
-const Terminal<TradingTerm> signedIndTerm(TradingTerm::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
-const Terminal<TradingTerm> unsignedIndTerm(TradingTerm::UnsignedInd, "unsignedInd", { "ClosingBias" });
+const Terminal volumeIndTerm(TradingTerm::VolumeInd, "volumeInd", { "TradingVolume" });
+const Terminal signedIndTerm(TradingTerm::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
+const Terminal unsignedIndTerm(TradingTerm::UnsignedInd, "unsignedInd", { "ClosingBias" });
 
-const NonTerminal<TradingNonTerm> conditionalNonTerm(TradingNonTerm::Conditional, "Cond");
-const NonTerminal<TradingNonTerm> priceExpressionNonTerm(TradingNonTerm::PriceExpression, "PriceExpression");
-const NonTerminal<TradingNonTerm> volumeExpressionNonTerm(TradingNonTerm::VolumeExpression, "VolumeExpression");
-const NonTerminal<TradingNonTerm> signedPercentageExpressionNonTerm(TradingNonTerm::SignedPercentageExpression, "SignedPercentageExpression");
-const NonTerminal<TradingNonTerm> unsignedPercentageExpressionNonTerm(TradingNonTerm::UnsignedPercentageExpression, "UnsignedPercentageExpression");
+const NonTerminal conditionalNonTerm(TradingNonTerm::Conditional, "Cond");
+const NonTerminal priceExpressionNonTerm(TradingNonTerm::PriceExpression, "PriceExpression");
+const NonTerminal volumeExpressionNonTerm(TradingNonTerm::VolumeExpression, "VolumeExpression");
+const NonTerminal signedPercentageExpressionNonTerm(TradingNonTerm::SignedPercentageExpression, "SignedPercentageExpression");
+const NonTerminal unsignedPercentageExpressionNonTerm(TradingNonTerm::UnsignedPercentageExpression, "UnsignedPercentageExpression");
 
 // Grammar definition.
 const ProductionRule<TradingTerm, TradingNonTerm> rule1(
@@ -247,8 +247,8 @@ TEST_CASE("Testing random individual generation")
                                                   rule9, rule10, rule11, rule12, rule13, rule14 };
 
     ConcreteSyntaxTree<TradingTerm, TradingNonTerm> cst(grammar);
-    cst.CreateRandomTreeSafe(100);
+    cst.CreateRandomTree(100);
     cst.PrintTree();
-    cout << cst.SynthesizeExpression() << endl;
-    CHECK(cst.SynthesizeExpression().size() > 0);
+    cout << cst.EvaluateExpression() << endl;
+    CHECK(cst.EvaluateExpression().size() > 0);
 }

@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../util/peglib.h"
+#include "../util/arithmetic_parser.h"
 #include "../include/cst_tree.h"
 #include "../include/individual.h"
 using namespace std;
@@ -23,15 +23,15 @@ enum class ArithmeticNonTerm
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal<ArithmeticTerm> varTerm(ArithmeticTerm::Variable, "var", { "1", "2", "3" });
-const Terminal<ArithmeticTerm> plusTerm(ArithmeticTerm::Plus, "Plus", { "+" });
-const Terminal<ArithmeticTerm> timesTerm(ArithmeticTerm::Times, "Times", { "*" });
-const Terminal<ArithmeticTerm> leftParenthesisTerm(ArithmeticTerm::LeftParenthesis, "LeftParenthesis", { "(" });
-const Terminal<ArithmeticTerm> rightParenthesisTerm(ArithmeticTerm::RightParenthesis, "RightParenthesis", { ")" });
+const Terminal varTerm(ArithmeticTerm::Variable, "var", { "1", "2", "3" });
+const Terminal plusTerm(ArithmeticTerm::Plus, "Plus", { "+" });
+const Terminal timesTerm(ArithmeticTerm::Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(ArithmeticTerm::LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(ArithmeticTerm::RightParenthesis, "RightParenthesis", { ")" });
 
-const NonTerminal<ArithmeticNonTerm> exprNonTerm(ArithmeticNonTerm::Expr, "EXPR");
-const NonTerminal<ArithmeticNonTerm> termNonTerm(ArithmeticNonTerm::Term, "TERM");
-const NonTerminal<ArithmeticNonTerm> factorNonTerm(ArithmeticNonTerm::Factor, "FACTOR");
+const NonTerminal exprNonTerm(ArithmeticNonTerm::Expr, "EXPR");
+const NonTerminal termNonTerm(ArithmeticNonTerm::Term, "TERM");
+const NonTerminal factorNonTerm(ArithmeticNonTerm::Factor, "FACTOR");
 
 // Grammar definition.
 const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule1(
@@ -45,6 +45,11 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule1(
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(plusTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+        },
+        [](EvaluationContext* ctx) {
+            int n1 = stoi(ctx->SemanticValue(0));
+            int n2 = stoi(ctx->SemanticValue(2));
+            ctx->result() = std::to_string(n1 + n2);
         }
 );
 
@@ -55,6 +60,9 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule2(
         },
         {
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+        },
+        [](EvaluationContext* ctx) {
+            ctx->result() = ctx->SemanticValue(0);
         }
 );
 
@@ -69,6 +77,11 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule3(
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(timesTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+        },
+        [](EvaluationContext* ctx) {
+            int n1 = stoi(ctx->SemanticValue(0));
+            int n2 = stoi(ctx->SemanticValue(2));
+            ctx->result() = std::to_string(n1 * n2);
         }
 );
 
@@ -79,6 +92,9 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule4(
         },
         {
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+        },
+        [](EvaluationContext* ctx) {
+            ctx->result() = ctx->SemanticValue(0);
         }
 );
 
@@ -93,6 +109,9 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule5(
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(leftParenthesisTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(rightParenthesisTerm)
+        },
+        [](EvaluationContext* ctx) {
+            ctx->result() = ctx->SemanticValue(1);
         }
 );
 
@@ -103,71 +122,27 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
         },
         {
                 SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(varTerm)
+        },
+        [](EvaluationContext* ctx) {
+            ctx->result() = ctx->SemanticValue(0);
         }
 );
-
-/************************************
-*  Make a PEGLIB arithmetic parser  *
-************************************/
-peg::parser parser(R"(
-        # Grammar for Calculator...
-        Additive    <- Multitive '+' Additive / Multitive
-        Multitive   <- Primary '*' Multitive / Primary
-        Primary     <- '(' Additive ')' / Number
-        Number      <- < [0-9]+ >
-        %whitespace <- [ \t]*
-    )");
-
-void initialize_arithmetic_parser()
-{
-    // Setup actions
-    parser["Additive"] = [](const peg::SemanticValues &vs)
-    {
-        switch (vs.choice())
-        {
-            case 0: // "Multitive '+' Additive"
-                return any_cast<int>(vs[0]) + any_cast<int>(vs[1]);
-            default: // "Multitive"
-                return any_cast<int>(vs[0]);
-        }
-    };
-
-    parser["Multitive"] = [](const peg::SemanticValues &vs)
-    {
-        switch (vs.choice())
-        {
-            case 0: // "Primary '*' Multitive"
-                return any_cast<int>(vs[0]) * any_cast<int>(vs[1]);
-            default: // "Primary"
-                return any_cast<int>(vs[0]);
-        }
-    };
-
-    parser["Number"] = [](const peg::SemanticValues &vs)
-    {
-        return vs.token_to_number<int>();
-    };
-
-    // Parse
-    parser.enable_packrat_parsing(); // Enable packrat parsing.
-}
-
-struct EvaluationResult
-{
-    bool success;
-    int value;
-};
-
-EvaluationResult evaluate_arithmetic_expression(const string& expression)
-{
-    EvaluationResult result{};
-    result.success = parser.parse(expression, result.value);
-    return result;
-}
 
 /****************************
 *       Test routines       *
 ****************************/
+TEST_CASE("Test individual evaluation")
+{
+    // GP Generator grammar
+    Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
+    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> cst(grammar);
+    EvaluationContext evaluationContext;
+    cst.CreateRandomTree(100);
+    cst.PrintTree();
+    cout << cst.EvaluateExpression(&evaluationContext) << endl;
+    cout << evaluationContext.result() << endl;
+}
+
 TEST_CASE("Test individual generation")
 {
     initialize_arithmetic_parser();
@@ -178,14 +153,14 @@ TEST_CASE("Test individual generation")
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        Individual<ArithmeticTerm, ArithmeticNonTerm, EvaluationResult>* ind =
-                Individual<ArithmeticTerm, ArithmeticNonTerm, EvaluationResult>::NewRandomIndividual(grammar, evaluate_arithmetic_expression);
+        Individual<ArithmeticTerm, ArithmeticNonTerm, int>* ind =
+                Individual<ArithmeticTerm, ArithmeticNonTerm, int>::NewRandomIndividual(grammar, evaluate_arithmetic_expression);
 
-        EvaluationResult evaluationResult = ind->Evaluate();
+        int evaluationResult = ind->Evaluate();
         cout << "Generated expression: " << ind->GetExpression() << endl;
-        cout << "Evaluation: " << evaluationResult.value << endl;
+        cout << "Evaluation: " << evaluationResult << endl;
 
-        CHECK(evaluationResult.success);
+        CHECK(evaluationResult != -1);
         delete ind;
     }
 }

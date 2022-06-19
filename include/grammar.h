@@ -160,6 +160,37 @@ template <typename TerminalType, typename NonTerminalType> struct SemanticElemen
 };
 
 /********************************
+*      Evaluation context       *
+********************************/
+
+class EvaluationContext
+{
+private:
+    std::string _result;
+    std::vector<std::string> semanticValues;
+
+public:
+    auto result()                     -> std::string&       { return _result; }
+    [[nodiscard]] auto result() const -> const std::string& { return _result; }
+
+    std::string SemanticValue(unsigned index)
+    {
+        return semanticValues.at(index);
+    }
+
+    void PushSemanticValue(const std::string& value)
+    {
+        semanticValues.push_back(value);
+    }
+
+    virtual void Prepare()
+    {
+        semanticValues.clear();
+        _result.clear();
+    }
+};
+
+/********************************
 *   Production rule definition  *
 ********************************/
 
@@ -168,19 +199,23 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
     NonTerminal<NonTerminalType> from;
     std::vector<ProductionElement<TerminalType, NonTerminalType>> to;
     std::vector<SemanticElement<TerminalType, NonTerminalType>> semanticRules;
+    std::function<void(EvaluationContext*)> semanticAction;
 
     ProductionRule()
     {
         from = NonTerminal<NonTerminalType>();
+        semanticAction = nullptr;
     }
     ProductionRule(
         const NonTerminal<NonTerminalType>& pfrom,
         const std::vector<ProductionElement<TerminalType, NonTerminalType>>& pto,
-        const std::vector<SemanticElement<TerminalType, NonTerminalType>>& psemrules)
+        const std::vector<SemanticElement<TerminalType, NonTerminalType>>& psemrules,
+        std::function<void(EvaluationContext*)> pSemanticAction = nullptr)
     {
         from = pfrom;
         to = pto;
         semanticRules = psemrules;
+        semanticAction = pSemanticAction;
     }
 
     int ElementsToSynthesize()
@@ -251,6 +286,11 @@ public:
     [[maybe_unused]] unsigned Size()
     {
         return static_cast<unsigned>(grammarRules.size());
+    }
+
+    unsigned IndexOfRule(const ProductionRule<TerminalType, NonTerminalType>& rule)
+    {
+        return find_index_of(grammarRules,rule);
     }
 
     ProductionRule<TerminalType, NonTerminalType>& operator[](int index)

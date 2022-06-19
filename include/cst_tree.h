@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ostream>
 #include <queue>
+#include <functional>
 #include "grammar.h"
 
 /****************************
@@ -60,14 +61,17 @@ public:
     /// List of references to the children of this node.
     std::vector<TreeNode<TerminalType, NonTerminalType>*> children;
 
-    /// Result of the synthesis of this node.
-    std::string synthesis;
-
     /// Value of the terminal used if the node is of Terminal type.
     std::string termValue;
 
     /// Unique identifier of this node.
     std::string uuid;
+
+    /// Result of the expressionSynthesis of this node.
+    std::string expressionSynthesis;
+
+    /// Result of the evaluation of this node.
+    std::string expressionEvaluation;
 
     /// Constructor of an empty node.
     TreeNode()
@@ -75,7 +79,8 @@ public:
         type = TreeNodeType::None;
         termInstance = Terminal<TerminalType>();
         nonTermInstance = NonTerminal<NonTerminalType>();
-        synthesis = "";
+        expressionSynthesis = "";
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
     }
@@ -86,7 +91,8 @@ public:
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
         termInstance = Terminal<TerminalType>();
-        synthesis = "";
+        expressionSynthesis = "";
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
     }
@@ -97,7 +103,8 @@ public:
         type = TreeNodeType::Terminal;
         nonTermInstance = NonTerminal<NonTerminalType>();
         termInstance = t;
-        synthesis = "";
+        expressionSynthesis = "";
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
     }
@@ -109,7 +116,8 @@ public:
         nonTermInstance = other.nonTermInstance;
         termInstance = other.termInstance;
         generatorPR = other.generatorPR;
-        synthesis = other.synthesis;
+        expressionSynthesis = other.expressionSynthesis;
+        expressionEvaluation = other.expressionEvaluation;
         termValue = other.termValue;
         parent = other.parent;
         uuid = GenerateUUID();
@@ -122,7 +130,8 @@ public:
         nonTermInstance = other->nonTermInstance;
         termInstance = other->termInstance;
         generatorPR = other->generatorPR;
-        synthesis = other->synthesis;
+        expressionSynthesis = other->expressionSynthesis;
+        expressionEvaluation = other->expressionEvaluation;
         termValue = other->termValue;
         parent = other->parent;
         uuid = GenerateUUID();
@@ -137,7 +146,7 @@ public:
     /// Check if this node has been synthesized.
     bool IsSynthesized()
     {
-        return !synthesis.empty();
+        return !expressionSynthesis.empty();
     }
 
     /// Add the node as a child.
@@ -224,8 +233,8 @@ private:
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
-    int  FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
-                         const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
+    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
+                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -247,57 +256,11 @@ private:
         return dfspo.size();
     }
 
-    /// Synthesize the first non-synthesized node and deletes the consumed nodes.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    void SynthesizeFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
-    {
-        unsigned nextIndex = NextToSynthesize(dfspo);
-        if (nextIndex == dfspo.size())
-            return;
-
-        ProductionRule<TerminalType, NonTerminalType> rule = dfspo[nextIndex]->generatorPR;
-        std::string synthesis;
-        std::vector<unsigned> toErase;
-
-        for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
-        {
-            if (se.type == SemanticElementType::String)
-                synthesis += se.string;
-            else if (se.type == SemanticElementType::NonTerminal)
-            {
-                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
-                if (pos != -1)
-                {
-                    synthesis += dfspo[pos]->synthesis;
-                    toErase.push_back(pos);
-                }
-                else
-                {
-                    std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during synthesis of node with UUID: " + dfspo[nextIndex]->uuid;
-                    throw std::runtime_error(errorReport);
-                }
-            }
-            else if (se.type == SemanticElementType::Terminal)
-            {
-                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
-                if (pos != -1)
-                {
-                    synthesis += dfspo[pos]->termValue;
-                    toErase.push_back(pos);
-                }
-                else
-                    throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during synthesis");
-            }
-        }
-        dfspo[nextIndex]->synthesis = synthesis;
-        delete_indexes(dfspo, toErase);
-    }
-
     /// Copy a tree by creating new instances of all the nodes.
     /// \param copyTree Pointer to the tree that holds the copy.
     /// \param originalTree Pointer to the original tree that will be copied.
-    void CopyTree(TreeNode<TerminalType, NonTerminalType>* copyTree, TreeNode<TerminalType, NonTerminalType>* originalTree)
+    void CopyTree(TreeNode<TerminalType, NonTerminalType>* copyTree,
+                  TreeNode<TerminalType, NonTerminalType>* originalTree)
     {
         if (originalTree != nullptr)
         {
@@ -306,7 +269,7 @@ private:
             copyTree->termValue = originalTree->termValue;
             copyTree->nonTermInstance = originalTree->nonTermInstance;
             copyTree->generatorPR = originalTree->generatorPR;
-            copyTree->synthesis = copyTree->synthesis;
+            copyTree->expressionSynthesis = copyTree->expressionSynthesis;
 
             for (TreeNode<TerminalType, NonTerminalType>* n : originalTree->children)
             {
@@ -315,52 +278,6 @@ private:
                 CopyTree(copyNode, n);
             }
         }
-    }
-
-    /// Recursive implementation. Create random tree based on the production rules described in the variable grammarRules.
-    /// \param maxDepth Maximum allowed tree depth.
-    /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
-    /// \param node Node from where the random tree will be created.
-    /// \return True if creation is successful, false if not.
-    bool CreateRandomTree(int maxDepth, int depth, TreeNode<TerminalType, NonTerminalType>* node)
-    {
-        if (node->type == TreeNodeType::NonTerminal)
-        {
-            // Create children nodes based on the current node production rule.
-            std::vector<TreeNode<TerminalType, NonTerminalType>*> newNodes;
-            for (ProductionElement<TerminalType, NonTerminalType> pe : node->generatorPR.to)
-            {
-                if (pe.type == ProductionElementType::NonTerminal)
-                    newNodes.push_back(AddNode(node, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
-                if (pe.type == ProductionElementType::Terminal)
-                    newNodes.push_back(AddNode(node, pe.term));
-                if (pe.type == ProductionElementType::Unassigned)
-                    throw std::runtime_error("Unassigned production element type");
-            }
-
-            // Create subtrees for children nodes.
-            if (depth != maxDepth)
-            {
-                for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
-                {
-                    bool branchCreationSuccess = CreateRandomTree(maxDepth, depth + 1, n);
-                    if (!branchCreationSuccess)
-                        return false;
-                }
-            }
-            else
-                return false;
-        }
-        else
-        {
-            // Select a terminal randomly.
-            std::vector<size_t> applicableTerminals = range<size_t>(node->termInstance.values.size());
-            const size_t r = *select_randomly(applicableTerminals.begin(), applicableTerminals.end());
-            const std::string selectedTerm = node->termInstance.values[r];
-            node->termValue = selectedTerm;
-        }
-
-        return true;
     }
 
     /// <summary>
@@ -401,7 +318,7 @@ public:
         root = new TreeNode<TerminalType, NonTerminalType>(proot);
         root->parent = nullptr;
         this->CopyTree(root, proot);
-        this->ClearSynthesis();
+        this->ClearEvaluation();
     }
 
     /// Copy constructor.
@@ -411,7 +328,7 @@ public:
         root = new TreeNode<TerminalType, NonTerminalType>(other.root);
         root->parent = nullptr;
         this->CopyTree(root, other.root);
-        this->ClearSynthesis();
+        this->ClearEvaluation();
     }
 
     /// Copy constructor from reference.
@@ -421,7 +338,7 @@ public:
         root = new TreeNode<TerminalType, NonTerminalType>(other->root);
         root->parent = nullptr;
         this->CopyTree(root, other->root);
-        this->ClearSynthesis();
+        this->ClearEvaluation();
     }
 
     ~ConcreteSyntaxTree()
@@ -468,14 +385,17 @@ public:
         }
     }
 
-    /// Remove the synthesis of every node.
-    void ClearSynthesis()
+    /// Clear the expressionSynthesis and expressionEvaluation of every node.
+    void ClearEvaluation()
     {
         std::vector<TreeNode<TerminalType, NonTerminalType>*> nodeList = this->DepthFirstScanPostorder(root);
         for (TreeNode<TerminalType, NonTerminalType>* n : nodeList)
         {
             if (n->type == TreeNodeType::NonTerminal)
-                n->synthesis = "";
+            {
+                n->expressionSynthesis = "";
+                n->expressionEvaluation = "";
+            }
         }
     }
 
@@ -517,7 +437,7 @@ public:
     /// \param target Node where the child will be placed.
     /// \param term Terminal instance.
     /// \return Pointer to the newly created node.
-    TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target, 
+    TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target,
                                                      const Terminal<TerminalType>& term)
     {
         auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
@@ -566,7 +486,7 @@ public:
         }
         rootOfSubtree->children.clear();
 
-        ClearSynthesis();
+        ClearEvaluation();
     }
 
     /// Get subtree starting from subTreeStartNode.
@@ -602,7 +522,7 @@ public:
                     }
                 }
 
-                this->ClearSynthesis();
+                this->ClearEvaluation();
             }
             else
                 throw std::runtime_error("Cannot insert subtree of different type of insertNode");
@@ -621,10 +541,56 @@ public:
     *      Utilities     *
     *********************/
 
+    /// Recursive implementation. Create random tree based on the production rules described in the variable grammarRules.
+    /// \param maxDepth Maximum allowed tree depth.
+    /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
+    /// \param node Node from where the random tree will be created.
+    /// \return True if creation is successful, false if not.
+    bool TryCreateRandomTree(int maxDepth, int depth, TreeNode<TerminalType, NonTerminalType>* node)
+    {
+        if (node->type == TreeNodeType::NonTerminal)
+        {
+            // Create children nodes based on the current node production rule.
+            std::vector<TreeNode<TerminalType, NonTerminalType>*> newNodes;
+            for (ProductionElement<TerminalType, NonTerminalType> pe : node->generatorPR.to)
+            {
+                if (pe.type == ProductionElementType::NonTerminal)
+                    newNodes.push_back(AddNode(node, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
+                if (pe.type == ProductionElementType::Terminal)
+                    newNodes.push_back(AddNode(node, pe.term));
+                if (pe.type == ProductionElementType::Unassigned)
+                    throw std::runtime_error("Unassigned production element type");
+            }
+
+            // Create subtrees for children nodes.
+            if (depth != maxDepth)
+            {
+                for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
+                {
+                    bool branchCreationSuccess = TryCreateRandomTree(maxDepth, depth + 1, n);
+                    if (!branchCreationSuccess)
+                        return false;
+                }
+            }
+            else
+                return false;
+        }
+        else
+        {
+            // Select a terminal randomly.
+            std::vector<size_t> applicableTerminals = range<size_t>(node->termInstance.values.size());
+            const size_t r = *select_randomly(applicableTerminals.begin(), applicableTerminals.end());
+            const std::string selectedTerm = node->termInstance.values[r];
+            node->termValue = selectedTerm;
+        }
+
+        return true;
+    }
+
     /// Create random tree based on the production rules described in the variable grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
-    bool CreateRandomTree(int maxDepth = 10)
+    bool TryCreateRandomTree(int maxDepth = 10)
     {
         root->generatorPR = treeGrammar.GetRandomRootRule();
 
@@ -642,7 +608,7 @@ public:
 
         for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
         {
-            bool branchCreationSuccess = CreateRandomTree(maxDepth, 1, n);
+            bool branchCreationSuccess = TryCreateRandomTree(maxDepth, 1, n);
             if (!branchCreationSuccess)
                 return false;
         }
@@ -651,14 +617,14 @@ public:
     }
 
     /// Ensure the creation of a random tree by creating random trees until there is a success.
-    /// \param maxDepth">Maximum allowed tree depth.
-    void CreateRandomTreeSafe(int maxDepth = 10)
+    /// \param maxDepth Maximum allowed tree depth.
+    void CreateRandomTree(int maxDepth = 10)
     {
         bool success = false;
         while (!success)
         {
             this->Reset();
-            success = this->CreateRandomTree(maxDepth);
+            success = this->TryCreateRandomTree(maxDepth);
         }
     }
 
@@ -750,7 +716,7 @@ public:
             2) temp_node = root
             3) Loop while temp_node is not NULL
                 a) print temp_node->data.
-                b) Enqueue temp_nodes children (first left then right children) to q
+                b) Enqueue temp_nodes children (first left then right children) to q
                 c) Dequeue a node from q.
         */
 
@@ -772,21 +738,94 @@ public:
     }
     
     /**************************
-    *      Tree synthesis     *
+    *     Tree evaluation     *
     **************************/
+
+    /// Synthesize the first non-synthesized node and deletes the consumed nodes.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
+                       EvaluationContext* evaluationContext)
+    {
+        unsigned nextIndex = NextToSynthesize(dfspo);
+        if (nextIndex == dfspo.size())
+            return;
+
+        ProductionRule<TerminalType, NonTerminalType> rule = dfspo[nextIndex]->generatorPR;
+        std::string synthesis;
+        std::vector<unsigned> toErase;
+
+        if (evaluationContext != nullptr)
+            evaluationContext->Prepare();
+
+        for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
+        {
+            if (se.type == SemanticElementType::String)
+            {
+                if (evaluationContext != nullptr)
+                    evaluationContext->PushSemanticValue(se.string);
+
+                synthesis += se.string;
+            }
+            else if (se.type == SemanticElementType::NonTerminal)
+            {
+                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                if (pos != -1)
+                {
+                    if (evaluationContext != nullptr)
+                        evaluationContext->PushSemanticValue(dfspo[pos]->expressionEvaluation);
+
+                    synthesis += dfspo[pos]->expressionSynthesis;
+                    toErase.push_back(pos);
+                }
+                else
+                {
+                    std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
+                    errorReport += " during expressionSynthesis of node with UUID: " + dfspo[nextIndex]->uuid;
+                    throw std::runtime_error(errorReport);
+                }
+            }
+            else if (se.type == SemanticElementType::Terminal)
+            {
+                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                if (pos != -1)
+                {
+                    if (evaluationContext != nullptr)
+                        evaluationContext->PushSemanticValue(dfspo[pos]->termValue);
+
+                    synthesis += dfspo[pos]->termValue;
+                    toErase.push_back(pos);
+                }
+                else
+                    throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during expressionSynthesis");
+            }
+        }
+
+        if (evaluationContext != nullptr)
+        {
+            if (rule.semanticAction != nullptr)
+            {
+                rule.semanticAction(evaluationContext);
+                dfspo[nextIndex]->expressionEvaluation = evaluationContext->result();
+            }
+            else
+                throw std::runtime_error("There is no semantic action for rule " + std::to_string(treeGrammar.IndexOfRule(rule)));
+        }
+
+        dfspo[nextIndex]->expressionSynthesis = synthesis;
+        delete_indexes(dfspo, toErase);
+    }
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
     /// \return The synthesized expression as a std::string.
-    std::string SynthesizeExpression()
+    std::string EvaluateExpression(EvaluationContext* evaluationContext = nullptr)
     {
         std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
-
         try
         {
             while (!AllNodesAreSynthesized(dfspo))
-                SynthesizeFirst(dfspo);
+                EvaluateFirst(dfspo, evaluationContext);
 
-            return dfspo.back()->synthesis;
+            return dfspo.back()->expressionSynthesis;
         }
         catch (std::runtime_error& e)
         {
