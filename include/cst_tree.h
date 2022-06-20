@@ -248,7 +248,7 @@ private:
     /// Find the index of the first non-synthesized non-terminal.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
-    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
@@ -746,7 +746,8 @@ public:
     void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
                        EvaluationContext* evaluationContext)
     {
-        unsigned nextIndex = NextToSynthesize(dfspo);
+        // Get the rule of the element to be evaluated.
+        unsigned nextIndex = NextToEvaluate(dfspo);
         if (nextIndex == dfspo.size())
             return;
 

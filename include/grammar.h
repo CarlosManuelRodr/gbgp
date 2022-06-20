@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "vector_ops.h"
 
 /****************************
@@ -215,10 +217,10 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
         from = pfrom;
         to = pto;
         semanticRules = psemrules;
-        semanticAction = pSemanticAction;
+        semanticAction = std::move(pSemanticAction);
     }
 
-    int ElementsToSynthesize()
+    [[nodiscard]] int ElementsToSynthesize() const
     {
         return static_cast<int>(to.size());
     }
@@ -283,7 +285,7 @@ public:
         return GetRandomCompatibleRule(this->GetRoot().id);
     }
 
-    [[maybe_unused]] unsigned Size()
+    [[maybe_unused]] [[nodiscard]] unsigned Size() const
     {
         return static_cast<unsigned>(grammarRules.size());
     }
