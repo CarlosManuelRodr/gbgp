@@ -10,12 +10,12 @@ using namespace std;
 
 enum class ArithmeticTerm
 {
-    NullTerm, Variable, Plus, Times, LeftParenthesis, RightParenthesis
+    Variable, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
 enum class ArithmeticNonTerm
 {
-    NullNonTerm, Expr, Term, Factor
+    Expr, Term, Factor
 };
 
 /****************************

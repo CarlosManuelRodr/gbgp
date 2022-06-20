@@ -3,6 +3,7 @@
 #include <ostream>
 #include <queue>
 #include <functional>
+#include <string>
 #include "grammar.h"
 
 /****************************

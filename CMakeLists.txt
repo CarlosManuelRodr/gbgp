@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(gbgp)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 add_executable(gbgp
         include/cst_tree.h
@@ -17,4 +17,6 @@ add_executable(gbgp
         tests/test_individual_generation.cpp
         tests/test_memory.cpp
 
-        util/peglib.h util/arithmetic_parser.h util/arithmetic_parser.cpp)
+        util/peglib.h
+        util/arithmetic_parser.h
+        util/arithmetic_parser.cpp)
