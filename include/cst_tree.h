@@ -423,7 +423,7 @@ public:
     *************************/
 
     /// Check if the tree is empty.
-    [[maybe_unused]] bool IsEmpty()
+    bool IsEmpty()
     {
         return (root->children.size() == 0);
     }
@@ -666,7 +666,8 @@ public:
     /// Traverses the tree in a depth first pre-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPreorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPreorder(
+            TreeNode<TerminalType, NonTerminalType>* node = nullptr)
     {
         /*
           Algorithm Preorder(tree)
@@ -695,7 +696,8 @@ public:
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPostorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPostorder(
+            TreeNode<TerminalType, NonTerminalType>* node = nullptr)
     {
         /*
           Algorithm Postorder(tree)
@@ -727,7 +729,7 @@ public:
 
     /// Traverses the tree in a breadth first order.
     /// \return List of references of the traversed nodes.
-    [[maybe_unused]] std::vector<TreeNode<TerminalType, NonTerminalType>*> BreadthFirstScan()
+    std::vector<TreeNode<TerminalType, NonTerminalType>*> BreadthFirstScan()
     {
         /*
             Algorithm BFS(tree)
@@ -773,13 +775,14 @@ public:
         std::string synthesis;
         std::vector<unsigned> toErase;
 
+        // Process the elements of dfspo that match the semantic rules.
         for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
         {
             if (se.type == SemanticElementType::String)
                 synthesis += se.string;
             else if (se.type == SemanticElementType::NonTerminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     synthesis += dfspo[pos]->expressionSynthesis;
@@ -794,7 +797,7 @@ public:
             }
             else if (se.type == SemanticElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     synthesis += dfspo[pos]->termValue;
@@ -805,6 +808,7 @@ public:
             }
         }
 
+        // Consume and delete
         dfspo[nextIndex]->expressionSynthesis = synthesis;
         delete_indexes(dfspo, toErase);
     }
@@ -846,11 +850,12 @@ public:
 
         evaluationContext->Prepare();
 
+        // Push to the context the elements of dfspo that match the production rules.
         for (ProductionElement<TerminalType, NonTerminalType> se : rule.to)
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     evaluationContext->PushSemanticValue(dfspo[pos]->expressionEvaluation);
@@ -865,7 +870,7 @@ public:
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     evaluationContext->PushSemanticValue(dfspo[pos]->termValue);
@@ -876,6 +881,7 @@ public:
             }
         }
 
+        // Execute semantic action and delete.
         if (rule.semanticAction != nullptr)
         {
             rule.semanticAction(evaluationContext);

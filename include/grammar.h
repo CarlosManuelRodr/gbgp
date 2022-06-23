@@ -220,7 +220,7 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
         semanticAction = std::move(pSemanticAction);
     }
 
-    [[nodiscard]] int ElementsToSynthesize() const
+    [[nodiscard]] int NumberOfRules() const
     {
         return static_cast<int>(to.size());
     }
@@ -250,14 +250,14 @@ public:
     Grammar(std::initializer_list<ProductionRule<TerminalType, NonTerminalType>> productionRuleList) : grammarRules(productionRuleList) {}
     Grammar(const Grammar<TerminalType, NonTerminalType>& other) : grammarRules(other.grammarRules) {}
 
-    [[maybe_unused]] explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
+    explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
 
     NonTerminal<NonTerminalType> GetRoot()
     {
         return grammarRules.front().from;
     }
 
-    [[maybe_unused]] int GetProductionRuleIndex(ProductionRule<TerminalType, NonTerminalType> pr)
+    int GetProductionRuleIndex(ProductionRule<TerminalType, NonTerminalType> pr)
     {
         return find_index_of(grammarRules, pr);
     }
