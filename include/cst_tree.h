@@ -68,7 +68,7 @@ public:
     /// Unique identifier of this node.
     std::string uuid;
 
-    /// Result of the expressionSynthesis of this node.
+    /// Result of the synthesis of this node.
     std::string expressionSynthesis;
 
     /// Result of the evaluation of this node.
@@ -144,10 +144,28 @@ public:
         children.clear();
     }
 
+    /// Reset the synthesis of this node
+    void ClearSynthesis()
+    {
+        expressionSynthesis.clear();
+    }
+
     /// Check if this node has been synthesized.
     bool IsSynthesized()
     {
         return !expressionSynthesis.empty();
+    }
+
+    /// Reset the evaluation of this node
+    void ClearEvaluation()
+    {
+        expressionEvaluation.clear();
+    }
+
+    /// Check if this node has been evaluated..
+    bool IsEvaluated()
+    {
+        return !expressionEvaluation.empty();
     }
 
     /// Add the node as a child.
@@ -187,17 +205,6 @@ private:
 
     /// Formal grammar that this instance of ConcreteSyntaxTree uses.
     Grammar<TerminalType, NonTerminalType> treeGrammar;
-
-    /// Check if all the nodes have been synthesized.
-    bool AllNodesAreSynthesized(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& nodes)
-    {
-        for (TreeNode<TerminalType, NonTerminalType>* n : nodes)
-        {
-            if (n->type == TreeNodeType::NonTerminal && !n->IsSynthesized())
-                return false;
-        }
-        return true;
-    }
 
     /// Print node in the terminal with the specified depth.
     void PrintNodeAsTree(TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
@@ -246,10 +253,21 @@ private:
         return -1;
     }
 
+    /// Find the index of the first non-evaluated non-terminal.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \return The index if the first non-evaluated non-terminal.
+    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    {
+        for (unsigned i = 0; i < dfspo.size(); i++)
+            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
+                return i;
+        return dfspo.size();
+    }
+
     /// Find the index of the first non-synthesized non-terminal.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
-    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
@@ -744,11 +762,10 @@ public:
 
     /// Synthesize the first non-synthesized node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
-                       EvaluationContext* evaluationContext)
+    void SynthesizeFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
     {
         // Get the rule of the element to be evaluated.
-        unsigned nextIndex = NextToEvaluate(dfspo);
+        unsigned nextIndex = NextToSynthesize(dfspo);
         if (nextIndex == dfspo.size())
             return;
 
@@ -756,33 +773,22 @@ public:
         std::string synthesis;
         std::vector<unsigned> toErase;
 
-        if (evaluationContext != nullptr)
-            evaluationContext->Prepare();
-
         for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
         {
             if (se.type == SemanticElementType::String)
-            {
-                if (evaluationContext != nullptr)
-                    evaluationContext->PushSemanticValue(se.string);
-
                 synthesis += se.string;
-            }
             else if (se.type == SemanticElementType::NonTerminal)
             {
                 const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
                 if (pos != -1)
                 {
-                    if (evaluationContext != nullptr)
-                        evaluationContext->PushSemanticValue(dfspo[pos]->expressionEvaluation);
-
                     synthesis += dfspo[pos]->expressionSynthesis;
                     toErase.push_back(pos);
                 }
                 else
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during expressionSynthesis of node with UUID: " + dfspo[nextIndex]->uuid;
+                    errorReport += " during synthesis of node with UUID: " + dfspo[nextIndex]->uuid;
                     throw std::runtime_error(errorReport);
                 }
             }
@@ -791,9 +797,6 @@ public:
                 const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
                 if (pos != -1)
                 {
-                    if (evaluationContext != nullptr)
-                        evaluationContext->PushSemanticValue(dfspo[pos]->termValue);
-
                     synthesis += dfspo[pos]->termValue;
                     toErase.push_back(pos);
                 }
@@ -802,30 +805,21 @@ public:
             }
         }
 
-        if (evaluationContext != nullptr)
-        {
-            if (rule.semanticAction != nullptr)
-            {
-                rule.semanticAction(evaluationContext);
-                dfspo[nextIndex]->expressionEvaluation = evaluationContext->result();
-            }
-            else
-                throw std::runtime_error("There is no semantic action for rule " + std::to_string(treeGrammar.IndexOfRule(rule)));
-        }
-
         dfspo[nextIndex]->expressionSynthesis = synthesis;
         delete_indexes(dfspo, toErase);
     }
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
     /// \return The synthesized expression as a std::string.
-    std::string EvaluateExpression(EvaluationContext* evaluationContext = nullptr)
+    std::string SynthesizeExpression()
     {
         std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
+        for (auto node : dfspo) node->ClearSynthesis();
+
         try
         {
-            while (!AllNodesAreSynthesized(dfspo))
-                EvaluateFirst(dfspo, evaluationContext);
+            while (dfspo.size() > 1)
+                SynthesizeFirst(dfspo);
 
             return dfspo.back()->expressionSynthesis;
         }
@@ -833,6 +827,85 @@ public:
         {
             std::cout << "Failed to synthesize expression: " << e.what() << std::endl;
             return "";
+        }
+    }
+
+    /// Evaluate the first non-evaluate node and deletes the consumed nodes.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param evaluationContext pointer to the evaluation context.
+    void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
+                         EvaluationContext* evaluationContext)
+    {
+        // Get the rule of the element to be evaluated.
+        unsigned nextIndex = NextToEvaluate(dfspo);
+        if (nextIndex == dfspo.size())
+            return;
+
+        ProductionRule<TerminalType, NonTerminalType> rule = dfspo[nextIndex]->generatorPR;
+        std::vector<unsigned> toErase;
+
+        evaluationContext->Prepare();
+
+        for (ProductionElement<TerminalType, NonTerminalType> se : rule.to)
+        {
+            if (se.type == ProductionElementType::NonTerminal)
+            {
+                const int pos = FindIndexOfTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                if (pos != -1)
+                {
+                    evaluationContext->PushSemanticValue(dfspo[pos]->expressionEvaluation);
+                    toErase.push_back(pos);
+                }
+                else
+                {
+                    std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
+                    errorReport += " during expression evaluation of node with UUID: " + dfspo[nextIndex]->uuid;
+                    throw std::runtime_error(errorReport);
+                }
+            }
+            else if (se.type == ProductionElementType::Terminal)
+            {
+                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.ElementsToSynthesize());
+                if (pos != -1)
+                {
+                    evaluationContext->PushSemanticValue(dfspo[pos]->termValue);
+                    toErase.push_back(pos);
+                }
+                else
+                    throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during expression evaluation");
+            }
+        }
+
+        if (rule.semanticAction != nullptr)
+        {
+            rule.semanticAction(evaluationContext);
+            dfspo[nextIndex]->expressionEvaluation = evaluationContext->result();
+        }
+        else
+            throw std::runtime_error("There is no semantic action for rule " + std::to_string(treeGrammar.IndexOfRule(rule)));
+
+        delete_indexes(dfspo, toErase);
+    }
+
+    /// Evaluates the tree using the production rules of the grammar.
+    /// \param evaluationContext pointer to the evaluation context.
+    /// \return true if expression was evaluated correctly, false if not.
+    bool Evaluate(EvaluationContext* evaluationContext)
+    {
+        std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
+        for (auto node : dfspo) node->ClearEvaluation();
+
+        try
+        {
+            while (dfspo.size() > 1)
+                EvaluateFirst(dfspo, evaluationContext);
+
+            return true;
+        }
+        catch (std::runtime_error& e)
+        {
+            std::cout << "Failed to evaluate expression: " << e.what() << std::endl;
+            return false;
         }
     }
 };

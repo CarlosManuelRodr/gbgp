@@ -139,8 +139,11 @@ TEST_CASE("Test individual evaluation")
     EvaluationContext evaluationContext;
     cst.CreateRandomTree(100);
     cst.PrintTree();
-    cout << cst.EvaluateExpression(&evaluationContext) << endl;
-    cout << evaluationContext.result() << endl;
+    bool evaluationState = cst.Evaluate(&evaluationContext);
+    if (evaluationState)
+        cout << evaluationContext.result() << endl;
+
+    CHECK(evaluationState == true);
 }
 
 TEST_CASE("Test individual generation")
@@ -153,14 +156,15 @@ TEST_CASE("Test individual generation")
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        Individual<ArithmeticTerm, ArithmeticNonTerm, int>* ind =
-                Individual<ArithmeticTerm, ArithmeticNonTerm, int>::NewRandomIndividual(grammar, evaluate_arithmetic_expression);
+        auto ind = Individual<ArithmeticTerm, ArithmeticNonTerm>::NewRandomIndividual(grammar);
 
-        int evaluationResult = ind->Evaluate();
-        cout << "Generated expression: " << ind->GetExpression() << endl;
+        string expression = ind->GetExpression();
+        string evaluationResult = ind->Evaluate();
+        string parserResult = std::to_string(evaluate_arithmetic_expression(expression));
+        cout << "Generated expression: " << expression << endl;
         cout << "Evaluation: " << evaluationResult << endl;
 
-        CHECK(evaluationResult != -1);
+        CHECK(evaluationResult == parserResult);
         delete ind;
     }
 }

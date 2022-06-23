@@ -249,6 +249,6 @@ TEST_CASE("Testing random individual generation")
     ConcreteSyntaxTree<TradingTerm, TradingNonTerm> cst(grammar);
     cst.CreateRandomTree(100);
     cst.PrintTree();
-    cout << cst.EvaluateExpression() << endl;
-    CHECK(cst.EvaluateExpression().size() > 0);
+    cout << cst.SynthesizeExpression() << endl;
+    CHECK(cst.SynthesizeExpression().size() > 0);
 }
