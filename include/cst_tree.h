@@ -352,7 +352,7 @@ public:
 
     /// Copy constructor from reference.
     /// \param other Pointer to the ConcreteSyntaxTree to be copied.
-    [[maybe_unused]] explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType>* other)
+    explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType>* other)
     {
         root = new TreeNode<TerminalType, NonTerminalType>(other->root);
         root->parent = nullptr;
@@ -363,6 +363,11 @@ public:
     ~ConcreteSyntaxTree()
     {
         this->Destroy();
+    }
+
+    void SetRootRule(ProductionRule<TerminalType, NonTerminalType> startRule)
+    {
+        root->generatorPR = startRule;
     }
 
     /// Reset the tree to its empty state.
@@ -430,7 +435,7 @@ public:
 
     /// Returns a reference to the root.
     /// \return Pointer to the root node.
-    TreeNode<TerminalType, NonTerminalType>* GetRoot()
+    TreeNode<TerminalType, NonTerminalType>* Root()
     {
         return root;
     }

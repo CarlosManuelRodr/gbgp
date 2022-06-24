@@ -96,11 +96,29 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionElem
         term = pterm;
         nonterm = NonTerminal<NonTerminalType>();
     }
+    ProductionElement(TerminalType pid, const std::string& psymbol)
+    {
+        type = ProductionElementType::Terminal;
+        term = Terminal<TerminalType>(pid, psymbol);
+        nonterm = NonTerminal<NonTerminalType>();
+    }
+    ProductionElement(TerminalType pid, const std::string& psymbol, const std::vector<std::string>& pvalue)
+    {
+        type = ProductionElementType::Terminal;
+        term = Terminal<TerminalType>(pid, psymbol, pvalue);
+        nonterm = NonTerminal<NonTerminalType>();
+    }
     explicit ProductionElement(const NonTerminal<NonTerminalType>& pnonterm)
     {
         type = ProductionElementType::NonTerminal;
         term = Terminal<TerminalType>();
         nonterm = pnonterm;
+    }
+    ProductionElement(NonTerminalType pid, const std::string& psymbol)
+    {
+        type = ProductionElementType::NonTerminal;
+        term = Terminal<TerminalType>();
+        nonterm = NonTerminal<NonTerminalType>(pid, psymbol);
     }
 
     bool operator==(const ProductionElement<TerminalType, NonTerminalType>& other) const

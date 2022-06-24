@@ -113,10 +113,10 @@ TEST_CASE("Testing subtree insertion")
 
     // First tree
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1(grammar);
-    ast1.GetRoot()->generatorPR = rule1;
-    auto leftExpr1 = ast1.AddNode(ast1.GetRoot(), exprNonTerm, rule2);
-    auto middleSum1 = ast1.AddNode(ast1.GetRoot(), plusTerm);
-    auto rightTerm1 = ast1.AddNode(ast1.GetRoot(), termNonTerm, rule3);
+    ast1.SetRootRule(rule1);
+    auto leftExpr1 = ast1.AddNode(ast1.Root(), exprNonTerm, rule2);
+    auto middleSum1 = ast1.AddNode(ast1.Root(), plusTerm);
+    auto rightTerm1 = ast1.AddNode(ast1.Root(), termNonTerm, rule3);
 
     auto leftTerm1 = ast1.AddNode(leftExpr1, termNonTerm, rule4);
     auto leftFactor1 = ast1.AddNode(leftTerm1, factorNonTerm, rule6);
@@ -133,10 +133,10 @@ TEST_CASE("Testing subtree insertion")
 
     // Second tree
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast2(grammar);
-    ast2.GetRoot()->generatorPR = rule1;
-    auto leftExpr2 = ast2.AddNode(ast2.GetRoot(), exprNonTerm, rule2);
-    auto middleSum2 = ast2.AddNode(ast2.GetRoot(), plusTerm);
-    auto rightTerm2 = ast2.AddNode(ast2.GetRoot(), termNonTerm, rule3);
+    ast2.SetRootRule(rule1);
+    auto leftExpr2 = ast2.AddNode(ast2.Root(), exprNonTerm, rule2);
+    auto middleSum2 = ast2.AddNode(ast2.Root(), plusTerm);
+    auto rightTerm2 = ast2.AddNode(ast2.Root(), termNonTerm, rule3);
 
     auto leftTerm2 = ast2.AddNode(leftExpr2, termNonTerm, rule4);
     auto leftFactor2 = ast2.AddNode(leftTerm2, factorNonTerm, rule6);
@@ -156,7 +156,7 @@ TEST_CASE("Testing subtree insertion")
 
     ast1.RemoveSubtree(rightTerm1);
     ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> subtree = ast2.GetSubtree(rightTerm2);
-    ast1.InsertSubtree(rightTerm1, subtree.GetRoot());
+    ast1.InsertSubtree(rightTerm1, subtree.Root());
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
 }
