@@ -1,9 +1,11 @@
 #pragma once
 #include <iostream>
 #include <ostream>
+#include <sstream>
 #include <queue>
 #include <functional>
 #include <string>
+#include <exception>
 #include "grammar.h"
 
 /****************************
@@ -206,15 +208,6 @@ private:
     /// Formal grammar that this instance of ConcreteSyntaxTree uses.
     Grammar<TerminalType, NonTerminalType> treeGrammar;
 
-    /// Print node in the terminal with the specified depth.
-    void PrintNodeAsTree(TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
-    {
-        std::string output = "|";
-        output.append(depth, '-');
-        output += node->GetLabel(showUUID);
-        std::cout << output << std::endl;
-    }
-
     /// Find the first position of a NonTerminal of type id.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \param id Identifier of the non terminal.
@@ -299,17 +292,30 @@ private:
         }
     }
 
+    /// Print node in the terminal with the specified depth.
+    /// \param stream target stream to print.
+    /// \param node current node to print.
+    /// \param depth level of indent of the printed node.
+    /// \param showUUID whether to show the UUID of the node.
+    void PrintNodeAsTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
+    {
+        std::string output = "|";
+        output.append(depth, '-');
+        output += node->GetLabel(showUUID);
+        std::cout << output << std::endl;
+    }
+
     /// <summary>
-    /// Recursive implementation. Prints the tree in the console.
+    /// Recursive implementation. Prints the tree in the output stream.
     /// </summary>
     /// <param name="node">Node to print.</param>
     /// <param name="depth">Current depth.</param>
-    void PrintTree(TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
+    void PrintTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
     {
         for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
         {
-            this->PrintNodeAsTree(n, depth, showUUID);
-            PrintTree(n, depth + 1, showUUID);
+            this->PrintNodeAsTree(stream, n, depth, showUUID);
+            PrintTree(stream, n, depth + 1, showUUID);
         }
     }
 
@@ -652,15 +658,15 @@ public:
         }
     }
 
-    /// Prints the tree in the console.
-    void PrintTree(bool showUUID = false)
+    /// Prints the tree in the output stream..
+    void PrintTree(std::ostream& stream = std::cout, bool showUUID = false)
     {
-        this->PrintNodeAsTree(root, 0, showUUID);
+        this->PrintNodeAsTree(stream, root, 0, showUUID);
         
         for (TreeNode<TerminalType, NonTerminalType>* n : root->children)
         {
-            this->PrintNodeAsTree(n, 1, showUUID);
-            PrintTree(n, 2, showUUID);
+            this->PrintNodeAsTree(stream, n, 1, showUUID);
+            PrintTree(stream, n, 2, showUUID);
         }
     }
 
