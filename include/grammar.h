@@ -1,12 +1,14 @@
 #pragma once
 #include <utility>
-
+#include "evaluation.h"
 #include "vector_ops.h"
 
-/****************************
-*         Terminal          *
-****************************/
+//*****************************
+//*         Terminal          *
+//****************************/
 
+/// Terminal term.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
 template <typename TerminalType> struct Terminal
 {
     TerminalType id;
@@ -17,16 +19,16 @@ template <typename TerminalType> struct Terminal
     {
         label = '\0';
     }
-    Terminal(TerminalType pid, const std::string& psymbol)
+    Terminal(TerminalType pid, const std::string& plabel)
     {
         id = pid;
-        label = psymbol;
-        values.push_back(psymbol);
+        label = plabel;
+        values.push_back(plabel);
     }
-    Terminal(TerminalType pid, const std::string& psymbol, const std::vector<std::string>& pvalues)
+    Terminal(TerminalType pid, const std::string& plabel, const std::vector<std::string>& pvalues)
     {
         id = pid;
-        label = psymbol;
+        label = plabel;
         values = pvalues;
     }
 
@@ -40,10 +42,12 @@ template <typename TerminalType> struct Terminal
     }
 };
 
-/****************************
-*        NonTerminal        *
-****************************/
+//*****************************
+//*        NonTerminal        *
+//****************************/
 
+/// Non-Terminal term.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename NonTerminalType> struct NonTerminal
 {
     NonTerminalType id;
@@ -53,10 +57,10 @@ template <typename NonTerminalType> struct NonTerminal
     {
         label = '\0';
     }
-    NonTerminal(NonTerminalType pid, const std::string& psymbol)
+    NonTerminal(NonTerminalType pid, const std::string& plabel)
     {
         id = pid;
-        label = psymbol;
+        label = plabel;
     }
 
     bool operator==(const NonTerminal<NonTerminalType>& other) const
@@ -69,15 +73,19 @@ template <typename NonTerminalType> struct NonTerminal
     }
 };
 
-/********************************
-* Production element definition *
-********************************/
+//*********************************
+//* Production element definition *
+//********************************/
 
 enum class ProductionElementType
 {
     Unassigned, NonTerminal, Terminal
 };
 
+/// Single target element of a production rule. Used as a container for building a ProductionRule.
+/// May contain a Terminal or a Non-Terminal.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> struct ProductionElement
 {
     ProductionElementType type;
@@ -131,15 +139,18 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionElem
     }
 };
 
-/********************************
-*  Semantic element definition  *
-********************************/
+//*********************************
+//*  Semantic element definition  *
+//********************************/
 
 enum class SemanticElementType
 {
     NonTerminal, Terminal, String
 };
 
+/// Single target element of a semantic rule. It is used for describing how an expression will be synthesized.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> struct SemanticElement
 {
     SemanticElementType type;
@@ -179,41 +190,15 @@ template <typename TerminalType, typename NonTerminalType> struct SemanticElemen
     }
 };
 
-/********************************
-*      Evaluation context       *
-********************************/
+//*********************************
+//*   Production rule definition  *
+//********************************/
 
-class EvaluationContext
-{
-private:
-    std::string _result;
-    std::vector<std::string> semanticValues;
-
-public:
-    auto result()                     -> std::string&       { return _result; }
-    [[nodiscard]] auto result() const -> const std::string& { return _result; }
-
-    std::string SemanticValue(unsigned index)
-    {
-        return semanticValues.at(index);
-    }
-
-    void PushSemanticValue(const std::string& value)
-    {
-        semanticValues.push_back(value);
-    }
-
-    virtual void Prepare()
-    {
-        semanticValues.clear();
-        _result.clear();
-    }
-};
-
-/********************************
-*   Production rule definition  *
-********************************/
-
+/// A rule that describes how to build the next sub-nodes from a given Non-Term. It can also contain
+/// a set of semantic rules for synthesizing an expression from the rule and a semantic action, which is
+/// a function that evaluates a node using its children values.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> struct ProductionRule
 {
     NonTerminal<NonTerminalType> from;
@@ -251,12 +236,17 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
     {
         return from != other.from || to != other.to || semanticRules != other.semanticRules;
     }
+
+    explicit operator std::string() const
+    {
+        return "";
+    }
 };
 
 
-/********************************
-*   Formal grammar container    *
-********************************/
+//*********************************
+//*   Formal grammar container    *
+//********************************/
 
 template <typename TerminalType, typename NonTerminalType> class Grammar
 {

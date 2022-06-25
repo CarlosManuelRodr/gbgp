@@ -8,6 +8,7 @@ add_executable(gbgp
         include/grammar.h
         include/individual.h
         include/vector_ops.h
+        include/evaluation.h
         include/gbgp.h
 
         tests/doctest.h

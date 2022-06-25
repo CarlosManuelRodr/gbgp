@@ -8,9 +8,9 @@
 #include <exception>
 #include "grammar.h"
 
-/****************************
-*    Node implementation    *
-****************************/
+//*****************************
+//*    Node implementation    *
+//****************************/
 
 /// A node can be either a Terminal or a NonTerminal. A None type is provided for convenience.
 enum class TreeNodeType
@@ -192,11 +192,11 @@ public:
     }
 };
 
-/****************************
-*    CST Implementation     *
-****************************/
+//*****************************
+//*    CST Implementation     *
+//****************************/
 
-/// Contains the expression tree, provides interfaces for manipulating its structure and synthesize the expression into a std::string.
+/// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
 /// \tparam TerminalType enum class with the Terminal IDs specified by the user.
 /// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> class ConcreteSyntaxTree
@@ -320,9 +320,9 @@ private:
     }
 
 public:
-    /**************************************************
-    *      CST Construction and status management     *
-    **************************************************/
+    //***************************************************
+    //*      CST Construction and status management     *
+    //**************************************************/
 
     /// Creates an empty ConcreteSyntaxTree.
     /// \param grammar The formal grammar of the ConcreteSyntaxTree.
@@ -429,9 +429,9 @@ public:
         }
     }
 
-    /*************************
-    *    Tree manipulation   *
-    *************************/
+    //**************************
+    //*    Tree manipulation   *
+    //*************************/
 
     /// Check if the tree is empty.
     bool IsEmpty()
@@ -567,9 +567,9 @@ public:
     }
 
 
-    /*********************
-    *      Utilities     *
-    *********************/
+    //**********************
+    //*      Utilities     *
+    //*********************/
 
     /// Recursive implementation. Create random tree based on the production rules described in the variable grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
@@ -670,9 +670,9 @@ public:
         }
     }
 
-    /**************************
-    *     Tree traversals     *
-    **************************/
+    //***************************
+    //*     Tree traversals     *
+    //**************************/
 
     /// Traverses the tree in a depth first pre-order.
     /// \param node Start node. The default value is the root of the tree.
@@ -768,10 +768,10 @@ public:
 
         return output;
     }
-    
-    /**************************
-    *     Tree evaluation     *
-    **************************/
+
+    //***************************
+    //*     Tree evaluation     *
+    //**************************/
 
     /// Synthesize the first non-synthesized node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
