@@ -2,7 +2,8 @@
 #include <limits>
 #include "cst_tree.h"
 
-template <typename TerminalType, typename NonTerminalType, typename EvaluationContextType = EvaluationContext> class Individual
+template <typename TerminalType, typename NonTerminalType, typename EvaluationContextType = EvaluationContext>
+class Individual
 {
 private:
     ConcreteSyntaxTree<TerminalType, NonTerminalType>* tree;
@@ -11,12 +12,12 @@ public:
     std::string expression;
     std::function<std::string(std::string)> evaluator;
 
-    static Individual* NewRandomIndividual(Grammar<TerminalType, NonTerminalType> grammar,
+    static Individual* NewRandomIndividual(const Grammar<TerminalType, NonTerminalType>& grammar,
                                            const std::function<std::string(std::string)>& pevaluator = nullptr,
                                            int maxDepth = 100)
     {
-        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>(grammar);
-        newTree->CreateRandomTree(maxDepth);
+        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>();
+        newTree->CreateRandomTree(grammar, maxDepth);
         return new Individual(newTree, pevaluator);
     }
 

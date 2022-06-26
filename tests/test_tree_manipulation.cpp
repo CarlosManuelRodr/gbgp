@@ -109,10 +109,8 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
 ****************************/
 TEST_CASE("Testing subtree insertion")
 {
-    Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-
     // First tree
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1(grammar);
+    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1;
     ast1.SetRootRule(rule1);
     auto leftExpr1 = ast1.AddNode(ast1.Root(), exprNonTerm, rule2);
     auto middleSum1 = ast1.AddNode(ast1.Root(), plusTerm);
@@ -132,7 +130,7 @@ TEST_CASE("Testing subtree insertion")
     auto rightRightVar1 = ast1.AddNode(rightRightFactor1, varTerm, "a");
 
     // Second tree
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast2(grammar);
+    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast2;
     ast2.SetRootRule(rule1);
     auto leftExpr2 = ast2.AddNode(ast2.Root(), exprNonTerm, rule2);
     auto middleSum2 = ast2.AddNode(ast2.Root(), plusTerm);

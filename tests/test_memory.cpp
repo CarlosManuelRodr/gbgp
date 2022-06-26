@@ -113,8 +113,8 @@ TEST_CASE("Test memory allocation/deallocation")
     Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{rule1, rule2, rule3, rule4, rule5, rule6};
 
     cout << "Testing CST Creation/destruction" << endl;
-    auto* newTree = new ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm>(grammar);
-    newTree->CreateRandomTree();
+    auto* newTree = new ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm>();
+    newTree->CreateRandomTree(grammar);
     delete newTree;
 
     cout << "Testing Individual Creation/destruction" << endl;

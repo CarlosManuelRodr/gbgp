@@ -135,9 +135,9 @@ TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
     Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> cst(grammar);
+    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> cst;
     EvaluationContext evaluationContext;
-    cst.CreateRandomTree(100);
+    cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
     bool evaluationState = cst.Evaluate(&evaluationContext);
     if (evaluationState)

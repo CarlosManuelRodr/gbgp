@@ -208,9 +208,6 @@ private:
     /// Root of the tree.
     TreeNode<TerminalType, NonTerminalType>* root;
 
-    /// Formal grammar that this instance of ConcreteSyntaxTree uses.
-    Grammar<TerminalType, NonTerminalType> treeGrammar;
-
     /// Find the first position of a NonTerminal of type id.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \param id Identifier of the non terminal.
@@ -335,20 +332,16 @@ public:
 
     /// Creates an empty ConcreteSyntaxTree.
     /// \param grammar The formal grammar of the ConcreteSyntaxTree.
-    explicit ConcreteSyntaxTree(Grammar<TerminalType, NonTerminalType> grammar)
+    ConcreteSyntaxTree()
     {
-        treeGrammar = grammar;
-        const NonTerminal<NonTerminalType> rootNonTerm = grammar.GetRoot();
-        root = new TreeNode<TerminalType, NonTerminalType>(rootNonTerm);
-        root->parent = nullptr;
+        root = nullptr;
     }
 
     /// Copy constructor that uses the root of the tree to copy.
     /// \param grammar The formal grammar of the ConcreteSyntaxTree.
     /// \param proot Root of the tree to be copied.
-    ConcreteSyntaxTree(Grammar<TerminalType, NonTerminalType> grammar, TreeNode<TerminalType, NonTerminalType>* proot)
+    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType>* proot)
     {
-        treeGrammar = grammar;
         root = new TreeNode<TerminalType, NonTerminalType>(proot);
         root->parent = nullptr;
         this->CopyTree(root, proot);
@@ -382,6 +375,8 @@ public:
 
     void SetRootRule(ProductionRule<TerminalType, NonTerminalType> startRule)
     {
+        root = new TreeNode<TerminalType, NonTerminalType>(startRule.from);
+        root->parent = nullptr;
         root->generatorPR = startRule;
     }
 
@@ -400,9 +395,7 @@ public:
                 }
             }
 
-            const NonTerminal<NonTerminalType> rootNonTerm = treeGrammar.GetRoot();
-            root = new TreeNode<TerminalType, NonTerminalType>(rootNonTerm);
-            root->parent = nullptr;
+            root = nullptr;
         }
     }
 
@@ -508,7 +501,7 @@ public:
             return newNode;
         }
         else
-            throw std::runtime_error("AddNode: The Terminal doesn't contain the termValue as one of its possible values.");
+            throw std::runtime_error("The Terminal doesn't contain the termValue as one of its possible values.");
     }
 
     /// Removes the subtree starting from rootOfSubtree.
@@ -534,15 +527,17 @@ public:
     /// \param subTreeStartNode Root node of subtree.
     /// \return A new ConcreteSyntaxTree starting from the subTreeStartNode.
     [[nodiscard]]
-    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetSubtree(TreeNode<TerminalType, NonTerminalType>* subTreeStartNode) const
+    ConcreteSyntaxTree<TerminalType, NonTerminalType>
+    GetSubtree(TreeNode<TerminalType, NonTerminalType>* subTreeStartNode) const
     {
-        return ConcreteSyntaxTree<TerminalType, NonTerminalType>(treeGrammar, subTreeStartNode);
+        return ConcreteSyntaxTree<TerminalType, NonTerminalType>(subTreeStartNode);
     }
 
     /// Insert a copy of the subtree into the position at insertNode.
-    /// \param insertNode">Node where the subtree will be inserted.
-    /// \param subtreeStartNode">Pointer to the subtree to copy and insert.
-    void InsertSubtree(TreeNode<TerminalType, NonTerminalType>* insertNode, TreeNode<TerminalType, NonTerminalType>* subtreeStartNode)
+    /// \param insertNode Node where the subtree will be inserted.
+    /// \param subtreeStartNode Pointer to the subtree to copy and insert.
+    void InsertSubtree(TreeNode<TerminalType, NonTerminalType>* insertNode,
+                       TreeNode<TerminalType, NonTerminalType>* subtreeStartNode)
     {
         // Check that both nodes are NonTerminals
         if (insertNode->type == TreeNodeType::NonTerminal && subtreeStartNode->type == TreeNodeType::NonTerminal)
@@ -588,7 +583,7 @@ public:
     /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
     /// \param node Node from where the random tree will be created.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(int maxDepth, int depth, TreeNode<TerminalType, NonTerminalType>* node)
+    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth, int depth, TreeNode<TerminalType, NonTerminalType>* node)
     {
         if (node->type == TreeNodeType::NonTerminal)
         {
@@ -609,7 +604,7 @@ public:
             {
                 for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
                 {
-                    bool branchCreationSuccess = TryCreateRandomTree(maxDepth, depth + 1, n);
+                    bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, depth + 1, n);
                     if (!branchCreationSuccess)
                         return false;
                 }
@@ -621,7 +616,7 @@ public:
         {
             // Select a terminal randomly.
             std::vector<size_t> applicableTerminals = range<size_t>(node->termInstance.values.size());
-            const size_t r = *select_randomly(applicableTerminals.begin(), applicableTerminals.end());
+            const size_t r = *random_choice(applicableTerminals.begin(), applicableTerminals.end());
             const std::string selectedTerm = node->termInstance.values[r];
             node->termValue = selectedTerm;
         }
@@ -632,9 +627,9 @@ public:
     /// Create random tree based on the production rules described in the variable grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(int maxDepth = 10)
+    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth = 10)
     {
-        root->generatorPR = treeGrammar.GetRandomRootRule();
+        this->SetRootRule(treeGrammar.GetRootRule());
 
         // Create children nodes based on the selected rule
         std::vector<TreeNode<TerminalType, NonTerminalType>*> newNodes;
@@ -650,7 +645,7 @@ public:
 
         for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
         {
-            bool branchCreationSuccess = TryCreateRandomTree(maxDepth, 1, n);
+            bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, 1, n);
             if (!branchCreationSuccess)
                 return false;
         }
@@ -660,17 +655,17 @@ public:
 
     /// Ensure the creation of a random tree by creating random trees until there is a success.
     /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(int maxDepth = 10)
+    void CreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth = 10)
     {
         bool success = false;
         while (!success)
         {
             this->Reset();
-            success = this->TryCreateRandomTree(maxDepth);
+            success = this->TryCreateRandomTree(treeGrammar, maxDepth);
         }
     }
 
-    /// Prints the tree in the output stream..
+    /// Prints the tree in the output stream.
     void PrintTree(std::ostream& stream = std::cout, bool showUUID = false)
     {
         this->PrintNodeAsTree(stream, root, 0, showUUID);
@@ -689,8 +684,8 @@ public:
     /// Traverses the tree in a depth first pre-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPreorder(
-            TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType>*>
+    DepthFirstScanPreorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
     {
         /*
           Algorithm Preorder(tree)
@@ -719,8 +714,8 @@ public:
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> DepthFirstScanPostorder(
-            TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType>*>
+    DepthFirstScanPostorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
     {
         /*
           Algorithm Postorder(tree)
@@ -838,6 +833,7 @@ public:
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
     /// \return The synthesized expression as a std::string.
+    [[nodiscard]]
     std::string SynthesizeExpression()
     {
         std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
@@ -861,7 +857,7 @@ public:
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext pointer to the evaluation context.
     void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
-                         EvaluationContext* evaluationContext)
+                       EvaluationContext* evaluationContext)
     {
         // Get the rule of the element to be evaluated.
         unsigned nextIndex = NextToEvaluate(dfspo);

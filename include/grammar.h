@@ -278,15 +278,14 @@ public:
     Grammar() = default;
     Grammar(std::initializer_list<ProductionRule<TerminalType, NonTerminalType>> productionRuleList) : grammarRules(productionRuleList) {}
     Grammar(const Grammar<TerminalType, NonTerminalType>& other) : grammarRules(other.grammarRules) {}
-
     explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
 
-    /// Get the root Non-Terminal of the grammar.
-    /// \return The root Non-Terminal of the grammar.
+    /// Get the root rule of the grammar.
+    /// \return The root rule of the grammar.
     [[nodiscard]]
-    NonTerminal<NonTerminalType> GetRoot() const
+    ProductionRule<TerminalType, NonTerminalType> GetRootRule() const
     {
-        return grammarRules.front().from;
+        return grammarRules.front();
     }
 
     /// Finds the index of a production rule contained in the grammar.
@@ -321,14 +320,7 @@ public:
     ProductionRule<TerminalType, NonTerminalType> GetRandomCompatibleRule(NonTerminalType fromNonTermType) const
     {
         std::vector<ProductionRule<TerminalType, NonTerminalType>> compatibleRules = this->GetCompatibleRules(fromNonTermType);
-        return *select_randomly(compatibleRules.begin(), compatibleRules.end());
-    }
-
-    /// Returns a random root rule.
-    [[nodiscard]]
-    ProductionRule<TerminalType, NonTerminalType> GetRandomRootRule() const
-    {
-        return GetRandomCompatibleRule(this->GetRoot().id);
+        return *random_choice(compatibleRules.begin(), compatibleRules.end());
     }
 
     /// Returns the number of production rules of this grammar.
