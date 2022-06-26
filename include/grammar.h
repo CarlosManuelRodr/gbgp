@@ -137,6 +137,20 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionElem
     {
         return type != other.type || nonterm != other.nonterm || term != other.term;
     }
+
+    [[nodiscard]] std::string ToString() const
+    {
+        switch (type)
+        {
+            case ProductionElementType::NonTerminal:
+                return nonterm.label;
+            case ProductionElementType::Terminal:
+                return term.label;
+            case ProductionElementType::Unassigned:
+            default:
+                return {};
+        }
+    }
 };
 
 //*********************************
@@ -237,9 +251,13 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
         return from != other.from || to != other.to || semanticRules != other.semanticRules;
     }
 
-    explicit operator std::string() const
+    [[nodiscard]] std::string ToString() const
     {
-        return "";
+        std::string output = from.label;
+        output += " -> ";
+        for (auto prodElement: to)
+            output += prodElement.ToString() + ((prodElement == to.back()) ? "" : " ");
+        return output;
     }
 };
 
@@ -248,6 +266,9 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
 //*   Formal grammar container    *
 //********************************/
 
+/// Defines a formal grammar that contains the rules needed to build, synthesize and evaluate syntax trees.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> class Grammar
 {
 private:
@@ -260,17 +281,28 @@ public:
 
     explicit Grammar(const std::vector<ProductionRule<TerminalType, NonTerminalType>>& productionRuleList) : grammarRules(productionRuleList) {}
 
-    NonTerminal<NonTerminalType> GetRoot()
+    /// Get the root Non-Terminal of the grammar.
+    /// \return The root Non-Terminal of the grammar.
+    [[nodiscard]]
+    NonTerminal<NonTerminalType> GetRoot() const
     {
         return grammarRules.front().from;
     }
 
-    int GetProductionRuleIndex(ProductionRule<TerminalType, NonTerminalType> pr)
+    /// Finds the index of a production rule contained in the grammar.
+    /// \param pr The production rule.
+    /// \return The index of a rule inside the current grammar.
+    [[nodiscard]]
+    unsigned IndexOfRule(const ProductionRule<TerminalType, NonTerminalType>& pr) const
     {
-        return find_index_of(grammarRules, pr);
+        return find_index_of(grammarRules,pr);
     }
 
-    std::vector<ProductionRule<TerminalType, NonTerminalType>> GetCompatibleRules(NonTerminalType fromNonTermType)
+    /// Finds all the rules compatible with the specified Non-Terminal type.
+    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
+    /// \return A vector containing the compatible rules.
+    [[nodiscard]]
+    std::vector<ProductionRule<TerminalType, NonTerminalType>> GetCompatibleRules(NonTerminalType fromNonTermType) const
     {
         std::vector<ProductionRule<TerminalType, NonTerminalType>> compatibleRules;
         for (ProductionRule<TerminalType, NonTerminalType> rule : grammarRules)
@@ -282,28 +314,31 @@ public:
         return compatibleRules;
     }
 
-    ProductionRule<TerminalType, NonTerminalType> GetRandomCompatibleRule(NonTerminalType fromNonTermType)
+    /// Gets a random rule that is compatible with the specified Non-Terminal type.
+    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
+    /// \return The selected random rule.
+    [[nodiscard]]
+    ProductionRule<TerminalType, NonTerminalType> GetRandomCompatibleRule(NonTerminalType fromNonTermType) const
     {
         std::vector<ProductionRule<TerminalType, NonTerminalType>> compatibleRules = this->GetCompatibleRules(fromNonTermType);
         return *select_randomly(compatibleRules.begin(), compatibleRules.end());
     }
 
-    ProductionRule<TerminalType, NonTerminalType> GetRandomRootRule()
+    /// Returns a random root rule.
+    [[nodiscard]]
+    ProductionRule<TerminalType, NonTerminalType> GetRandomRootRule() const
     {
         return GetRandomCompatibleRule(this->GetRoot().id);
     }
 
-    [[maybe_unused]] [[nodiscard]] unsigned Size() const
+    /// Returns the number of production rules of this grammar.
+    [[nodiscard]]
+    unsigned Size() const
     {
         return static_cast<unsigned>(grammarRules.size());
     }
 
-    unsigned IndexOfRule(const ProductionRule<TerminalType, NonTerminalType>& rule)
-    {
-        return find_index_of(grammarRules,rule);
-    }
-
-    ProductionRule<TerminalType, NonTerminalType>& operator[](int index)
+    ProductionRule<TerminalType, NonTerminalType>& operator[](int index) const
     {
         return grammarRules[index];
     }

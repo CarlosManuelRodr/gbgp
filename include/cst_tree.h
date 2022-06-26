@@ -19,14 +19,14 @@ enum class TreeNodeType
 };
 
 /// Represents a node of an n-ary tree
-/// \param TerminalType enum class with the Terminal IDs specified by the user.
-/// \param NonTerminalType enum class with the NonTerminal IDs specified by the user.
+/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
+/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 template <typename TerminalType, typename NonTerminalType> class TreeNode
 {
 private:
     /// Generate an Unique Identifier for this node.
     /// \return A std::string containing the generated UUID.
-    std::string GenerateUUID()
+    static std::string GenerateUUID()
     {
         static std::random_device dev;
         static std::mt19937 rng(dev());
@@ -153,7 +153,8 @@ public:
     }
 
     /// Check if this node has been synthesized.
-    bool IsSynthesized()
+    [[nodiscard]]
+    bool IsSynthesized() const
     {
         return !expressionSynthesis.empty();
     }
@@ -165,7 +166,8 @@ public:
     }
 
     /// Check if this node has been evaluated..
-    bool IsEvaluated()
+    [[nodiscard]]
+    bool IsEvaluated() const
     {
         return !expressionEvaluation.empty();
     }
@@ -178,7 +180,8 @@ public:
     }
 
     /// Returns a formatted label of the node.
-    std::string GetLabel(bool showUUID = false)
+    [[nodiscard]]
+    std::string GetLabel(bool showUUID = false) const
     {
         std::string label;
         if (type == TreeNodeType::NonTerminal)
@@ -215,8 +218,9 @@ private:
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
+    [[nodiscard]]
     int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, NonTerminalType id,
-                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
+                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize) const
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -234,8 +238,9 @@ private:
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
+    [[nodiscard]]
     int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
-                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize)
+                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize) const
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -249,7 +254,8 @@ private:
     /// Find the index of the first non-evaluated non-terminal.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-evaluated non-terminal.
-    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    [[nodiscard]]
+    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo) const
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
@@ -260,7 +266,8 @@ private:
     /// Find the index of the first non-synthesized non-terminal.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
-    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    [[nodiscard]]
+    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo) const
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
@@ -272,7 +279,7 @@ private:
     /// \param copyTree Pointer to the tree that holds the copy.
     /// \param originalTree Pointer to the original tree that will be copied.
     void CopyTree(TreeNode<TerminalType, NonTerminalType>* copyTree,
-                  TreeNode<TerminalType, NonTerminalType>* originalTree)
+                  TreeNode<TerminalType, NonTerminalType>* originalTree) const
     {
         if (originalTree != nullptr)
         {
@@ -297,7 +304,8 @@ private:
     /// \param node current node to print.
     /// \param depth level of indent of the printed node.
     /// \param showUUID whether to show the UUID of the node.
-    void PrintNodeAsTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
+    void PrintNodeAsTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth,
+                         bool showUUID = false) const
     {
         std::string output = "|";
         output.append(depth, '-');
@@ -310,7 +318,8 @@ private:
     /// </summary>
     /// <param name="node">Node to print.</param>
     /// <param name="depth">Current depth.</param>
-    void PrintTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth, bool showUUID = false)
+    void PrintTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth,
+                   bool showUUID = false) const
     {
         for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
         {
@@ -434,14 +443,16 @@ public:
     //*************************/
 
     /// Check if the tree is empty.
-    bool IsEmpty()
+    [[nodiscard]]
+    bool IsEmpty() const
     {
         return (root->children.size() == 0);
     }
 
     /// Returns a reference to the root.
     /// \return Pointer to the root node.
-    TreeNode<TerminalType, NonTerminalType>* Root()
+    [[nodiscard]]
+    TreeNode<TerminalType, NonTerminalType>* Root() const
     {
         return root;
     }
@@ -522,7 +533,8 @@ public:
     /// Get subtree starting from subTreeStartNode.
     /// \param subTreeStartNode Root node of subtree.
     /// \return A new ConcreteSyntaxTree starting from the subTreeStartNode.
-    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetSubtree(TreeNode<TerminalType, NonTerminalType>* subTreeStartNode)
+    [[nodiscard]]
+    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetSubtree(TreeNode<TerminalType, NonTerminalType>* subTreeStartNode) const
     {
         return ConcreteSyntaxTree<TerminalType, NonTerminalType>(treeGrammar, subTreeStartNode);
     }
@@ -899,7 +911,7 @@ public:
             dfspo[nextIndex]->expressionEvaluation = evaluationContext->result();
         }
         else
-            throw std::runtime_error("There is no semantic action for rule " + std::to_string(treeGrammar.IndexOfRule(rule)));
+            throw std::runtime_error("There is no semantic action for rule " + rule.ToString());
 
         delete_indexes(dfspo, toErase);
     }
