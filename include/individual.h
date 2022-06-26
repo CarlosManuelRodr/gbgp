@@ -2,21 +2,22 @@
 #include <limits>
 #include "cst_tree.h"
 
-template <typename TerminalType, typename NonTerminalType, typename EvaluationContextType = EvaluationContext<std::string>>
+template <typename TerminalType, typename NonTerminalType, typename ValueType = std::string,
+          typename EvaluationContextType = EvaluationContext<ValueType>>
 class Individual
 {
 private:
-    ConcreteSyntaxTree<TerminalType, NonTerminalType>* tree;
+    ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>* tree;
 
 public:
     std::string expression;
-    std::function<std::string(std::string)> evaluator;
+    std::function<ValueType(std::string)> evaluator;
 
-    static Individual* NewRandomIndividual(const Grammar<TerminalType, NonTerminalType>& grammar,
-                                           const std::function<std::string(std::string)>& pevaluator = nullptr,
+    static Individual* NewRandomIndividual(const Grammar<TerminalType, NonTerminalType, ValueType>& grammar,
+                                           const std::function<ValueType(std::string)>& pevaluator = nullptr,
                                            int maxDepth = 100)
     {
-        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType>();
+        auto* newTree = new ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>();
         newTree->CreateRandomTree(grammar, maxDepth);
         return new Individual(newTree, pevaluator);
     }
@@ -26,21 +27,21 @@ public:
         tree = nullptr;
         evaluator = nullptr;
     }
-    Individual(const Individual<TerminalType, NonTerminalType, EvaluationContextType>& other)
+    Individual(const Individual<TerminalType, NonTerminalType, ValueType, EvaluationContextType>& other)
     {
         tree = other.tree;
         evaluator = other.evaluator;
         expression = other.expression;
     }
-    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>& cst,
-                        const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>& cst,
+                        const std::function<ValueType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
         expression = cst.SynthesizeExpression();
         evaluator = pevaluator;
     }
-    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType>* cst,
-                        const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>* cst,
+                        const std::function<ValueType(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
         expression = cst->SynthesizeExpression();
@@ -51,12 +52,12 @@ public:
         delete tree;
     }
 
-    void SetEvaluator(const std::function<std::string(std::string)>& pevaluator)
+    void SetEvaluator(const std::function<ValueType(std::string)>& pevaluator)
     {
         evaluator = pevaluator;
     }
 
-    std::string Evaluate()
+    ValueType Evaluate()
     {
         if (evaluator == nullptr)
         {
@@ -69,7 +70,7 @@ public:
     }
 
     [[nodiscard]]
-    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetTree() const
+    ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType> GetTree() const
     {
         return *tree;
     }

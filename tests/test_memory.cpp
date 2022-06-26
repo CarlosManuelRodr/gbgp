@@ -109,6 +109,6 @@ TEST_CASE("Test memory allocation/deallocation")
     delete newTree;
 
     cout << "Testing Individual Creation/destruction" << endl;
-    auto* ind = Individual<TermType, NonTermType, int>::NewRandomIndividual(grammar);
+    auto* ind = Individual<TermType, NonTermType>::NewRandomIndividual(grammar);
     delete ind;
 }

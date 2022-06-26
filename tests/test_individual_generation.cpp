@@ -143,7 +143,7 @@ TEST_CASE("Test individual evaluation")
 
 TEST_CASE("Test individual generation")
 {
-/*    initialize_arithmetic_parser();
+    initialize_arithmetic_parser();
 
     // GP Generator grammar
     Grammar<TermType, NonTermType, int> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
@@ -151,15 +151,15 @@ TEST_CASE("Test individual generation")
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        auto ind = Individual<TermType, NonTermType>::NewRandomIndividual(grammar);
+        auto ind = Individual<TermType, NonTermType, int>::NewRandomIndividual(grammar);
 
         string expression = ind->GetExpression();
-        string evaluationResult = ind->Evaluate();
-        string parserResult = std::to_string(evaluate_arithmetic_expression(expression));
+        int evaluationResult = ind->Evaluate();
+        int parserResult = evaluate_arithmetic_expression(expression);
         cout << "Generated expression: " << expression << endl;
         cout << "Evaluation: " << evaluationResult << endl;
 
         CHECK(evaluationResult == parserResult);
         delete ind;
-    }*/
+    }
 }
