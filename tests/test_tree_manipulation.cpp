@@ -21,11 +21,11 @@ enum class NonTermType
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal<TermType> varTerm(TermType::Var, "var", {"a", "b", "c" });
-const Terminal<TermType> plusTerm(TermType::Plus, "Plus", {"+" });
-const Terminal<TermType> timesTerm(TermType::Times, "Times", {"*" });
-const Terminal<TermType> leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", {"(" });
-const Terminal<TermType> rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", {")" });
+const Terminal<TermType> varTerm(TermType::Var, "var", { "a", "b", "c" });
+const Terminal<TermType> plusTerm(TermType::Plus, "Plus", { "+" });
+const Terminal<TermType> timesTerm(TermType::Times, "Times", { "*" });
+const Terminal<TermType> leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal<TermType> rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", { ")" });
 
 const NonTerminal<NonTermType> exprNonTerm(NonTermType::Expr, "EXPR");
 const NonTerminal<NonTermType> termNonTerm(NonTermType::Term, "TERM");
