@@ -475,9 +475,7 @@ public:
                                                      const Terminal<TerminalType>& term)
     {
         auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
-        if (term.values.size() == 1)
-            newNode->termValue = term.values.front();
-
+        newNode->termValue = term.GetValue();
         newNode->parent = target;
         target->AddChildNode(newNode);
         return newNode;
@@ -490,18 +488,13 @@ public:
     /// \return Pointer to the newly created node.
     TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target,
                                                      const Terminal<TerminalType>& term,
-                                                     std::string termValue)
+                                                     const std::string& termValue)
     {
-        if (vector_contains_q(term.values, termValue))
-        {
-            auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
-            newNode->termValue = termValue;
-            newNode->parent = target;
-            target->AddChildNode(newNode);
-            return newNode;
-        }
-        else
-            throw std::runtime_error("The Terminal doesn't contain the termValue as one of its possible values.");
+        auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
+        newNode->termValue = termValue;
+        newNode->parent = target;
+        target->AddChildNode(newNode);
+        return newNode;
     }
 
     /// Removes the subtree starting from rootOfSubtree.
@@ -519,7 +512,6 @@ public:
             }
         }
         rootOfSubtree->children.clear();
-
         ClearEvaluation();
     }
 
@@ -613,13 +605,7 @@ public:
                 return false;
         }
         else
-        {
-            // Select a terminal randomly.
-            std::vector<size_t> applicableTerminals = range<size_t>(node->termInstance.values.size());
-            const size_t r = *random_choice(applicableTerminals.begin(), applicableTerminals.end());
-            const std::string selectedTerm = node->termInstance.values[r];
-            node->termValue = selectedTerm;
-        }
+            node->termValue = node->termInstance.GetValue();
 
         return true;
     }

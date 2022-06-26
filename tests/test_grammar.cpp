@@ -8,7 +8,7 @@ using namespace std;
 
 enum class TermType
 {
-    Variable, Plus, Times, LeftParenthesis, RightParenthesis
+    Var, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
 enum class NonTermType
@@ -21,7 +21,7 @@ enum class NonTermType
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(TermType::Variable, "var", { "1", "2", "3" });
+const Terminal varTerm(TermType::Var, "var", {"1", "2", "3" });
 
 const NonTerminal exprNonTerm(NonTermType::Expr, "EXPR");
 const NonTerminal termNonTerm(NonTermType::Term, "TERM");

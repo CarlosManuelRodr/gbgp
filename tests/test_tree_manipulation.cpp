@@ -8,7 +8,7 @@ using namespace std;
 
 enum class TermType
 {
-    NullTerm, Variable, Plus, Times, LeftParenthesis, RightParenthesis
+    NullTerm, Var, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
 enum class NonTermType
@@ -21,7 +21,7 @@ enum class NonTermType
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal<TermType> varTerm(TermType::Variable, "var", {"a", "b", "c" });
+const Terminal<TermType> varTerm(TermType::Var, "var", {"a", "b", "c" });
 const Terminal<TermType> plusTerm(TermType::Plus, "Plus", {"+" });
 const Terminal<TermType> timesTerm(TermType::Times, "Times", {"*" });
 const Terminal<TermType> leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", {"(" });

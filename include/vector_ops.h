@@ -79,25 +79,3 @@ template<typename T> bool vector_contains_q(const std::vector<T>& v, const T& ke
 {
     return std::find(v.begin(), v.end(), key) != v.end();
 }
-
-template<typename T> int find_index_of(const std::vector<T>& v, const T& key)
-{
-    auto it = std::find(v.begin(), v.end(), key);
-
-    if (it != v.end())
-    {
-        int index = static_cast<int>(std::distance(v.begin(), it));
-        return index;
-    }
-    else
-        return -1;
-}
-
-template<typename T> T* find_first_of(const std::vector<T>& v, const T& key)
-{
-    auto it = std::find(v.begin(), v.end(), key);
-    if (it != v.end())
-        return it;
-    else
-        return nullptr;
-}

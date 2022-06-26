@@ -40,6 +40,20 @@ template <typename TerminalType> struct Terminal
     {
         return id != other.id;
     }
+
+    [[nodiscard]]
+    std::string GetValue() const
+    {
+        if (values.size() == 1)
+            return values.front();
+        else
+        {
+            // Select a terminal value randomly.
+            std::vector<size_t> applicableTerminals = range<size_t>(values.size());
+            const size_t r = *random_choice(applicableTerminals.begin(), applicableTerminals.end());
+            return values[r];
+        }
+    }
 };
 
 //*****************************

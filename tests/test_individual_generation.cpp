@@ -4,13 +4,13 @@
 #include "../include/individual.h"
 using namespace std;
 
-/****************************
-*     Types declaration     *
-****************************/
+//*****************************
+//*     Types declaration     *
+//****************************/
 
 enum class TermType
 {
-    Variable, Plus, Times, LeftParenthesis, RightParenthesis
+    Var
 };
 
 enum class NonTermType
@@ -18,12 +18,12 @@ enum class NonTermType
     Expr, Term, Factor
 };
 
-/****************************
-*    Grammar declaration    *
-****************************/
+//*****************************
+//*    Grammar declaration    *
+//****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(TermType::Variable, "var", { "1", "2", "3" });
+const Terminal varTerm(TermType::Var, "var", { "1", "2", "3" });
 const NonTerminal exprNonTerm(NonTermType::Expr, "EXPR");
 const NonTerminal termNonTerm(NonTermType::Term, "TERM");
 const NonTerminal factorNonTerm(NonTermType::Factor, "FACTOR");
@@ -119,9 +119,9 @@ const ProductionRule<TermType, NonTermType> rule6(
         }
 );
 
-/****************************
-*       Test routines       *
-****************************/
+//*****************************
+//*       Test routines       *
+//****************************/
 TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
