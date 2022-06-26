@@ -68,12 +68,14 @@ public:
             return evaluator(expression);
     }
 
-    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetTree()
+    [[nodiscard]]
+    ConcreteSyntaxTree<TerminalType, NonTerminalType> GetTree() const
     {
         return *tree;
     }
 
-    std::string GetExpression()
+    [[nodiscard]]
+    std::string GetExpression() const
     {
         return expression;
     }

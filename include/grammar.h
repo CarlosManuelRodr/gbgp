@@ -137,20 +137,6 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionElem
     {
         return type != other.type || nonterm != other.nonterm || term != other.term;
     }
-
-    [[nodiscard]] std::string ToString() const
-    {
-        switch (type)
-        {
-            case ProductionElementType::NonTerminal:
-                return nonterm.label;
-            case ProductionElementType::Terminal:
-                return term.label;
-            case ProductionElementType::Unassigned:
-            default:
-                return {};
-        }
-    }
 };
 
 //*********************************
@@ -201,6 +187,20 @@ template <typename TerminalType, typename NonTerminalType> struct SemanticElemen
     bool operator!=(const SemanticElement<TerminalType, NonTerminalType>& other) const
     {
         return type != other.type || nonterm != other.nonterm || term != other.term || string == other.string;
+    }
+
+    [[nodiscard]] std::string ToString() const
+    {
+        switch (type)
+        {
+            case SemanticElementType::NonTerminal:
+                return nonterm.label;
+            case SemanticElementType::Terminal:
+                return term.label;
+            case SemanticElementType::String:
+            default:
+                return string;
+        }
     }
 };
 
@@ -255,8 +255,8 @@ template <typename TerminalType, typename NonTerminalType> struct ProductionRule
     {
         std::string output = from.label;
         output += " -> ";
-        for (auto prodElement: to)
-            output += prodElement.ToString() + ((prodElement == to.back()) ? "" : " ");
+        for (auto prodElement: semanticRules)
+            output += prodElement.ToString() + ((prodElement == semanticRules.back()) ? "" : " ");
         return output;
     }
 };

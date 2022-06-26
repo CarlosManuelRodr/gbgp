@@ -24,11 +24,6 @@ enum class NonTermType
 
 // Term/Nonterm declaration.
 const Terminal varTerm(TermType::Variable, "var", { "1", "2", "3" });
-const Terminal plusTerm(TermType::Plus, "Plus", { "+" });
-const Terminal timesTerm(TermType::Times, "Times", { "*" });
-const Terminal leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", { "(" });
-const Terminal rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", { ")" });
-
 const NonTerminal exprNonTerm(NonTermType::Expr, "EXPR");
 const NonTerminal termNonTerm(NonTermType::Term, "TERM");
 const NonTerminal factorNonTerm(NonTermType::Factor, "FACTOR");
@@ -38,17 +33,16 @@ const ProductionRule<TermType, NonTermType> rule1(
         exprNonTerm,
         {
                 ProductionElement<TermType, NonTermType>(exprNonTerm),
-                ProductionElement<TermType, NonTermType>(plusTerm),
                 ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
                 SemanticElement<TermType, NonTermType>(exprNonTerm),
-                SemanticElement<TermType, NonTermType>(plusTerm),
+                SemanticElement<TermType, NonTermType>("+"),
                 SemanticElement<TermType, NonTermType>(termNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(2));
+            int n2 = stoi(ctx->SemanticValue(1));
             ctx->result() = std::to_string(n1 + n2);
         }
 );
@@ -70,17 +64,16 @@ const ProductionRule<TermType, NonTermType> rule3(
         termNonTerm,
         {
                 ProductionElement<TermType, NonTermType>(termNonTerm),
-                ProductionElement<TermType, NonTermType>(timesTerm),
                 ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
                 SemanticElement<TermType, NonTermType>(termNonTerm),
-                SemanticElement<TermType, NonTermType>(timesTerm),
+                SemanticElement<TermType, NonTermType>("*"),
                 SemanticElement<TermType, NonTermType>(factorNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(2));
+            int n2 = stoi(ctx->SemanticValue(1));
             ctx->result() = std::to_string(n1 * n2);
         }
 );
@@ -101,17 +94,15 @@ const ProductionRule<TermType, NonTermType> rule4(
 const ProductionRule<TermType, NonTermType> rule5(
         factorNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(leftParenthesisTerm),
                 ProductionElement<TermType, NonTermType>(exprNonTerm),
-                ProductionElement<TermType, NonTermType>(rightParenthesisTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>(leftParenthesisTerm),
+                SemanticElement<TermType, NonTermType>("("),
                 SemanticElement<TermType, NonTermType>(exprNonTerm),
-                SemanticElement<TermType, NonTermType>(rightParenthesisTerm)
+                SemanticElement<TermType, NonTermType>(")")
         },
         [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(1);
+            ctx->result() = ctx->SemanticValue(0);
         }
 );
 

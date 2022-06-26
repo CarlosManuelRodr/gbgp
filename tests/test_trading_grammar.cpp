@@ -7,234 +7,234 @@ using namespace std;
 ****************************/
 
 // Types declaration.
-enum class TradingTerm
+enum class TermType
 {
     NullTerm, LogicOp, Not, NumOp, Percentile, PriceInd, VolumeInd, SignedInd, UnsignedInd
 };
 
-enum class TradingNonTerm
+enum class NonTermType
 {
     NullNonTerm, Conditional, PriceExpression, VolumeExpression, SignedPercentageExpression, UnsignedPercentageExpression
 };
 
 // Term/Nonterm declaration.
-const Terminal logicOpTerm(TradingTerm::LogicOp, "logicOp", { "&&", "||" });
-const Terminal notTerm(TradingTerm::Not, "not", { "!" });
-const Terminal numOpTerm(TradingTerm::NumOp, "numOp", { ">", ">=", "<", "<=" });
-const Terminal percentileTerm(TradingTerm::Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
-const Terminal priceIndTerm(TradingTerm::PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
-                                                                              "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
+const Terminal logicOpTerm(TermType::LogicOp, "logicOp", { "&&", "||" });
+const Terminal notTerm(TermType::Not, "not", { "!" });
+const Terminal numOpTerm(TermType::NumOp, "numOp", { ">", ">=", "<", "<=" });
+const Terminal percentileTerm(TermType::Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
+const Terminal priceIndTerm(TermType::PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
+                                                             "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
 
-const Terminal volumeIndTerm(TradingTerm::VolumeInd, "volumeInd", { "TradingVolume" });
-const Terminal signedIndTerm(TradingTerm::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
-const Terminal unsignedIndTerm(TradingTerm::UnsignedInd, "unsignedInd", { "ClosingBias" });
+const Terminal volumeIndTerm(TermType::VolumeInd, "volumeInd", { "TradingVolume" });
+const Terminal signedIndTerm(TermType::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
+const Terminal unsignedIndTerm(TermType::UnsignedInd, "unsignedInd", { "ClosingBias" });
 
-const NonTerminal conditionalNonTerm(TradingNonTerm::Conditional, "Cond");
-const NonTerminal priceExpressionNonTerm(TradingNonTerm::PriceExpression, "PriceExpression");
-const NonTerminal volumeExpressionNonTerm(TradingNonTerm::VolumeExpression, "VolumeExpression");
-const NonTerminal signedPercentageExpressionNonTerm(TradingNonTerm::SignedPercentageExpression, "SignedPercentageExpression");
-const NonTerminal unsignedPercentageExpressionNonTerm(TradingNonTerm::UnsignedPercentageExpression, "UnsignedPercentageExpression");
+const NonTerminal conditionalNonTerm(NonTermType::Conditional, "Cond");
+const NonTerminal priceExpressionNonTerm(NonTermType::PriceExpression, "PriceExpression");
+const NonTerminal volumeExpressionNonTerm(NonTermType::VolumeExpression, "VolumeExpression");
+const NonTerminal signedPercentageExpressionNonTerm(NonTermType::SignedPercentageExpression, "SignedPercentageExpression");
+const NonTerminal unsignedPercentageExpressionNonTerm(NonTermType::UnsignedPercentageExpression, "UnsignedPercentageExpression");
 
 // Grammar definition.
-const ProductionRule<TradingTerm, TradingNonTerm> rule1(
+const ProductionRule<TermType, NonTermType> rule1(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(conditionalNonTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(logicOpTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(conditionalNonTerm)
+                ProductionElement<TermType, NonTermType>(conditionalNonTerm),
+                ProductionElement<TermType, NonTermType>(logicOpTerm),
+                ProductionElement<TermType, NonTermType>(conditionalNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("("),
-                SemanticElement<TradingTerm, TradingNonTerm>(conditionalNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(") "),
-                SemanticElement<TradingTerm, TradingNonTerm>(logicOpTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" ("),
-                SemanticElement<TradingTerm, TradingNonTerm>(conditionalNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(")")
+                SemanticElement<TermType, NonTermType>("("),
+                SemanticElement<TermType, NonTermType>(conditionalNonTerm),
+                SemanticElement<TermType, NonTermType>(") "),
+                SemanticElement<TermType, NonTermType>(logicOpTerm),
+                SemanticElement<TermType, NonTermType>(" ("),
+                SemanticElement<TermType, NonTermType>(conditionalNonTerm),
+                SemanticElement<TermType, NonTermType>(")")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule2(
+const ProductionRule<TermType, NonTermType> rule2(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(notTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(conditionalNonTerm)
+                ProductionElement<TermType, NonTermType>(notTerm),
+                ProductionElement<TermType, NonTermType>(conditionalNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>(notTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(conditionalNonTerm)
+                SemanticElement<TermType, NonTermType>(notTerm),
+                SemanticElement<TermType, NonTermType>(conditionalNonTerm)
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule3(
+const ProductionRule<TermType, NonTermType> rule3(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(priceExpressionNonTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(priceExpressionNonTerm)
+                ProductionElement<TermType, NonTermType>(priceExpressionNonTerm),
+                ProductionElement<TermType, NonTermType>(numOpTerm),
+                ProductionElement<TermType, NonTermType>(priceExpressionNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>(priceExpressionNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(priceExpressionNonTerm)
+                SemanticElement<TermType, NonTermType>(priceExpressionNonTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(numOpTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(priceExpressionNonTerm)
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule4(
+const ProductionRule<TermType, NonTermType> rule4(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(volumeExpressionNonTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(volumeExpressionNonTerm)
+                ProductionElement<TermType, NonTermType>(volumeExpressionNonTerm),
+                ProductionElement<TermType, NonTermType>(numOpTerm),
+                ProductionElement<TermType, NonTermType>(volumeExpressionNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>(volumeExpressionNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(volumeExpressionNonTerm)
+                SemanticElement<TermType, NonTermType>(volumeExpressionNonTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(numOpTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(volumeExpressionNonTerm)
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule5(
+const ProductionRule<TermType, NonTermType> rule5(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(signedPercentageExpressionNonTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(signedPercentageExpressionNonTerm)
+                ProductionElement<TermType, NonTermType>(signedPercentageExpressionNonTerm),
+                ProductionElement<TermType, NonTermType>(numOpTerm),
+                ProductionElement<TermType, NonTermType>(signedPercentageExpressionNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>(signedPercentageExpressionNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(signedPercentageExpressionNonTerm)
+                SemanticElement<TermType, NonTermType>(signedPercentageExpressionNonTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(numOpTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(signedPercentageExpressionNonTerm)
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule6(
+const ProductionRule<TermType, NonTermType> rule6(
         conditionalNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(unsignedPercentageExpressionNonTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(unsignedPercentageExpressionNonTerm)
+                ProductionElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm),
+                ProductionElement<TermType, NonTermType>(numOpTerm),
+                ProductionElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>(unsignedPercentageExpressionNonTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(numOpTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(" "),
-                SemanticElement<TradingTerm, TradingNonTerm>(unsignedPercentageExpressionNonTerm)
+                SemanticElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(numOpTerm),
+                SemanticElement<TermType, NonTermType>(" "),
+                SemanticElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm)
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule7(
+const ProductionRule<TermType, NonTermType> rule7(
         priceExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(priceIndTerm)
+                ProductionElement<TermType, NonTermType>(priceIndTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("Indicator(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(priceIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", stock, time)")
+                SemanticElement<TermType, NonTermType>("Indicator(\""),
+                SemanticElement<TermType, NonTermType>(priceIndTerm),
+                SemanticElement<TermType, NonTermType>("\", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule8(
+const ProductionRule<TermType, NonTermType> rule8(
         priceExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(priceIndTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(percentileTerm),
+                ProductionElement<TermType, NonTermType>(priceIndTerm),
+                ProductionElement<TermType, NonTermType>(percentileTerm),
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("IndQuantile(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(priceIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", "),
-                SemanticElement<TradingTerm, TradingNonTerm>(percentileTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(", stock, time)")
+                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
+                SemanticElement<TermType, NonTermType>(priceIndTerm),
+                SemanticElement<TermType, NonTermType>("\", "),
+                SemanticElement<TermType, NonTermType>(percentileTerm),
+                SemanticElement<TermType, NonTermType>(", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule9(
+const ProductionRule<TermType, NonTermType> rule9(
         volumeExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(volumeIndTerm)
+                ProductionElement<TermType, NonTermType>(volumeIndTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("Indicator(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(volumeIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", stock, time)")
+                SemanticElement<TermType, NonTermType>("Indicator(\""),
+                SemanticElement<TermType, NonTermType>(volumeIndTerm),
+                SemanticElement<TermType, NonTermType>("\", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule10(
+const ProductionRule<TermType, NonTermType> rule10(
         volumeExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(volumeIndTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(percentileTerm),
+                ProductionElement<TermType, NonTermType>(volumeIndTerm),
+                ProductionElement<TermType, NonTermType>(percentileTerm),
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("IndQuantile(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(volumeIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", "),
-                SemanticElement<TradingTerm, TradingNonTerm>(percentileTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(", stock, time)")
+                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
+                SemanticElement<TermType, NonTermType>(volumeIndTerm),
+                SemanticElement<TermType, NonTermType>("\", "),
+                SemanticElement<TermType, NonTermType>(percentileTerm),
+                SemanticElement<TermType, NonTermType>(", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule11(
+const ProductionRule<TermType, NonTermType> rule11(
         signedPercentageExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(signedIndTerm)
+                ProductionElement<TermType, NonTermType>(signedIndTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("Indicator(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(signedIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", stock, time)")
+                SemanticElement<TermType, NonTermType>("Indicator(\""),
+                SemanticElement<TermType, NonTermType>(signedIndTerm),
+                SemanticElement<TermType, NonTermType>("\", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule12(
+const ProductionRule<TermType, NonTermType> rule12(
         signedPercentageExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(signedIndTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(percentileTerm),
+                ProductionElement<TermType, NonTermType>(signedIndTerm),
+                ProductionElement<TermType, NonTermType>(percentileTerm),
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("IndQuantile(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(signedIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", "),
-                SemanticElement<TradingTerm, TradingNonTerm>(percentileTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(", stock, time)")
+                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
+                SemanticElement<TermType, NonTermType>(signedIndTerm),
+                SemanticElement<TermType, NonTermType>("\", "),
+                SemanticElement<TermType, NonTermType>(percentileTerm),
+                SemanticElement<TermType, NonTermType>(", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule13(
+const ProductionRule<TermType, NonTermType> rule13(
         unsignedPercentageExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(unsignedIndTerm)
+                ProductionElement<TermType, NonTermType>(unsignedIndTerm)
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("Indicator(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(unsignedIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", stock, time)")
+                SemanticElement<TermType, NonTermType>("Indicator(\""),
+                SemanticElement<TermType, NonTermType>(unsignedIndTerm),
+                SemanticElement<TermType, NonTermType>("\", stock, time)")
         }
 );
 
-const ProductionRule<TradingTerm, TradingNonTerm> rule14(
+const ProductionRule<TermType, NonTermType> rule14(
         unsignedPercentageExpressionNonTerm,
         {
-                ProductionElement<TradingTerm, TradingNonTerm>(unsignedIndTerm),
-                ProductionElement<TradingTerm, TradingNonTerm>(percentileTerm),
+                ProductionElement<TermType, NonTermType>(unsignedIndTerm),
+                ProductionElement<TermType, NonTermType>(percentileTerm),
         },
         {
-                SemanticElement<TradingTerm, TradingNonTerm>("IndQuantile(\""),
-                SemanticElement<TradingTerm, TradingNonTerm>(unsignedIndTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>("\", "),
-                SemanticElement<TradingTerm, TradingNonTerm>(percentileTerm),
-                SemanticElement<TradingTerm, TradingNonTerm>(", stock, time)")
+                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
+                SemanticElement<TermType, NonTermType>(unsignedIndTerm),
+                SemanticElement<TermType, NonTermType>("\", "),
+                SemanticElement<TermType, NonTermType>(percentileTerm),
+                SemanticElement<TermType, NonTermType>(", stock, time)")
         }
 );
 
@@ -243,10 +243,10 @@ const ProductionRule<TradingTerm, TradingNonTerm> rule14(
 ****************************/
 TEST_CASE("Testing random individual generation")
 {
-    Grammar<TradingTerm, TradingNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
-                                                  rule9, rule10, rule11, rule12, rule13, rule14 };
+    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
+                                           rule9, rule10, rule11, rule12, rule13, rule14 };
 
-    ConcreteSyntaxTree<TradingTerm, TradingNonTerm> cst;
+    ConcreteSyntaxTree<TermType, NonTermType> cst;
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
