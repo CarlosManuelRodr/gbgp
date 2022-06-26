@@ -8,12 +8,12 @@ using namespace std;
 *     Types declaration     *
 ****************************/
 
-enum class ArithmeticTerm
+enum class TermType
 {
     Variable, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
-enum class ArithmeticNonTerm
+enum class NonTermType
 {
     Expr, Term, Factor
 };
@@ -23,28 +23,28 @@ enum class ArithmeticNonTerm
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(ArithmeticTerm::Variable, "var", { "1", "2", "3" });
-const Terminal plusTerm(ArithmeticTerm::Plus, "Plus", { "+" });
-const Terminal timesTerm(ArithmeticTerm::Times, "Times", { "*" });
-const Terminal leftParenthesisTerm(ArithmeticTerm::LeftParenthesis, "LeftParenthesis", { "(" });
-const Terminal rightParenthesisTerm(ArithmeticTerm::RightParenthesis, "RightParenthesis", { ")" });
+const Terminal varTerm(TermType::Variable, "var", { "1", "2", "3" });
+const Terminal plusTerm(TermType::Plus, "Plus", { "+" });
+const Terminal timesTerm(TermType::Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", { ")" });
 
-const NonTerminal exprNonTerm(ArithmeticNonTerm::Expr, "EXPR");
-const NonTerminal termNonTerm(ArithmeticNonTerm::Term, "TERM");
-const NonTerminal factorNonTerm(ArithmeticNonTerm::Factor, "FACTOR");
+const NonTerminal exprNonTerm(NonTermType::Expr, "EXPR");
+const NonTerminal termNonTerm(NonTermType::Term, "TERM");
+const NonTerminal factorNonTerm(NonTermType::Factor, "FACTOR");
 
 // Grammar definition.
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule1(
+const ProductionRule<TermType, NonTermType> rule1(
         exprNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(plusTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(plusTerm),
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(plusTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>(plusTerm),
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
@@ -53,30 +53,30 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule1(
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule2(
+const ProductionRule<TermType, NonTermType> rule2(
         exprNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         },
         [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule3(
+const ProductionRule<TermType, NonTermType> rule3(
         termNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(timesTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm),
+                ProductionElement<TermType, NonTermType>(timesTerm),
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(timesTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm),
+                SemanticElement<TermType, NonTermType>(timesTerm),
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
@@ -85,43 +85,43 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule3(
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule4(
+const ProductionRule<TermType, NonTermType> rule4(
         termNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         },
         [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule5(
+const ProductionRule<TermType, NonTermType> rule5(
         factorNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(leftParenthesisTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(rightParenthesisTerm),
+                ProductionElement<TermType, NonTermType>(leftParenthesisTerm),
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(rightParenthesisTerm),
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(leftParenthesisTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(rightParenthesisTerm)
+                SemanticElement<TermType, NonTermType>(leftParenthesisTerm),
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>(rightParenthesisTerm)
         },
         [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(1);
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
+const ProductionRule<TermType, NonTermType> rule6(
         factorNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(varTerm),
+                ProductionElement<TermType, NonTermType>(varTerm),
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(varTerm)
+                SemanticElement<TermType, NonTermType>(varTerm)
         },
         [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
@@ -134,8 +134,8 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
 TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
-    Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> cst;
+    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    ConcreteSyntaxTree<TermType, NonTermType> cst;
     EvaluationContext evaluationContext;
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
@@ -151,12 +151,12 @@ TEST_CASE("Test individual generation")
     initialize_arithmetic_parser();
 
     // GP Generator grammar
-    Grammar<ArithmeticTerm, ArithmeticNonTerm> grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
+    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
 
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        auto ind = Individual<ArithmeticTerm, ArithmeticNonTerm>::NewRandomIndividual(grammar);
+        auto ind = Individual<TermType, NonTermType>::NewRandomIndividual(grammar);
 
         string expression = ind->GetExpression();
         string evaluationResult = ind->Evaluate();

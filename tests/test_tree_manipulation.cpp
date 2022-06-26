@@ -6,12 +6,12 @@ using namespace std;
 *     Types declaration     *
 ****************************/
 
-enum class ArithmeticTerm
+enum class TermType
 {
     NullTerm, Variable, Plus, Times, LeftParenthesis, RightParenthesis
 };
 
-enum class ArithmeticNonTerm
+enum class NonTermType
 {
     NullNonTerm, Expr, Term, Factor
 };
@@ -21,86 +21,86 @@ enum class ArithmeticNonTerm
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal<ArithmeticTerm> varTerm(ArithmeticTerm::Variable, "var", { "a", "b", "c" });
-const Terminal<ArithmeticTerm> plusTerm(ArithmeticTerm::Plus, "Plus", { "+" });
-const Terminal<ArithmeticTerm> timesTerm(ArithmeticTerm::Times, "Times", { "*" });
-const Terminal<ArithmeticTerm> leftParenthesisTerm(ArithmeticTerm::LeftParenthesis, "LeftParenthesis", { "(" });
-const Terminal<ArithmeticTerm> rightParenthesisTerm(ArithmeticTerm::RightParenthesis, "RightParenthesis", { ")" });
+const Terminal<TermType> varTerm(TermType::Variable, "var", {"a", "b", "c" });
+const Terminal<TermType> plusTerm(TermType::Plus, "Plus", {"+" });
+const Terminal<TermType> timesTerm(TermType::Times, "Times", {"*" });
+const Terminal<TermType> leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", {"(" });
+const Terminal<TermType> rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", {")" });
 
-const NonTerminal<ArithmeticNonTerm> exprNonTerm(ArithmeticNonTerm::Expr, "EXPR");
-const NonTerminal<ArithmeticNonTerm> termNonTerm(ArithmeticNonTerm::Term, "TERM");
-const NonTerminal<ArithmeticNonTerm> factorNonTerm(ArithmeticNonTerm::Factor, "FACTOR");
+const NonTerminal<NonTermType> exprNonTerm(NonTermType::Expr, "EXPR");
+const NonTerminal<NonTermType> termNonTerm(NonTermType::Term, "TERM");
+const NonTerminal<NonTermType> factorNonTerm(NonTermType::Factor, "FACTOR");
 
 // Grammar definition.
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule1(
+const ProductionRule<TermType, NonTermType> rule1(
         exprNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(plusTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(plusTerm),
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(plusTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>(plusTerm),
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule2(
+const ProductionRule<TermType, NonTermType> rule2(
         exprNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule3(
+const ProductionRule<TermType, NonTermType> rule3(
         termNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(timesTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm),
+                ProductionElement<TermType, NonTermType>(timesTerm),
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(termNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(timesTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm),
+                SemanticElement<TermType, NonTermType>(timesTerm),
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule4(
+const ProductionRule<TermType, NonTermType> rule4(
         termNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule5(
+const ProductionRule<TermType, NonTermType> rule5(
         factorNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(leftParenthesisTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(rightParenthesisTerm),
+                ProductionElement<TermType, NonTermType>(leftParenthesisTerm),
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(rightParenthesisTerm),
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(leftParenthesisTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(exprNonTerm),
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(rightParenthesisTerm)
+                SemanticElement<TermType, NonTermType>(leftParenthesisTerm),
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>(rightParenthesisTerm)
         }
 );
 
-const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
+const ProductionRule<TermType, NonTermType> rule6(
         factorNonTerm,
         {
-                ProductionElement<ArithmeticTerm, ArithmeticNonTerm>(varTerm),
+                ProductionElement<TermType, NonTermType>(varTerm),
         },
         {
-                SemanticElement<ArithmeticTerm, ArithmeticNonTerm>(varTerm)
+                SemanticElement<TermType, NonTermType>(varTerm)
         }
 );
 
@@ -110,7 +110,7 @@ const ProductionRule<ArithmeticTerm, ArithmeticNonTerm> rule6(
 TEST_CASE("Testing subtree insertion")
 {
     // First tree
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast1;
+    ConcreteSyntaxTree<TermType, NonTermType> ast1;
     ast1.SetRootRule(rule1);
     auto leftExpr1 = ast1.AddNode(ast1.Root(), exprNonTerm, rule2);
     auto middleSum1 = ast1.AddNode(ast1.Root(), plusTerm);
@@ -130,7 +130,7 @@ TEST_CASE("Testing subtree insertion")
     auto rightRightVar1 = ast1.AddNode(rightRightFactor1, varTerm, "a");
 
     // Second tree
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> ast2;
+    ConcreteSyntaxTree<TermType, NonTermType> ast2;
     ast2.SetRootRule(rule1);
     auto leftExpr2 = ast2.AddNode(ast2.Root(), exprNonTerm, rule2);
     auto middleSum2 = ast2.AddNode(ast2.Root(), plusTerm);
@@ -153,7 +153,7 @@ TEST_CASE("Testing subtree insertion")
     CHECK(ast2.SynthesizeExpression() == "c+b*b");
 
     ast1.RemoveSubtree(rightTerm1);
-    ConcreteSyntaxTree<ArithmeticTerm, ArithmeticNonTerm> subtree = ast2.GetSubtree(rightTerm2);
+    ConcreteSyntaxTree<TermType, NonTermType> subtree = ast2.GetSubtree(rightTerm2);
     ast1.InsertSubtree(rightTerm1, subtree.Root());
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
