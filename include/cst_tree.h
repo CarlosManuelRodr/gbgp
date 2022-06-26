@@ -6,6 +6,7 @@
 #include <functional>
 #include <string>
 #include <exception>
+#include <type_traits>
 #include "grammar.h"
 
 //*****************************
@@ -21,7 +22,7 @@ enum class TreeNodeType
 /// Represents a node of an n-ary tree
 /// \tparam TerminalType enum class with the Terminal IDs specified by the user.
 /// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
-template <typename TerminalType, typename NonTerminalType> class TreeNode
+template <typename TerminalType, typename NonTerminalType, typename ValueType = std::string> class TreeNode
 {
 private:
     /// Generate an Unique Identifier for this node.
@@ -53,19 +54,19 @@ public:
     NonTerminal<NonTerminalType> nonTermInstance;
 
     /// Terminal instance used if the node is of Terminal type.
-    Terminal<TerminalType> termInstance;
+    Terminal<TerminalType, ValueType> termInstance;
 
     /// Production rule from which this node is part of.
-    ProductionRule<TerminalType, NonTerminalType> generatorPR;
+    ProductionRule<TerminalType, NonTerminalType, ValueType> generatorPR;
 
     /// Parent of the node. If the node is a root, its value will be null.
-    TreeNode<TerminalType, NonTerminalType>* parent;
+    TreeNode<TerminalType, NonTerminalType, ValueType>* parent;
 
     /// List of references to the children of this node.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> children;
+    std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> children;
 
     /// Value of the terminal used if the node is of Terminal type.
-    std::string termValue;
+    ValueType termValue;
 
     /// Unique identifier of this node.
     std::string uuid;
@@ -74,16 +75,17 @@ public:
     std::string expressionSynthesis;
 
     /// Result of the evaluation of this node.
-    std::string expressionEvaluation;
+    ValueType expressionEvaluation;
 
     /// Constructor of an empty node.
     TreeNode()
     {
         type = TreeNodeType::None;
-        termInstance = Terminal<TerminalType>();
+        termInstance = Terminal<TerminalType, ValueType>();
         nonTermInstance = NonTerminal<NonTerminalType>();
         expressionSynthesis = "";
-        expressionEvaluation = "";
+        termValue = ValueType();
+        expressionEvaluation = ValueType();
         parent = nullptr;
         uuid = GenerateUUID();
     }
@@ -93,27 +95,29 @@ public:
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
-        termInstance = Terminal<TerminalType>();
+        termInstance = Terminal<TerminalType, ValueType>();
         expressionSynthesis = "";
-        expressionEvaluation = "";
+        termValue = ValueType();
+        expressionEvaluation = ValueType();
         parent = nullptr;
         uuid = GenerateUUID();
     }
 
     /// Constructor of a Terminal node.
-    explicit TreeNode(const Terminal<TerminalType>& t)
+    explicit TreeNode(const Terminal<TerminalType, ValueType>& t)
     {
         type = TreeNodeType::Terminal;
         nonTermInstance = NonTerminal<NonTerminalType>();
         termInstance = t;
         expressionSynthesis = "";
-        expressionEvaluation = "";
+        termValue = ValueType();
+        expressionEvaluation = ValueType();
         parent = nullptr;
         uuid = GenerateUUID();
     }
 
     /// Copy constructor.
-    TreeNode(const TreeNode<TerminalType, NonTerminalType>& other)
+    TreeNode(const TreeNode<TerminalType, NonTerminalType, ValueType>& other)
     {
         type = other.type;
         nonTermInstance = other.nonTermInstance;
@@ -127,7 +131,7 @@ public:
     }
 
     /// Copy constructor by reference.
-    explicit TreeNode(TreeNode<TerminalType, NonTerminalType>* other)
+    explicit TreeNode(TreeNode<TerminalType, NonTerminalType, ValueType>* other)
     {
         type = other->type;
         nonTermInstance = other->nonTermInstance;
@@ -162,19 +166,19 @@ public:
     /// Reset the evaluation of this node
     void ClearEvaluation()
     {
-        expressionEvaluation.clear();
+        expressionEvaluation = ValueType();
     }
 
     /// Check if this node has been evaluated..
     [[nodiscard]]
     bool IsEvaluated() const
     {
-        return !expressionEvaluation.empty();
+        return expressionEvaluation != ValueType();
     }
 
     /// Add the node as a child.
     /// \param node Reference to the child node.
-    void AddChildNode(TreeNode<TerminalType, NonTerminalType>* node)
+    void AddChildNode(TreeNode<TerminalType, NonTerminalType, ValueType>* node)
     {
         children.push_back(node);
     }
@@ -183,12 +187,7 @@ public:
     [[nodiscard]]
     std::string GetLabel(bool showUUID = false) const
     {
-        std::string label;
-        if (type == TreeNodeType::NonTerminal)
-            label = nonTermInstance.label;
-        else
-            label = termInstance.label + " [" + termValue + "]";
-
+        std::string label = (type == TreeNodeType::NonTerminal) ? nonTermInstance.label : termInstance.label;
         if (showUUID)
             label += " UUID: " + uuid;
         return label;
@@ -202,11 +201,13 @@ public:
 /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
 /// \tparam TerminalType enum class with the Terminal IDs specified by the user.
 /// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
-template <typename TerminalType, typename NonTerminalType> class ConcreteSyntaxTree
+template <typename TerminalType, typename NonTerminalType, typename ValueType = std::string> class ConcreteSyntaxTree
 {
 private:
+    static constexpr bool stringValueType = std::is_same<ValueType, std::string>::value;
+
     /// Root of the tree.
-    TreeNode<TerminalType, NonTerminalType>* root;
+    TreeNode<TerminalType, NonTerminalType, ValueType>* root;
 
     /// Find the first position of a NonTerminal of type id.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
@@ -216,8 +217,9 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, NonTerminalType id,
-                        const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize) const
+    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo,
+                        NonTerminalType id, const std::vector<unsigned>& avoid, int currentPosition,
+                        int elementsToSynthesize) const
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
         {
@@ -236,7 +238,7 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo, TerminalType id,
+    int FindIndexOfTerm(const std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo, TerminalType id,
                         const std::vector<unsigned>& avoid, int currentPosition, int elementsToSynthesize) const
     {
         for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
@@ -252,7 +254,7 @@ private:
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-evaluated non-terminal.
     [[nodiscard]]
-    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo) const
+    unsigned NextToEvaluate(std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo) const
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
@@ -264,7 +266,7 @@ private:
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
     [[nodiscard]]
-    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo) const
+    unsigned NextToSynthesize(std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo) const
     {
         for (unsigned i = 0; i < dfspo.size(); i++)
             if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
@@ -275,8 +277,8 @@ private:
     /// Copy a tree by creating new instances of all the nodes.
     /// \param copyTree Pointer to the tree that holds the copy.
     /// \param originalTree Pointer to the original tree that will be copied.
-    void CopyTree(TreeNode<TerminalType, NonTerminalType>* copyTree,
-                  TreeNode<TerminalType, NonTerminalType>* originalTree) const
+    void CopyTree(TreeNode<TerminalType, NonTerminalType, ValueType>* copyTree,
+                  TreeNode<TerminalType, NonTerminalType, ValueType>* originalTree) const
     {
         if (originalTree != nullptr)
         {
@@ -287,9 +289,9 @@ private:
             copyTree->generatorPR = originalTree->generatorPR;
             copyTree->expressionSynthesis = copyTree->expressionSynthesis;
 
-            for (TreeNode<TerminalType, NonTerminalType>* n : originalTree->children)
+            for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : originalTree->children)
             {
-                auto* copyNode = new TreeNode<TerminalType, NonTerminalType>(n);
+                auto* copyNode = new TreeNode<TerminalType, NonTerminalType, ValueType>(n);
                 copyTree->AddChildNode(copyNode);
                 CopyTree(copyNode, n);
             }
@@ -301,7 +303,7 @@ private:
     /// \param node current node to print.
     /// \param depth level of indent of the printed node.
     /// \param showUUID whether to show the UUID of the node.
-    void PrintNodeAsTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth,
+    void PrintNodeAsTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType, ValueType>* node, int depth,
                          bool showUUID = false) const
     {
         std::string output = "|";
@@ -315,10 +317,10 @@ private:
     /// </summary>
     /// <param name="node">Node to print.</param>
     /// <param name="depth">Current depth.</param>
-    void PrintTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType>* node, int depth,
+    void PrintTree(std::ostream& stream, TreeNode<TerminalType, NonTerminalType, ValueType>* node, int depth,
                    bool showUUID = false) const
     {
-        for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : node->children)
         {
             this->PrintNodeAsTree(stream, n, depth, showUUID);
             PrintTree(stream, n, depth + 1, showUUID);
@@ -340,9 +342,9 @@ public:
     /// Copy constructor that uses the root of the tree to copy.
     /// \param grammar The formal grammar of the ConcreteSyntaxTree.
     /// \param proot Root of the tree to be copied.
-    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType>* proot)
+    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType, ValueType>* proot)
     {
-        root = new TreeNode<TerminalType, NonTerminalType>(proot);
+        root = new TreeNode<TerminalType, NonTerminalType, ValueType>(proot);
         root->parent = nullptr;
         this->CopyTree(root, proot);
         this->ClearEvaluation();
@@ -350,9 +352,9 @@ public:
 
     /// Copy constructor.
     /// \param other ConcreteSyntaxTree to be copied.
-    ConcreteSyntaxTree(const ConcreteSyntaxTree<TerminalType, NonTerminalType>& other)
+    ConcreteSyntaxTree(const ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>& other)
     {
-        root = new TreeNode<TerminalType, NonTerminalType>(other.root);
+        root = new TreeNode<TerminalType, NonTerminalType, ValueType>(other.root);
         root->parent = nullptr;
         this->CopyTree(root, other.root);
         this->ClearEvaluation();
@@ -360,9 +362,9 @@ public:
 
     /// Copy constructor from reference.
     /// \param other Pointer to the ConcreteSyntaxTree to be copied.
-    explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType>* other)
+    explicit ConcreteSyntaxTree(ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>* other)
     {
-        root = new TreeNode<TerminalType, NonTerminalType>(other->root);
+        root = new TreeNode<TerminalType, NonTerminalType, ValueType>(other->root);
         root->parent = nullptr;
         this->CopyTree(root, other->root);
         this->ClearEvaluation();
@@ -373,9 +375,9 @@ public:
         this->Destroy();
     }
 
-    void SetRootRule(ProductionRule<TerminalType, NonTerminalType> startRule)
+    void SetRootRule(ProductionRule<TerminalType, NonTerminalType, ValueType> startRule)
     {
-        root = new TreeNode<TerminalType, NonTerminalType>(startRule.from);
+        root = new TreeNode<TerminalType, NonTerminalType, ValueType>(startRule.from);
         root->parent = nullptr;
         root->generatorPR = startRule;
     }
@@ -385,8 +387,8 @@ public:
     {
         if (root != nullptr)
         {
-            std::vector<TreeNode<TerminalType, NonTerminalType>*> nodeList = DepthFirstScanPostorder();
-            for (TreeNode<TerminalType, NonTerminalType>* n : nodeList)
+            std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> nodeList = DepthFirstScanPostorder();
+            for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : nodeList)
             {
                 if (n != nullptr)
                 {
@@ -404,8 +406,10 @@ public:
     {
         if (root != nullptr)
         {
-            std::vector<TreeNode<TerminalType, NonTerminalType>*> nodeList = this->DepthFirstScanPostorder(root);
-            for (TreeNode<TerminalType, NonTerminalType>*& n : nodeList)
+            std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+            nodeList = this->DepthFirstScanPostorder(root);
+
+            for (TreeNode<TerminalType, NonTerminalType, ValueType>*& n : nodeList)
             {
                 if (n != nullptr)
                 {
@@ -420,13 +424,15 @@ public:
     /// Clear the expressionSynthesis and expressionEvaluation of every node.
     void ClearEvaluation()
     {
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> nodeList = this->DepthFirstScanPostorder(root);
-        for (TreeNode<TerminalType, NonTerminalType>* n : nodeList)
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+        nodeList = this->DepthFirstScanPostorder(root);
+
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : nodeList)
         {
             if (n->type == TreeNodeType::NonTerminal)
             {
                 n->expressionSynthesis = "";
-                n->expressionEvaluation = "";
+                n->expressionEvaluation = ValueType();
             }
         }
     }
@@ -445,7 +451,7 @@ public:
     /// Returns a reference to the root.
     /// \return Pointer to the root node.
     [[nodiscard]]
-    TreeNode<TerminalType, NonTerminalType>* Root() const
+    TreeNode<TerminalType, NonTerminalType, ValueType>* Root() const
     {
         return root;
     }
@@ -455,11 +461,11 @@ public:
     /// \param nonTerm NonTerminal instance.
     /// \param generatorPR Production rule from which this node is part of.
     /// \return Pointer to the newly created node.
-    TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target,
-                                                     const NonTerminal<NonTerminalType>& nonTerm,
-                                                     ProductionRule<TerminalType, NonTerminalType> generatorPR)
+    TreeNode<TerminalType, NonTerminalType, ValueType>*
+    AddNode(TreeNode<TerminalType, NonTerminalType, ValueType>* target, const NonTerminal<NonTerminalType>& nonTerm,
+            ProductionRule<TerminalType, NonTerminalType, ValueType> generatorPR)
     {
-        auto* newNode = new TreeNode<TerminalType, NonTerminalType>(nonTerm);
+        auto* newNode = new TreeNode<TerminalType, NonTerminalType, ValueType>(nonTerm);
         newNode->generatorPR = generatorPR;
         newNode->parent = target;
         target->AddChildNode(newNode);
@@ -471,10 +477,10 @@ public:
     /// \param target Node where the child will be placed.
     /// \param term Terminal instance.
     /// \return Pointer to the newly created node.
-    TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target,
-                                                     const Terminal<TerminalType>& term)
+    TreeNode<TerminalType, NonTerminalType, ValueType>*
+    AddNode(TreeNode<TerminalType, NonTerminalType, ValueType>* target, const Terminal<TerminalType, ValueType>& term)
     {
-        auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
+        auto* newNode = new TreeNode<TerminalType, NonTerminalType, ValueType>(term);
         newNode->termValue = term.GetValue();
         newNode->parent = target;
         target->AddChildNode(newNode);
@@ -486,11 +492,11 @@ public:
     /// \param term Terminal instance.
     /// \param termValue Terminal value.
     /// \return Pointer to the newly created node.
-    TreeNode<TerminalType, NonTerminalType>* AddNode(TreeNode<TerminalType, NonTerminalType>* target,
-                                                     const Terminal<TerminalType>& term,
-                                                     const std::string& termValue)
+    TreeNode<TerminalType, NonTerminalType, ValueType>*
+    AddNode(TreeNode<TerminalType, NonTerminalType, ValueType>* target, const Terminal<TerminalType, ValueType>& term,
+            const ValueType& termValue)
     {
-        auto* newNode = new TreeNode<TerminalType, NonTerminalType>(term);
+        auto* newNode = new TreeNode<TerminalType, NonTerminalType, ValueType>(term);
         newNode->termValue = termValue;
         newNode->parent = target;
         target->AddChildNode(newNode);
@@ -499,11 +505,13 @@ public:
 
     /// Removes the subtree starting from rootOfSubtree.
     /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
-    void RemoveSubtree(TreeNode<TerminalType, NonTerminalType>* rootOfSubtree)
+    void RemoveSubtree(TreeNode<TerminalType, NonTerminalType, ValueType>* rootOfSubtree)
     {
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> nodeList = this->DepthFirstScanPostorder(rootOfSubtree);
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+        nodeList = this->DepthFirstScanPostorder(rootOfSubtree);
+
         nodeList.pop_back();
-        for (TreeNode<TerminalType, NonTerminalType>*& n : nodeList)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>*& n : nodeList)
         {
             if (n != nullptr)
             {
@@ -519,17 +527,17 @@ public:
     /// \param subTreeStartNode Root node of subtree.
     /// \return A new ConcreteSyntaxTree starting from the subTreeStartNode.
     [[nodiscard]]
-    ConcreteSyntaxTree<TerminalType, NonTerminalType>
-    GetSubtree(TreeNode<TerminalType, NonTerminalType>* subTreeStartNode) const
+    ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>
+    GetSubtree(TreeNode<TerminalType, NonTerminalType, ValueType>* subTreeStartNode) const
     {
-        return ConcreteSyntaxTree<TerminalType, NonTerminalType>(subTreeStartNode);
+        return ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>(subTreeStartNode);
     }
 
     /// Insert a copy of the subtree into the position at insertNode.
     /// \param insertNode Node where the subtree will be inserted.
     /// \param subtreeStartNode Pointer to the subtree to copy and insert.
-    void InsertSubtree(TreeNode<TerminalType, NonTerminalType>* insertNode,
-                       TreeNode<TerminalType, NonTerminalType>* subtreeStartNode)
+    void InsertSubtree(TreeNode<TerminalType, NonTerminalType, ValueType>* insertNode,
+                       TreeNode<TerminalType, NonTerminalType, ValueType>* subtreeStartNode)
     {
         // Check that both nodes are NonTerminals
         if (insertNode->type == TreeNodeType::NonTerminal && subtreeStartNode->type == TreeNodeType::NonTerminal)
@@ -537,11 +545,11 @@ public:
             // Check that both nodes are of the same type.
             if (insertNode->nonTermInstance.id == subtreeStartNode->nonTermInstance.id)
             {
-                auto* copySubtreeStartNode = new TreeNode<TerminalType, NonTerminalType>();
+                auto* copySubtreeStartNode = new TreeNode<TerminalType, NonTerminalType, ValueType>();
                 CopyTree(copySubtreeStartNode, subtreeStartNode);
 
                 // Find parent and replace child reference of insertNode to subtreeStartNode.
-                for (TreeNode<TerminalType, NonTerminalType>*& child : insertNode->parent->children)
+                for (TreeNode<TerminalType, NonTerminalType, ValueType>*& child : insertNode->parent->children)
                 {
                     if (child == insertNode)
                     {
@@ -575,13 +583,14 @@ public:
     /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
     /// \param node Node from where the random tree will be created.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth, int depth, TreeNode<TerminalType, NonTerminalType>* node)
+    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType, ValueType>& treeGrammar, int maxDepth,
+                             int depth, TreeNode<TerminalType, NonTerminalType, ValueType>* node)
     {
         if (node->type == TreeNodeType::NonTerminal)
         {
             // Create children nodes based on the current node production rule.
-            std::vector<TreeNode<TerminalType, NonTerminalType>*> newNodes;
-            for (ProductionElement<TerminalType, NonTerminalType> pe : node->generatorPR.to)
+            std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> newNodes;
+            for (ProductionElement<TerminalType, NonTerminalType, ValueType> pe : node->generatorPR.to)
             {
                 if (pe.type == ProductionElementType::NonTerminal)
                     newNodes.push_back(AddNode(node, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
@@ -594,7 +603,7 @@ public:
             // Create subtrees for children nodes.
             if (depth != maxDepth)
             {
-                for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
+                for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : newNodes)
                 {
                     bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, depth + 1, n);
                     if (!branchCreationSuccess)
@@ -613,13 +622,13 @@ public:
     /// Create random tree based on the production rules described in the variable grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth = 10)
+    bool TryCreateRandomTree(const Grammar<TerminalType, NonTerminalType, ValueType>& treeGrammar, int maxDepth = 10)
     {
         this->SetRootRule(treeGrammar.GetRootRule());
 
         // Create children nodes based on the selected rule
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> newNodes;
-        for (ProductionElement<TerminalType, NonTerminalType> pe : root->generatorPR.to)
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> newNodes;
+        for (ProductionElement<TerminalType, NonTerminalType, ValueType> pe : root->generatorPR.to)
         {
             if (pe.type == ProductionElementType::NonTerminal)
                 newNodes.push_back(AddNode(root, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
@@ -629,7 +638,7 @@ public:
                 throw std::runtime_error("Unassigned production element type");
         }
 
-        for (TreeNode<TerminalType, NonTerminalType>* n : newNodes)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : newNodes)
         {
             bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, 1, n);
             if (!branchCreationSuccess)
@@ -641,7 +650,7 @@ public:
 
     /// Ensure the creation of a random tree by creating random trees until there is a success.
     /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(const Grammar<TerminalType, NonTerminalType>& treeGrammar, int maxDepth = 10)
+    void CreateRandomTree(const Grammar<TerminalType, NonTerminalType, ValueType>& treeGrammar, int maxDepth = 10)
     {
         bool success = false;
         while (!success)
@@ -656,7 +665,7 @@ public:
     {
         this->PrintNodeAsTree(stream, root, 0, showUUID);
         
-        for (TreeNode<TerminalType, NonTerminalType>* n : root->children)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : root->children)
         {
             this->PrintNodeAsTree(stream, n, 1, showUUID);
             PrintTree(stream, n, 2, showUUID);
@@ -670,8 +679,8 @@ public:
     /// Traverses the tree in a depth first pre-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*>
-    DepthFirstScanPreorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+    DepthFirstScanPreorder(TreeNode<TerminalType, NonTerminalType, ValueType>* node = nullptr)
     {
         /*
           Algorithm Preorder(tree)
@@ -679,7 +688,7 @@ public:
           2. Traverse the left subtree, i.e., call Preorder(left-subtree)
           3. Traverse the right subtree, i.e., call Preorder(right-subtree)
         */
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> output;
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> output;
 
         if (node == nullptr)
         {
@@ -687,10 +696,13 @@ public:
             output.push_back(node);
         }
 
-        for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : node->children)
         {
             output.push_back(n);
-            const std::vector<TreeNode<TerminalType, NonTerminalType>*> childrenTreeNodes = DepthFirstScanPreorder(n);
+
+            const std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+            childrenTreeNodes = DepthFirstScanPreorder(n);
+
             output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
         }
 
@@ -700,8 +712,8 @@ public:
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*>
-    DepthFirstScanPostorder(TreeNode<TerminalType, NonTerminalType>* node = nullptr)
+    std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+    DepthFirstScanPostorder(TreeNode<TerminalType, NonTerminalType, ValueType>* node = nullptr)
     {
         /*
           Algorithm Postorder(tree)
@@ -710,7 +722,7 @@ public:
           3. Visit the root.
         */
 
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> output;
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> output;
 
         if (node == nullptr)
             node = root;
@@ -721,9 +733,11 @@ public:
             return output;
         }
 
-        for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
+        for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : node->children)
         {
-            const std::vector<TreeNode<TerminalType, NonTerminalType>*> childrenTreeNodes = DepthFirstScanPostorder(n);
+            const std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>
+            childrenTreeNodes = DepthFirstScanPostorder(n);
+
             output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
         }
         output.push_back(node);
@@ -733,7 +747,7 @@ public:
 
     /// Traverses the tree in a breadth first order.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode<TerminalType, NonTerminalType>*> BreadthFirstScan()
+    std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> BreadthFirstScan()
     {
         /*
             Algorithm BFS(tree)
@@ -745,17 +759,17 @@ public:
                 c) Dequeue a node from q.
         */
 
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> output;
-        std::queue<TreeNode<TerminalType, NonTerminalType>*> q;
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> output;
+        std::queue<TreeNode<TerminalType, NonTerminalType, ValueType>*> q;
         q.push(root);
 
         while (!q.empty())
         {
-            TreeNode<TerminalType, NonTerminalType>* node = q.front();
+            TreeNode<TerminalType, NonTerminalType, ValueType>* node = q.front();
             output.push_back(node);
             q.pop();
 
-            for (TreeNode<TerminalType, NonTerminalType>* n : node->children)
+            for (TreeNode<TerminalType, NonTerminalType, ValueType>* n : node->children)
                 q.push(n);
         }
 
@@ -768,19 +782,19 @@ public:
 
     /// Synthesize the first non-synthesized node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    void SynthesizeFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo)
+    void SynthesizeFirst(std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo)
     {
         // Get the rule of the element to be evaluated.
         unsigned nextIndex = NextToSynthesize(dfspo);
         if (nextIndex == dfspo.size())
             return;
 
-        ProductionRule<TerminalType, NonTerminalType> rule = dfspo[nextIndex]->generatorPR;
+        ProductionRule<TerminalType, NonTerminalType, ValueType> rule = dfspo[nextIndex]->generatorPR;
         std::string synthesis;
         std::vector<unsigned> toErase;
 
         // Process the elements of dfspo that match the semantic rules.
-        for (SemanticElement<TerminalType, NonTerminalType> se : rule.semanticRules)
+        for (SemanticElement<TerminalType, NonTerminalType, ValueType> se : rule.semanticRules)
         {
             if (se.type == SemanticElementType::String)
                 synthesis += se.string;
@@ -804,7 +818,11 @@ public:
                 const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    synthesis += dfspo[pos]->termValue;
+                    if constexpr(stringValueType)
+                        synthesis += dfspo[pos]->termValue;
+                    else
+                        synthesis += std::to_string(dfspo[pos]->termValue);
+
                     toErase.push_back(pos);
                 }
                 else
@@ -822,7 +840,7 @@ public:
     [[nodiscard]]
     std::string SynthesizeExpression()
     {
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> dfspo = this->DepthFirstScanPostorder();
         for (auto node : dfspo) node->ClearSynthesis();
 
         try
@@ -842,21 +860,21 @@ public:
     /// Evaluate the first non-evaluate node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext pointer to the evaluation context.
-    void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType>*>& dfspo,
-                       EvaluationContext* evaluationContext)
+    void EvaluateFirst(std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*>& dfspo,
+                       EvaluationContext<ValueType>* evaluationContext)
     {
         // Get the rule of the element to be evaluated.
         unsigned nextIndex = NextToEvaluate(dfspo);
         if (nextIndex == dfspo.size())
             return;
 
-        ProductionRule<TerminalType, NonTerminalType> rule = dfspo[nextIndex]->generatorPR;
+        ProductionRule<TerminalType, NonTerminalType, ValueType> rule = dfspo[nextIndex]->generatorPR;
         std::vector<unsigned> toErase;
 
         evaluationContext->Prepare();
 
         // Push to the context the elements of dfspo that match the production rules.
-        for (ProductionElement<TerminalType, NonTerminalType> se : rule.to)
+        for (ProductionElement<TerminalType, NonTerminalType, ValueType> se : rule.to)
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
@@ -901,9 +919,9 @@ public:
     /// Evaluates the tree using the production rules of the grammar.
     /// \param evaluationContext pointer to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
-    bool Evaluate(EvaluationContext* evaluationContext)
+    bool Evaluate(EvaluationContext<ValueType>* evaluationContext)
     {
-        std::vector<TreeNode<TerminalType, NonTerminalType>*> dfspo = this->DepthFirstScanPostorder();
+        std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>*> dfspo = this->DepthFirstScanPostorder();
         for (auto node : dfspo) node->ClearEvaluation();
 
         try

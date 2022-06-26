@@ -2,7 +2,7 @@
 #include <limits>
 #include "cst_tree.h"
 
-template <typename TerminalType, typename NonTerminalType, typename EvaluationContextType = EvaluationContext>
+template <typename TerminalType, typename NonTerminalType, typename EvaluationContextType = EvaluationContext<std::string>>
 class Individual
 {
 private:
