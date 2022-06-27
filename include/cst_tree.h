@@ -101,24 +101,23 @@ public:
     }
 
     TreeNode(const NonTerminal<NonTerminalType>& nt,
-             std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>> children)
+             std::vector<TreeNode<TerminalType, NonTerminalType>> children)
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
         termInstance = Terminal<TerminalType, ValueType>();
         expressionSynthesis = "";
-        termValue = ValueType();
-        expressionEvaluation = ValueType();
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
 
         for (auto c : children)
-            AddChildNode(new TreeNode<TerminalType, NonTerminalType, ValueType>(c), this);
+            AddChildNode(new TreeNode<TerminalType, NonTerminalType>(c), this);
     }
 
-    TreeNode(ProductionRule<TerminalType, NonTerminalType, ValueType> productionRule,
+    TreeNode(ProductionRule<TerminalType, NonTerminalType> productionRule,
              const NonTerminal<NonTerminalType>& nt,
-             std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>> children)
+             std::vector<TreeNode<TerminalType, NonTerminalType>> children)
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
@@ -146,14 +145,14 @@ public:
         uuid = GenerateUUID();
     }
 
-    TreeNode(const Terminal<TerminalType, ValueType>& t, ValueType value)
+    TreeNode(const Terminal<TerminalType>& t, std::string value)
     {
         type = TreeNodeType::Terminal;
         nonTermInstance = NonTerminal<NonTerminalType>();
         termInstance = t;
         expressionSynthesis = "";
         termValue = value;
-        expressionEvaluation = ValueType();
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
     }
