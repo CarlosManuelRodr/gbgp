@@ -23,98 +23,98 @@ enum class NonTermType
 //****************************/
 
 // Term/Nonterm declaration.
-const Terminal<TermType, int> varTerm(TermType::Var, "var", { 1, 2, 3 });
+const Terminal varTerm(TermType::Var, "var", { "1", "2", "3" });
 const NonTerminal exprNonTerm(NonTermType::Expr, "EXPR");
 const NonTerminal termNonTerm(NonTermType::Term, "TERM");
 const NonTerminal factorNonTerm(NonTermType::Factor, "FACTOR");
 
 // Grammar definition.
-const ProductionRule<TermType, NonTermType, int> rule1(
+const ProductionRule<TermType, NonTermType> rule1(
         exprNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(exprNonTerm),
-                ProductionElement<TermType, NonTermType, int>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType, int>(exprNonTerm),
-                SemanticElement<TermType, NonTermType, int>("+"),
-                SemanticElement<TermType, NonTermType, int>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>("+"),
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         },
-        [](EvaluationContext<int>* ctx) {
-            int n1 = ctx->SemanticValue(0);
-            int n2 = ctx->SemanticValue(1);
-            ctx->result() = n1 + n2;
+        [](EvaluationContext* ctx) {
+            int n1 = stoi(ctx->SemanticValue(0));
+            int n2 = stoi(ctx->SemanticValue(1));
+            ctx->result() = std::to_string(n1 + n2);
         }
 );
 
-const ProductionRule<TermType, NonTermType, int> rule2(
+const ProductionRule<TermType, NonTermType> rule2(
         exprNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(termNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType, int>(termNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm)
         },
-        [](EvaluationContext<int>* ctx) {
+        [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
 
-const ProductionRule<TermType, NonTermType, int> rule3(
+const ProductionRule<TermType, NonTermType> rule3(
         termNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(termNonTerm),
-                ProductionElement<TermType, NonTermType, int>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(termNonTerm),
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType, int>(termNonTerm),
-                SemanticElement<TermType, NonTermType, int>("*"),
-                SemanticElement<TermType, NonTermType, int>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(termNonTerm),
+                SemanticElement<TermType, NonTermType>("*"),
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         },
-        [](EvaluationContext<int>* ctx) {
-            int n1 = ctx->SemanticValue(0);
-            int n2 = ctx->SemanticValue(1);
-            ctx->result() = n1 * n2;
+        [](EvaluationContext* ctx) {
+            int n1 = stoi(ctx->SemanticValue(0));
+            int n2 = stoi(ctx->SemanticValue(1));
+            ctx->result() = std::to_string(n1 * n2);
         }
 );
 
-const ProductionRule<TermType, NonTermType, int> rule4(
+const ProductionRule<TermType, NonTermType> rule4(
         termNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(factorNonTerm)
+                ProductionElement<TermType, NonTermType>(factorNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType, int>(factorNonTerm)
+                SemanticElement<TermType, NonTermType>(factorNonTerm)
         },
-        [](EvaluationContext<int>* ctx) {
+        [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
 
-const ProductionRule<TermType, NonTermType, int> rule5(
+const ProductionRule<TermType, NonTermType> rule5(
         factorNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(exprNonTerm),
+                ProductionElement<TermType, NonTermType>(exprNonTerm),
         },
         {
-                SemanticElement<TermType, NonTermType, int>("("),
-                SemanticElement<TermType, NonTermType, int>(exprNonTerm),
-                SemanticElement<TermType, NonTermType, int>(")")
+                SemanticElement<TermType, NonTermType>("("),
+                SemanticElement<TermType, NonTermType>(exprNonTerm),
+                SemanticElement<TermType, NonTermType>(")")
         },
-        [](EvaluationContext<int>* ctx) {
+        [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
 
-const ProductionRule<TermType, NonTermType, int> rule6(
+const ProductionRule<TermType, NonTermType> rule6(
         factorNonTerm,
         {
-                ProductionElement<TermType, NonTermType, int>(varTerm),
+                ProductionElement<TermType, NonTermType>(varTerm),
         },
         {
-                SemanticElement<TermType, NonTermType, int>(varTerm)
+                SemanticElement<TermType, NonTermType>(varTerm)
         },
-        [](EvaluationContext<int>* ctx) {
+        [](EvaluationContext* ctx) {
             ctx->result() = ctx->SemanticValue(0);
         }
 );
@@ -125,28 +125,24 @@ const ProductionRule<TermType, NonTermType, int> rule6(
 TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
-    Grammar<TermType, NonTermType, int> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    ConcreteSyntaxTree<TermType, NonTermType, int> cst;
-    EvaluationContext<int> evaluationContext;
+    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    ConcreteSyntaxTree<TermType, NonTermType> cst;
+    EvaluationContext evaluationContext;
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
     bool evaluationState = cst.Evaluate(&evaluationContext);
     if (evaluationState)
-    {
-        string synth = cst.SynthesizeExpression();
-        cout << synth << endl;
         cout << evaluationContext.result() << endl;
-    }
 
     CHECK(evaluationState == true);
 }
 
 TEST_CASE("Test individual generation")
 {
-/*    initialize_arithmetic_parser();
+    initialize_arithmetic_parser();
 
     // GP Generator grammar
-    Grammar<TermType, NonTermType, int> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
 
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
@@ -161,5 +157,5 @@ TEST_CASE("Test individual generation")
 
         CHECK(evaluationResult == parserResult);
         delete ind;
-    }*/
+    }
 }
