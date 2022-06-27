@@ -103,6 +103,40 @@ public:
         uuid = GenerateUUID();
     }
 
+    TreeNode(const NonTerminal<NonTerminalType>& nt,
+             std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>> children)
+    {
+        type = TreeNodeType::NonTerminal;
+        nonTermInstance = nt;
+        termInstance = Terminal<TerminalType, ValueType>();
+        expressionSynthesis = "";
+        termValue = ValueType();
+        expressionEvaluation = ValueType();
+        parent = nullptr;
+        uuid = GenerateUUID();
+
+        for (auto c : children)
+            AddChildNode(new TreeNode<TerminalType, NonTerminalType, ValueType>(c), this);
+    }
+
+    TreeNode(ProductionRule<TerminalType, NonTerminalType, ValueType> productionRule,
+             const NonTerminal<NonTerminalType>& nt,
+             std::vector<TreeNode<TerminalType, NonTerminalType, ValueType>> children)
+    {
+        type = TreeNodeType::NonTerminal;
+        nonTermInstance = nt;
+        termInstance = Terminal<TerminalType, ValueType>();
+        expressionSynthesis = "";
+        termValue = ValueType();
+        expressionEvaluation = ValueType();
+        parent = nullptr;
+        uuid = GenerateUUID();
+        generatorPR = productionRule;
+
+        for (auto c : children)
+            AddChildNode(new TreeNode<TerminalType, NonTerminalType, ValueType>(c), this);
+    }
+
     /// Constructor of a Terminal node.
     explicit TreeNode(const Terminal<TerminalType, ValueType>& t)
     {
@@ -111,6 +145,18 @@ public:
         termInstance = t;
         expressionSynthesis = "";
         termValue = ValueType();
+        expressionEvaluation = ValueType();
+        parent = nullptr;
+        uuid = GenerateUUID();
+    }
+
+    TreeNode(const Terminal<TerminalType, ValueType>& t, ValueType value)
+    {
+        type = TreeNodeType::Terminal;
+        nonTermInstance = NonTerminal<NonTerminalType>();
+        termInstance = t;
+        expressionSynthesis = "";
+        termValue = value;
         expressionEvaluation = ValueType();
         parent = nullptr;
         uuid = GenerateUUID();
@@ -127,6 +173,7 @@ public:
         expressionEvaluation = other.expressionEvaluation;
         termValue = other.termValue;
         parent = other.parent;
+        children = other.children;
         uuid = GenerateUUID();
     }
 
@@ -178,8 +225,11 @@ public:
 
     /// Add the node as a child.
     /// \param node Reference to the child node.
-    void AddChildNode(TreeNode<TerminalType, NonTerminalType, ValueType>* node)
+    void AddChildNode(TreeNode<TerminalType, NonTerminalType, ValueType>* node,
+                      TreeNode<TerminalType, NonTerminalType, ValueType>* nodeParent = nullptr)
     {
+        if (nodeParent != nullptr)
+            node->parent = nodeParent;
         children.push_back(node);
     }
 
@@ -339,14 +389,27 @@ public:
         root = nullptr;
     }
 
-    /// Copy constructor that uses the root of the tree to copy.
-    /// \param grammar The formal grammar of the ConcreteSyntaxTree.
-    /// \param proot Root of the tree to be copied.
-    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType, ValueType>* proot)
+    /// Builds a tree from a root node.
+    /// \param proot Pointer to the root of the tree.
+    /// \param deepCopy If set to true, it will copy the tree into a new instance.
+    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType, ValueType>* proot, bool deepCopy = false)
     {
         root = new TreeNode<TerminalType, NonTerminalType, ValueType>(proot);
         root->parent = nullptr;
-        this->CopyTree(root, proot);
+        if (deepCopy)
+            this->CopyTree(root, proot);
+        this->ClearEvaluation();
+    }
+
+    /// Builds a tree from a root node.
+    /// \param proot Root of the tree.
+    /// \param deepCopy If set to true, it will copy the tree into a new instance.
+    explicit ConcreteSyntaxTree(TreeNode<TerminalType, NonTerminalType, ValueType> proot, bool deepCopy = false)
+    {
+        root = new TreeNode<TerminalType, NonTerminalType, ValueType>(proot);
+        root->parent = nullptr;
+        if (deepCopy)
+            this->CopyTree(root, &proot);
         this->ClearEvaluation();
     }
 
@@ -530,7 +593,7 @@ public:
     ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>
     GetSubtree(TreeNode<TerminalType, NonTerminalType, ValueType>* subTreeStartNode) const
     {
-        return ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>(subTreeStartNode);
+        return ConcreteSyntaxTree<TerminalType, NonTerminalType, ValueType>(subTreeStartNode, true);
     }
 
     /// Insert a copy of the subtree into the position at insertNode.

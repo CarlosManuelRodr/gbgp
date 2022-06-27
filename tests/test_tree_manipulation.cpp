@@ -109,7 +109,7 @@ const ProductionRule<TermType, NonTermType> rule6(
 ****************************/
 TEST_CASE("Testing subtree insertion")
 {
-    // First tree
+    // First tree. Procedural construction.
     ConcreteSyntaxTree<TermType, NonTermType> ast1;
     ast1.SetRootRule(rule1);
     auto leftExpr1 = ast1.AddNode(ast1.Root(), exprNonTerm, rule2);
@@ -129,7 +129,7 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar1 = ast1.AddNode(rightRightFactor1, varTerm, "a");
 
-    // Second tree
+    // Second tree. Procedural construction.
     ConcreteSyntaxTree<TermType, NonTermType> ast2;
     ast2.SetRootRule(rule1);
     auto leftExpr2 = ast2.AddNode(ast2.Root(), exprNonTerm, rule2);
@@ -149,8 +149,59 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar2 = ast2.AddNode(rightRightFactor2, varTerm, "b");
 
+    // Third tree. Declarative construction.
+    ConcreteSyntaxTree<TermType, NonTermType> ast3(
+        TreeNode<TermType, NonTermType>(
+                rule1,
+                exprNonTerm,
+                {
+                    TreeNode<TermType, NonTermType>(
+                        rule2,
+                        exprNonTerm,
+                        {
+                            TreeNode<TermType, NonTermType>(
+                                rule4,
+                                termNonTerm,
+                                {
+                                    TreeNode<TermType, NonTermType>(
+                                    rule6,
+                                    factorNonTerm,
+                                    {
+                                        TreeNode<TermType, NonTermType>(varTerm, "c")
+                                    })
+                                })
+                        }),
+                    TreeNode<TermType, NonTermType>(plusTerm, "+"),
+                    TreeNode<TermType, NonTermType>(
+                        rule3,
+                        termNonTerm,
+                        {
+                            TreeNode<TermType, NonTermType>(
+                                rule4,
+                                termNonTerm,
+                                {
+                                    TreeNode<TermType, NonTermType>(
+                                        rule6,
+                                        factorNonTerm,
+                                        {
+                                            TreeNode<TermType,NonTermType>(varTerm, "b")
+                                        })
+                                }),
+                            TreeNode<TermType, NonTermType>(timesTerm, "*"),
+                            TreeNode<TermType, NonTermType>(
+                                rule6,
+                                factorNonTerm,
+                                {
+                                    TreeNode<TermType, NonTermType>(varTerm, "b")
+                                })
+                        })
+                })
+            );
+
+    ast3.PrintTree();
     CHECK(ast1.SynthesizeExpression() == "a+a*a");
     CHECK(ast2.SynthesizeExpression() == "c+b*b");
+    CHECK(ast3.SynthesizeExpression() == "c+b*b");
 
     ast1.RemoveSubtree(rightTerm1);
     ConcreteSyntaxTree<TermType, NonTermType> subtree = ast2.GetSubtree(rightTerm2);
