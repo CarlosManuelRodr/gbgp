@@ -105,7 +105,7 @@ public:
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
-        termInstance = Terminal<TerminalType, ValueType>();
+        termInstance = Terminal<TerminalType>();
         expressionSynthesis = "";
         expressionEvaluation = "";
         parent = nullptr;
@@ -121,16 +121,16 @@ public:
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
-        termInstance = Terminal<TerminalType, ValueType>();
+        termInstance = Terminal<TerminalType>();
         expressionSynthesis = "";
-        termValue = ValueType();
-        expressionEvaluation = ValueType();
+        termValue = "";
+        expressionEvaluation = "";
         parent = nullptr;
         uuid = GenerateUUID();
         generatorPR = productionRule;
 
         for (auto c : children)
-            AddChildNode(new TreeNode<TerminalType, NonTerminalType, ValueType>(c), this);
+            AddChildNode(new TreeNode<TerminalType, NonTerminalType>(c), this);
     }
 
     /// Constructor of a Terminal node.
@@ -145,7 +145,7 @@ public:
         uuid = GenerateUUID();
     }
 
-    TreeNode(const Terminal<TerminalType>& t, std::string value)
+    TreeNode(const Terminal<TerminalType>& t, const std::string& value)
     {
         type = TreeNodeType::Terminal;
         nonTermInstance = NonTerminal<NonTerminalType>();
