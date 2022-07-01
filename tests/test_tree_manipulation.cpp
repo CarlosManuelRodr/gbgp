@@ -6,14 +6,10 @@ using namespace std;
 *     Types declaration     *
 ****************************/
 
-enum class TermType
+enum Terms
 {
-    NullTerm, Var, Plus, Times, LeftParenthesis, RightParenthesis
-};
-
-enum class NonTermType
-{
-    NullNonTerm, Expr, Term, Factor
+    Var, Plus, Times, LeftParenthesis, RightParenthesis, // Terminals
+    Expr, Term, Factor // NonTerminals
 };
 
 /****************************
@@ -21,86 +17,86 @@ enum class NonTermType
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal<TermType> varTerm(TermType::Var, "var", { "a", "b", "c" });
-const Terminal<TermType> plusTerm(TermType::Plus, "Plus", { "+" });
-const Terminal<TermType> timesTerm(TermType::Times, "Times", { "*" });
-const Terminal<TermType> leftParenthesisTerm(TermType::LeftParenthesis, "LeftParenthesis", { "(" });
-const Terminal<TermType> rightParenthesisTerm(TermType::RightParenthesis, "RightParenthesis", { ")" });
+const Terminal varTerm(Var, "var", { "a", "b", "c" });
+const Terminal plusTerm(Plus, "Plus", { "+" });
+const Terminal timesTerm(Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(RightParenthesis, "RightParenthesis", { ")" });
 
-const NonTerminal<NonTermType> exprNonTerm(NonTermType::Expr, "EXPR");
-const NonTerminal<NonTermType> termNonTerm(NonTermType::Term, "TERM");
-const NonTerminal<NonTermType> factorNonTerm(NonTermType::Factor, "FACTOR");
+const NonTerminal exprNonTerm(Expr, "EXPR");
+const NonTerminal termNonTerm(Term, "TERM");
+const NonTerminal factorNonTerm(Factor, "FACTOR");
 
 // Grammar definition.
-const ProductionRule<TermType, NonTermType> rule1(
+const ProductionRule rule1(
         exprNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(exprNonTerm),
-                ProductionElement<TermType, NonTermType>(plusTerm),
-                ProductionElement<TermType, NonTermType>(termNonTerm)
+                ProductionElement(exprNonTerm),
+                ProductionElement(plusTerm),
+                ProductionElement(termNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(exprNonTerm),
-                SemanticElement<TermType, NonTermType>(plusTerm),
-                SemanticElement<TermType, NonTermType>(termNonTerm)
+                SemanticElement(exprNonTerm),
+                SemanticElement(plusTerm),
+                SemanticElement(termNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule2(
+const ProductionRule rule2(
         exprNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(termNonTerm)
+                ProductionElement(termNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(termNonTerm)
+                SemanticElement(termNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule3(
+const ProductionRule rule3(
         termNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(termNonTerm),
-                ProductionElement<TermType, NonTermType>(timesTerm),
-                ProductionElement<TermType, NonTermType>(factorNonTerm)
+                ProductionElement(termNonTerm),
+                ProductionElement(timesTerm),
+                ProductionElement(factorNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(termNonTerm),
-                SemanticElement<TermType, NonTermType>(timesTerm),
-                SemanticElement<TermType, NonTermType>(factorNonTerm)
+                SemanticElement(termNonTerm),
+                SemanticElement(timesTerm),
+                SemanticElement(factorNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule4(
+const ProductionRule rule4(
         termNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(factorNonTerm)
+                ProductionElement(factorNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(factorNonTerm)
+                SemanticElement(factorNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule5(
+const ProductionRule rule5(
         factorNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(leftParenthesisTerm),
-                ProductionElement<TermType, NonTermType>(exprNonTerm),
-                ProductionElement<TermType, NonTermType>(rightParenthesisTerm),
+                ProductionElement(leftParenthesisTerm),
+                ProductionElement(exprNonTerm),
+                ProductionElement(rightParenthesisTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>(leftParenthesisTerm),
-                SemanticElement<TermType, NonTermType>(exprNonTerm),
-                SemanticElement<TermType, NonTermType>(rightParenthesisTerm)
+                SemanticElement(leftParenthesisTerm),
+                SemanticElement(exprNonTerm),
+                SemanticElement(rightParenthesisTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule6(
+const ProductionRule rule6(
         factorNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(varTerm),
+                ProductionElement(varTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>(varTerm)
+                SemanticElement(varTerm)
         }
 );
 
@@ -109,51 +105,102 @@ const ProductionRule<TermType, NonTermType> rule6(
 ****************************/
 TEST_CASE("Testing subtree insertion")
 {
-    // First tree
-    ConcreteSyntaxTree<TermType, NonTermType> ast1;
+    // First tree. Procedural construction.
+    ConcreteSyntaxTree ast1;
     ast1.SetRootRule(rule1);
-    auto leftExpr1 = ast1.AddNode(ast1.Root(), exprNonTerm, rule2);
-    auto middleSum1 = ast1.AddNode(ast1.Root(), plusTerm);
-    auto rightTerm1 = ast1.AddNode(ast1.Root(), termNonTerm, rule3);
+    auto leftExpr1 = ConcreteSyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
+    auto middleSum1 = ConcreteSyntaxTree::AddNode(ast1.Root(), plusTerm);
+    auto rightTerm1 = ConcreteSyntaxTree::AddNode(ast1.Root(), termNonTerm, rule3);
 
-    auto leftTerm1 = ast1.AddNode(leftExpr1, termNonTerm, rule4);
-    auto leftFactor1 = ast1.AddNode(leftTerm1, factorNonTerm, rule6);
-    auto leftVar1 = ast1.AddNode(leftFactor1, varTerm, "a");
+    auto leftTerm1 = ConcreteSyntaxTree::AddNode(leftExpr1, termNonTerm, rule4);
+    auto leftFactor1 = ConcreteSyntaxTree::AddNode(leftTerm1, factorNonTerm, rule6);
+    auto leftVar1 = ConcreteSyntaxTree::AddNode(leftFactor1, varTerm, "a");
 
-    auto rightLeftTerm1 = ast1.AddNode(rightTerm1, termNonTerm, rule4);
-    auto rightMultiplication1 = ast1.AddNode(rightTerm1, timesTerm);
-    auto rightRightFactor1 = ast1.AddNode(rightTerm1, factorNonTerm, rule6);
+    auto rightLeftTerm1 = ConcreteSyntaxTree::AddNode(rightTerm1, termNonTerm, rule4);
+    auto rightMultiplication1 = ConcreteSyntaxTree::AddNode(rightTerm1, timesTerm);
+    auto rightRightFactor1 = ConcreteSyntaxTree::AddNode(rightTerm1, factorNonTerm, rule6);
 
-    auto rightLeftFactor1 = ast1.AddNode(rightLeftTerm1, factorNonTerm, rule6);
-    auto rightLeftVar1 = ast1.AddNode(rightLeftFactor1, varTerm, "a");
+    auto rightLeftFactor1 = ConcreteSyntaxTree::AddNode(rightLeftTerm1, factorNonTerm, rule6);
+    auto rightLeftVar1 = ConcreteSyntaxTree::AddNode(rightLeftFactor1, varTerm, "a");
 
-    auto rightRightVar1 = ast1.AddNode(rightRightFactor1, varTerm, "a");
+    auto rightRightVar1 = ConcreteSyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
 
-    // Second tree
-    ConcreteSyntaxTree<TermType, NonTermType> ast2;
+    // Second tree. Procedural construction.
+    ConcreteSyntaxTree ast2;
     ast2.SetRootRule(rule1);
-    auto leftExpr2 = ast2.AddNode(ast2.Root(), exprNonTerm, rule2);
-    auto middleSum2 = ast2.AddNode(ast2.Root(), plusTerm);
-    auto rightTerm2 = ast2.AddNode(ast2.Root(), termNonTerm, rule3);
+    auto leftExpr2 = ConcreteSyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
+    auto middleSum2 = ConcreteSyntaxTree::AddNode(ast2.Root(), plusTerm);
+    auto rightTerm2 = ConcreteSyntaxTree::AddNode(ast2.Root(), termNonTerm, rule3);
 
-    auto leftTerm2 = ast2.AddNode(leftExpr2, termNonTerm, rule4);
-    auto leftFactor2 = ast2.AddNode(leftTerm2, factorNonTerm, rule6);
-    auto leftVar2 = ast2.AddNode(leftFactor2, varTerm, "c");
+    auto leftTerm2 = ConcreteSyntaxTree::AddNode(leftExpr2, termNonTerm, rule4);
+    auto leftFactor2 = ConcreteSyntaxTree::AddNode(leftTerm2, factorNonTerm, rule6);
+    auto leftVar2 = ConcreteSyntaxTree::AddNode(leftFactor2, varTerm, "c");
 
-    auto rightLeftTerm2 = ast2.AddNode(rightTerm2, termNonTerm, rule4);
-    auto rightMultiplication2 = ast2.AddNode(rightTerm2, timesTerm);
-    auto rightRightFactor2 = ast2.AddNode(rightTerm2, factorNonTerm, rule6);
+    auto rightLeftTerm2 = ConcreteSyntaxTree::AddNode(rightTerm2, termNonTerm, rule4);
+    auto rightMultiplication2 = ConcreteSyntaxTree::AddNode(rightTerm2, timesTerm);
+    auto rightRightFactor2 = ConcreteSyntaxTree::AddNode(rightTerm2, factorNonTerm, rule6);
 
-    auto rightLeftFactor2 = ast2.AddNode(rightLeftTerm2, factorNonTerm, rule6);
-    auto rightLeftVar2 = ast2.AddNode(rightLeftFactor2, varTerm, "b");
+    auto rightLeftFactor2 = ConcreteSyntaxTree::AddNode(rightLeftTerm2, factorNonTerm, rule6);
+    auto rightLeftVar2 = ConcreteSyntaxTree::AddNode(rightLeftFactor2, varTerm, "b");
 
-    auto rightRightVar2 = ast2.AddNode(rightRightFactor2, varTerm, "b");
+    auto rightRightVar2 = ConcreteSyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
 
+    // Third tree. Declarative construction.
+    ConcreteSyntaxTree ast3(
+        TreeNode(
+                rule1,
+                exprNonTerm,
+                {
+                    TreeNode(
+                        rule2,
+                        exprNonTerm,
+                        {
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                {
+                                    TreeNode(
+                                    rule6,
+                                    factorNonTerm,
+                                    {
+                                        TreeNode(varTerm, "c")
+                                    })
+                                })
+                        }),
+                    TreeNode(plusTerm, "+"),
+                    TreeNode(
+                        rule3,
+                        termNonTerm,
+                        {
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                {
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        {
+                                            TreeNode(varTerm, "b")
+                                        })
+                                }),
+                            TreeNode(timesTerm, "*"),
+                            TreeNode(
+                                rule6,
+                                factorNonTerm,
+                                {
+                                    TreeNode(varTerm, "b")
+                                })
+                        })
+                })
+            );
+
+    ast3.PrintTree();
     CHECK(ast1.SynthesizeExpression() == "a+a*a");
     CHECK(ast2.SynthesizeExpression() == "c+b*b");
+    CHECK(ast3.SynthesizeExpression() == "c+b*b");
 
     ast1.RemoveSubtree(rightTerm1);
-    ConcreteSyntaxTree<TermType, NonTermType> subtree = ast2.GetSubtree(rightTerm2);
+    ConcreteSyntaxTree subtree = ConcreteSyntaxTree::GetSubtree(rightTerm2);
     ast1.InsertSubtree(rightTerm1, subtree.Root());
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");

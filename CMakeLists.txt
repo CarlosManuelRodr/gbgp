@@ -18,6 +18,7 @@ add_executable(gbgp
         tests/test_individual_generation.cpp
         tests/test_memory.cpp
         tests/test_grammar.cpp
+        tests/test_evaluation.cpp
 
         util/peglib.h
         util/arithmetic_parser.h

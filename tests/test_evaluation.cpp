@@ -1,8 +1,16 @@
 #include "doctest.h"
-#include "../util/arithmetic_parser.h"
 #include "../include/cst_tree.h"
-#include "../include/individual.h"
 using namespace std;
+
+//*****************************
+//*    Evaluation context     *
+//****************************/
+
+class ArithmeticContext : public EvaluationContext
+{
+public:
+    int x{}, y{};
+};
 
 //*****************************
 //*     Types declaration     *
@@ -18,7 +26,7 @@ enum Terms
 //****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", { "1", "2", "3" });
+const Terminal varTerm(Var, "var", { "x", "y" });
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -110,48 +118,32 @@ const ProductionRule rule6(
                 SemanticElement(varTerm)
         },
         [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+            auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
+            string var = ctx->SemanticValue(0);
+            int varValue = var == "x" ? arithmeticContext->x : arithmeticContext->y;
+            ctx->result() = to_string(varValue);
         }
 );
 
 //*****************************
 //*       Test routines       *
 //****************************/
-TEST_CASE("Test individual evaluation")
+TEST_CASE("Test arithmetic evaluation")
 {
     // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
     ConcreteSyntaxTree cst;
-    EvaluationContext evaluationContext;
+
+    ArithmeticContext arithmeticContext;
+    arithmeticContext.x = 4;
+    arithmeticContext.y = 5;
+
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
-    bool evaluationState = cst.Evaluate(&evaluationContext);
+    bool evaluationState = cst.Evaluate(&arithmeticContext);
     if (evaluationState)
-        cout << evaluationContext.result() << endl;
+        cout << arithmeticContext.result() << endl;
 
     CHECK(evaluationState == true);
-}
-
-TEST_CASE("Test individual generation")
-{
-    initialize_arithmetic_parser();
-
-    // GP Generator grammar
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-
-    cout << "Testing random Individual generation" << endl;
-    for (int i = 0; i < 100; i++)
-    {
-        auto ind = Individual<>::NewRandomIndividual(grammar);
-
-        string expression = ind->GetExpression();
-        string evaluationResult = ind->Evaluate();
-        string parserResult = std::to_string(evaluate_arithmetic_expression(expression));
-        cout << "Generated expression: " << expression << endl;
-        cout << "Evaluation: " << evaluationResult << endl;
-
-        CHECK(evaluationResult == parserResult);
-        delete ind;
-    }
 }

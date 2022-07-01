@@ -6,235 +6,230 @@ using namespace std;
 *    Grammar declaration    *
 ****************************/
 
-// Types declaration.
-enum class TermType
+enum Terms
 {
-    NullTerm, LogicOp, Not, NumOp, Percentile, PriceInd, VolumeInd, SignedInd, UnsignedInd
-};
-
-enum class NonTermType
-{
-    NullNonTerm, Conditional, PriceExpression, VolumeExpression, SignedPercentageExpression, UnsignedPercentageExpression
+    NullTerm, LogicOp, Not, NumOp, Percentile, PriceInd, VolumeInd, SignedInd, UnsignedInd, // Terminals
+    NullNonTerm, Conditional, PriceExpression, VolumeExpression, SignedPercentageExpression, UnsignedPercentageExpression // NonTerminals
 };
 
 // Term/Nonterm declaration.
-const Terminal logicOpTerm(TermType::LogicOp, "logicOp", { "&&", "||" });
-const Terminal notTerm(TermType::Not, "not", { "!" });
-const Terminal numOpTerm(TermType::NumOp, "numOp", { ">", ">=", "<", "<=" });
-const Terminal percentileTerm(TermType::Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
-const Terminal priceIndTerm(TermType::PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
+const Terminal logicOpTerm(LogicOp, "logicOp", { "&&", "||" });
+const Terminal notTerm(Not, "not", { "!" });
+const Terminal numOpTerm(NumOp, "numOp", { ">", ">=", "<", "<=" });
+const Terminal percentileTerm(Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
+const Terminal priceIndTerm(PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
                                                              "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
 
-const Terminal volumeIndTerm(TermType::VolumeInd, "volumeInd", { "TradingVolume" });
-const Terminal signedIndTerm(TermType::SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
-const Terminal unsignedIndTerm(TermType::UnsignedInd, "unsignedInd", { "ClosingBias" });
+const Terminal volumeIndTerm(VolumeInd, "volumeInd", { "TradingVolume" });
+const Terminal signedIndTerm(SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
+const Terminal unsignedIndTerm(UnsignedInd, "unsignedInd", { "ClosingBias" });
 
-const NonTerminal conditionalNonTerm(NonTermType::Conditional, "Cond");
-const NonTerminal priceExpressionNonTerm(NonTermType::PriceExpression, "PriceExpression");
-const NonTerminal volumeExpressionNonTerm(NonTermType::VolumeExpression, "VolumeExpression");
-const NonTerminal signedPercentageExpressionNonTerm(NonTermType::SignedPercentageExpression, "SignedPercentageExpression");
-const NonTerminal unsignedPercentageExpressionNonTerm(NonTermType::UnsignedPercentageExpression, "UnsignedPercentageExpression");
+const NonTerminal conditionalNonTerm(Conditional, "Cond");
+const NonTerminal priceExpressionNonTerm(PriceExpression, "PriceExpression");
+const NonTerminal volumeExpressionNonTerm(VolumeExpression, "VolumeExpression");
+const NonTerminal signedPercentageExpressionNonTerm(SignedPercentageExpression, "SignedPercentageExpression");
+const NonTerminal unsignedPercentageExpressionNonTerm(UnsignedPercentageExpression, "UnsignedPercentageExpression");
 
 // Grammar definition.
-const ProductionRule<TermType, NonTermType> rule1(
+const ProductionRule rule1(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(conditionalNonTerm),
-                ProductionElement<TermType, NonTermType>(logicOpTerm),
-                ProductionElement<TermType, NonTermType>(conditionalNonTerm)
+                ProductionElement(conditionalNonTerm),
+                ProductionElement(logicOpTerm),
+                ProductionElement(conditionalNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>("("),
-                SemanticElement<TermType, NonTermType>(conditionalNonTerm),
-                SemanticElement<TermType, NonTermType>(") "),
-                SemanticElement<TermType, NonTermType>(logicOpTerm),
-                SemanticElement<TermType, NonTermType>(" ("),
-                SemanticElement<TermType, NonTermType>(conditionalNonTerm),
-                SemanticElement<TermType, NonTermType>(")")
+                SemanticElement("("),
+                SemanticElement(conditionalNonTerm),
+                SemanticElement(") "),
+                SemanticElement(logicOpTerm),
+                SemanticElement(" ("),
+                SemanticElement(conditionalNonTerm),
+                SemanticElement(")")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule2(
+const ProductionRule rule2(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(notTerm),
-                ProductionElement<TermType, NonTermType>(conditionalNonTerm)
+                ProductionElement(notTerm),
+                ProductionElement(conditionalNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(notTerm),
-                SemanticElement<TermType, NonTermType>(conditionalNonTerm)
+                SemanticElement(notTerm),
+                SemanticElement(conditionalNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule3(
+const ProductionRule rule3(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(priceExpressionNonTerm),
-                ProductionElement<TermType, NonTermType>(numOpTerm),
-                ProductionElement<TermType, NonTermType>(priceExpressionNonTerm)
+                ProductionElement(priceExpressionNonTerm),
+                ProductionElement(numOpTerm),
+                ProductionElement(priceExpressionNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(priceExpressionNonTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(numOpTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(priceExpressionNonTerm)
+                SemanticElement(priceExpressionNonTerm),
+                SemanticElement(" "),
+                SemanticElement(numOpTerm),
+                SemanticElement(" "),
+                SemanticElement(priceExpressionNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule4(
+const ProductionRule rule4(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(volumeExpressionNonTerm),
-                ProductionElement<TermType, NonTermType>(numOpTerm),
-                ProductionElement<TermType, NonTermType>(volumeExpressionNonTerm)
+                ProductionElement(volumeExpressionNonTerm),
+                ProductionElement(numOpTerm),
+                ProductionElement(volumeExpressionNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(volumeExpressionNonTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(numOpTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(volumeExpressionNonTerm)
+                SemanticElement(volumeExpressionNonTerm),
+                SemanticElement(" "),
+                SemanticElement(numOpTerm),
+                SemanticElement(" "),
+                SemanticElement(volumeExpressionNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule5(
+const ProductionRule rule5(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(signedPercentageExpressionNonTerm),
-                ProductionElement<TermType, NonTermType>(numOpTerm),
-                ProductionElement<TermType, NonTermType>(signedPercentageExpressionNonTerm)
+                ProductionElement(signedPercentageExpressionNonTerm),
+                ProductionElement(numOpTerm),
+                ProductionElement(signedPercentageExpressionNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(signedPercentageExpressionNonTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(numOpTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(signedPercentageExpressionNonTerm)
+                SemanticElement(signedPercentageExpressionNonTerm),
+                SemanticElement(" "),
+                SemanticElement(numOpTerm),
+                SemanticElement(" "),
+                SemanticElement(signedPercentageExpressionNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule6(
+const ProductionRule rule6(
         conditionalNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm),
-                ProductionElement<TermType, NonTermType>(numOpTerm),
-                ProductionElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm)
+                ProductionElement(unsignedPercentageExpressionNonTerm),
+                ProductionElement(numOpTerm),
+                ProductionElement(unsignedPercentageExpressionNonTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(numOpTerm),
-                SemanticElement<TermType, NonTermType>(" "),
-                SemanticElement<TermType, NonTermType>(unsignedPercentageExpressionNonTerm)
+                SemanticElement(unsignedPercentageExpressionNonTerm),
+                SemanticElement(" "),
+                SemanticElement(numOpTerm),
+                SemanticElement(" "),
+                SemanticElement(unsignedPercentageExpressionNonTerm)
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule7(
+const ProductionRule rule7(
         priceExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(priceIndTerm)
+                ProductionElement(priceIndTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>("Indicator(\""),
-                SemanticElement<TermType, NonTermType>(priceIndTerm),
-                SemanticElement<TermType, NonTermType>("\", stock, time)")
+                SemanticElement("Indicator(\""),
+                SemanticElement(priceIndTerm),
+                SemanticElement("\", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule8(
+const ProductionRule rule8(
         priceExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(priceIndTerm),
-                ProductionElement<TermType, NonTermType>(percentileTerm),
+                ProductionElement(priceIndTerm),
+                ProductionElement(percentileTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
-                SemanticElement<TermType, NonTermType>(priceIndTerm),
-                SemanticElement<TermType, NonTermType>("\", "),
-                SemanticElement<TermType, NonTermType>(percentileTerm),
-                SemanticElement<TermType, NonTermType>(", stock, time)")
+                SemanticElement("IndQuantile(\""),
+                SemanticElement(priceIndTerm),
+                SemanticElement("\", "),
+                SemanticElement(percentileTerm),
+                SemanticElement(", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule9(
+const ProductionRule rule9(
         volumeExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(volumeIndTerm)
+                ProductionElement(volumeIndTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>("Indicator(\""),
-                SemanticElement<TermType, NonTermType>(volumeIndTerm),
-                SemanticElement<TermType, NonTermType>("\", stock, time)")
+                SemanticElement("Indicator(\""),
+                SemanticElement(volumeIndTerm),
+                SemanticElement("\", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule10(
+const ProductionRule rule10(
         volumeExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(volumeIndTerm),
-                ProductionElement<TermType, NonTermType>(percentileTerm),
+                ProductionElement(volumeIndTerm),
+                ProductionElement(percentileTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
-                SemanticElement<TermType, NonTermType>(volumeIndTerm),
-                SemanticElement<TermType, NonTermType>("\", "),
-                SemanticElement<TermType, NonTermType>(percentileTerm),
-                SemanticElement<TermType, NonTermType>(", stock, time)")
+                SemanticElement("IndQuantile(\""),
+                SemanticElement(volumeIndTerm),
+                SemanticElement("\", "),
+                SemanticElement(percentileTerm),
+                SemanticElement(", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule11(
+const ProductionRule rule11(
         signedPercentageExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(signedIndTerm)
+                ProductionElement(signedIndTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>("Indicator(\""),
-                SemanticElement<TermType, NonTermType>(signedIndTerm),
-                SemanticElement<TermType, NonTermType>("\", stock, time)")
+                SemanticElement("Indicator(\""),
+                SemanticElement(signedIndTerm),
+                SemanticElement("\", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule12(
+const ProductionRule rule12(
         signedPercentageExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(signedIndTerm),
-                ProductionElement<TermType, NonTermType>(percentileTerm),
+                ProductionElement(signedIndTerm),
+                ProductionElement(percentileTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
-                SemanticElement<TermType, NonTermType>(signedIndTerm),
-                SemanticElement<TermType, NonTermType>("\", "),
-                SemanticElement<TermType, NonTermType>(percentileTerm),
-                SemanticElement<TermType, NonTermType>(", stock, time)")
+                SemanticElement("IndQuantile(\""),
+                SemanticElement(signedIndTerm),
+                SemanticElement("\", "),
+                SemanticElement(percentileTerm),
+                SemanticElement(", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule13(
+const ProductionRule rule13(
         unsignedPercentageExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(unsignedIndTerm)
+                ProductionElement(unsignedIndTerm)
         },
         {
-                SemanticElement<TermType, NonTermType>("Indicator(\""),
-                SemanticElement<TermType, NonTermType>(unsignedIndTerm),
-                SemanticElement<TermType, NonTermType>("\", stock, time)")
+                SemanticElement("Indicator(\""),
+                SemanticElement(unsignedIndTerm),
+                SemanticElement("\", stock, time)")
         }
 );
 
-const ProductionRule<TermType, NonTermType> rule14(
+const ProductionRule rule14(
         unsignedPercentageExpressionNonTerm,
         {
-                ProductionElement<TermType, NonTermType>(unsignedIndTerm),
-                ProductionElement<TermType, NonTermType>(percentileTerm),
+                ProductionElement(unsignedIndTerm),
+                ProductionElement(percentileTerm),
         },
         {
-                SemanticElement<TermType, NonTermType>("IndQuantile(\""),
-                SemanticElement<TermType, NonTermType>(unsignedIndTerm),
-                SemanticElement<TermType, NonTermType>("\", "),
-                SemanticElement<TermType, NonTermType>(percentileTerm),
-                SemanticElement<TermType, NonTermType>(", stock, time)")
+                SemanticElement("IndQuantile(\""),
+                SemanticElement(unsignedIndTerm),
+                SemanticElement("\", "),
+                SemanticElement(percentileTerm),
+                SemanticElement(", stock, time)")
         }
 );
 
@@ -243,10 +238,10 @@ const ProductionRule<TermType, NonTermType> rule14(
 ****************************/
 TEST_CASE("Testing random individual generation")
 {
-    Grammar<TermType, NonTermType> grammar{rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
-                                           rule9, rule10, rule11, rule12, rule13, rule14 };
+    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
+                    rule9, rule10, rule11, rule12, rule13, rule14 };
 
-    ConcreteSyntaxTree<TermType, NonTermType> cst;
+    ConcreteSyntaxTree cst;
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
