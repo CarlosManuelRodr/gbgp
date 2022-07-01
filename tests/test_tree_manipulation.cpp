@@ -106,47 +106,47 @@ const ProductionRule rule6(
 TEST_CASE("Testing subtree insertion")
 {
     // First tree. Procedural construction.
-    ConcreteSyntaxTree ast1;
+    SyntaxTree ast1;
     ast1.SetRootRule(rule1);
-    auto leftExpr1 = ConcreteSyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
-    auto middleSum1 = ConcreteSyntaxTree::AddNode(ast1.Root(), plusTerm);
-    auto rightTerm1 = ConcreteSyntaxTree::AddNode(ast1.Root(), termNonTerm, rule3);
+    auto leftExpr1 = SyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
+    auto middleSum1 = SyntaxTree::AddNode(ast1.Root(), plusTerm);
+    auto rightTerm1 = SyntaxTree::AddNode(ast1.Root(), termNonTerm, rule3);
 
-    auto leftTerm1 = ConcreteSyntaxTree::AddNode(leftExpr1, termNonTerm, rule4);
-    auto leftFactor1 = ConcreteSyntaxTree::AddNode(leftTerm1, factorNonTerm, rule6);
-    auto leftVar1 = ConcreteSyntaxTree::AddNode(leftFactor1, varTerm, "a");
+    auto leftTerm1 = SyntaxTree::AddNode(leftExpr1, termNonTerm, rule4);
+    auto leftFactor1 = SyntaxTree::AddNode(leftTerm1, factorNonTerm, rule6);
+    auto leftVar1 = SyntaxTree::AddNode(leftFactor1, varTerm, "a");
 
-    auto rightLeftTerm1 = ConcreteSyntaxTree::AddNode(rightTerm1, termNonTerm, rule4);
-    auto rightMultiplication1 = ConcreteSyntaxTree::AddNode(rightTerm1, timesTerm);
-    auto rightRightFactor1 = ConcreteSyntaxTree::AddNode(rightTerm1, factorNonTerm, rule6);
+    auto rightLeftTerm1 = SyntaxTree::AddNode(rightTerm1, termNonTerm, rule4);
+    auto rightMultiplication1 = SyntaxTree::AddNode(rightTerm1, timesTerm);
+    auto rightRightFactor1 = SyntaxTree::AddNode(rightTerm1, factorNonTerm, rule6);
 
-    auto rightLeftFactor1 = ConcreteSyntaxTree::AddNode(rightLeftTerm1, factorNonTerm, rule6);
-    auto rightLeftVar1 = ConcreteSyntaxTree::AddNode(rightLeftFactor1, varTerm, "a");
+    auto rightLeftFactor1 = SyntaxTree::AddNode(rightLeftTerm1, factorNonTerm, rule6);
+    auto rightLeftVar1 = SyntaxTree::AddNode(rightLeftFactor1, varTerm, "a");
 
-    auto rightRightVar1 = ConcreteSyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
+    auto rightRightVar1 = SyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
 
     // Second tree. Procedural construction.
-    ConcreteSyntaxTree ast2;
+    SyntaxTree ast2;
     ast2.SetRootRule(rule1);
-    auto leftExpr2 = ConcreteSyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
-    auto middleSum2 = ConcreteSyntaxTree::AddNode(ast2.Root(), plusTerm);
-    auto rightTerm2 = ConcreteSyntaxTree::AddNode(ast2.Root(), termNonTerm, rule3);
+    auto leftExpr2 = SyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
+    auto middleSum2 = SyntaxTree::AddNode(ast2.Root(), plusTerm);
+    auto rightTerm2 = SyntaxTree::AddNode(ast2.Root(), termNonTerm, rule3);
 
-    auto leftTerm2 = ConcreteSyntaxTree::AddNode(leftExpr2, termNonTerm, rule4);
-    auto leftFactor2 = ConcreteSyntaxTree::AddNode(leftTerm2, factorNonTerm, rule6);
-    auto leftVar2 = ConcreteSyntaxTree::AddNode(leftFactor2, varTerm, "c");
+    auto leftTerm2 = SyntaxTree::AddNode(leftExpr2, termNonTerm, rule4);
+    auto leftFactor2 = SyntaxTree::AddNode(leftTerm2, factorNonTerm, rule6);
+    auto leftVar2 = SyntaxTree::AddNode(leftFactor2, varTerm, "c");
 
-    auto rightLeftTerm2 = ConcreteSyntaxTree::AddNode(rightTerm2, termNonTerm, rule4);
-    auto rightMultiplication2 = ConcreteSyntaxTree::AddNode(rightTerm2, timesTerm);
-    auto rightRightFactor2 = ConcreteSyntaxTree::AddNode(rightTerm2, factorNonTerm, rule6);
+    auto rightLeftTerm2 = SyntaxTree::AddNode(rightTerm2, termNonTerm, rule4);
+    auto rightMultiplication2 = SyntaxTree::AddNode(rightTerm2, timesTerm);
+    auto rightRightFactor2 = SyntaxTree::AddNode(rightTerm2, factorNonTerm, rule6);
 
-    auto rightLeftFactor2 = ConcreteSyntaxTree::AddNode(rightLeftTerm2, factorNonTerm, rule6);
-    auto rightLeftVar2 = ConcreteSyntaxTree::AddNode(rightLeftFactor2, varTerm, "b");
+    auto rightLeftFactor2 = SyntaxTree::AddNode(rightLeftTerm2, factorNonTerm, rule6);
+    auto rightLeftVar2 = SyntaxTree::AddNode(rightLeftFactor2, varTerm, "b");
 
-    auto rightRightVar2 = ConcreteSyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
+    auto rightRightVar2 = SyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
 
     // Third tree. Declarative construction.
-    ConcreteSyntaxTree ast3(
+    SyntaxTree ast3(
         TreeNode(
                 rule1,
                 exprNonTerm,
@@ -200,7 +200,7 @@ TEST_CASE("Testing subtree insertion")
     CHECK(ast3.SynthesizeExpression() == "c+b*b");
 
     ast1.RemoveSubtree(rightTerm1);
-    ConcreteSyntaxTree subtree = ConcreteSyntaxTree::GetSubtree(rightTerm2);
+    SyntaxTree subtree = SyntaxTree::GetSubtree(rightTerm2);
     ast1.InsertSubtree(rightTerm1, subtree.Root());
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");

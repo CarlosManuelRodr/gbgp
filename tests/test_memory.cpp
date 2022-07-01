@@ -99,7 +99,7 @@ TEST_CASE("Test memory allocation/deallocation")
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6};
 
     cout << "Testing CST Creation/destruction" << endl;
-    auto* newTree = new ConcreteSyntaxTree();
+    auto* newTree = new SyntaxTree();
     newTree->CreateRandomTree(grammar);
     delete newTree;
 

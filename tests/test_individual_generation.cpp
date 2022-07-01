@@ -121,7 +121,7 @@ TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    ConcreteSyntaxTree cst;
+    SyntaxTree cst;
     EvaluationContext evaluationContext;
     cst.CreateRandomTree(grammar, 100);
     cst.PrintTree();

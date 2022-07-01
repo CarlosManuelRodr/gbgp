@@ -132,7 +132,7 @@ TEST_CASE("Test arithmetic evaluation")
 {
     // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    ConcreteSyntaxTree cst;
+    SyntaxTree cst;
 
     ArithmeticContext arithmeticContext;
     arithmeticContext.x = 4;

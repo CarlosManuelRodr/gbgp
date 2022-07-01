@@ -5,7 +5,7 @@
 template <typename EvaluationContextType = EvaluationContext> class Individual
 {
 private:
-    ConcreteSyntaxTree* tree;
+    SyntaxTree* tree;
 
 public:
     std::string expression;
@@ -15,7 +15,7 @@ public:
     NewRandomIndividual(const Grammar& grammar, const std::function<std::string(std::string)>& pevaluator = nullptr,
                         int maxDepth = 100)
     {
-        auto* newTree = new ConcreteSyntaxTree();
+        auto* newTree = new SyntaxTree();
         newTree->CreateRandomTree(grammar, maxDepth);
         return new Individual(newTree, pevaluator);
     }
@@ -31,13 +31,13 @@ public:
         evaluator = other.evaluator;
         expression = other.expression;
     }
-    explicit Individual(ConcreteSyntaxTree& cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(SyntaxTree& cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
         tree = &cst;
         expression = cst.SynthesizeExpression();
         evaluator = pevaluator;
     }
-    explicit Individual(ConcreteSyntaxTree* cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(SyntaxTree* cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
         tree = cst;
         expression = cst->SynthesizeExpression();
@@ -66,7 +66,7 @@ public:
     }
 
     [[nodiscard]]
-    ConcreteSyntaxTree GetTree() const
+    SyntaxTree GetTree() const
     {
         return *tree;
     }

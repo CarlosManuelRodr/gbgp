@@ -246,7 +246,7 @@ public:
 /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
 /// \tparam TerminalType enum class with the Terminal IDs specified by the user.
 /// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
-class ConcreteSyntaxTree
+class SyntaxTree
 {
 private:
     /// Root of the tree.
@@ -361,7 +361,7 @@ private:
     {
         for (TreeNode* n : node->children)
         {
-            ConcreteSyntaxTree::PrintNodeAsTree(stream, n, depth, showUUID);
+            SyntaxTree::PrintNodeAsTree(stream, n, depth, showUUID);
             PrintTree(stream, n, depth + 1, showUUID);
         }
     }
@@ -371,9 +371,9 @@ public:
     //*      CST Construction and status management     *
     //**************************************************/
 
-    /// Creates an empty ConcreteSyntaxTree.
-    /// \param grammar The formal grammar of the ConcreteSyntaxTree.
-    ConcreteSyntaxTree()
+    /// Creates an empty SyntaxTree.
+    /// \param grammar The formal grammar of the SyntaxTree.
+    SyntaxTree()
     {
         root = nullptr;
     }
@@ -381,7 +381,7 @@ public:
     /// Builds a tree from a root node.
     /// \param proot Pointer to the root of the tree.
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
-    explicit ConcreteSyntaxTree(TreeNode* proot, bool deepCopy = false)
+    explicit SyntaxTree(TreeNode* proot, bool deepCopy = false)
     {
         root = new TreeNode(proot);
         root->parent = nullptr;
@@ -393,7 +393,7 @@ public:
     /// Builds a tree from a root node.
     /// \param proot Root of the tree.
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
-    explicit ConcreteSyntaxTree(TreeNode proot, bool deepCopy = false)
+    explicit SyntaxTree(TreeNode proot, bool deepCopy = false)
     {
         root = new TreeNode(proot);
         root->parent = nullptr;
@@ -403,8 +403,8 @@ public:
     }
 
     /// Copy constructor.
-    /// \param other ConcreteSyntaxTree to be copied.
-    ConcreteSyntaxTree(const ConcreteSyntaxTree& other)
+    /// \param other SyntaxTree to be copied.
+    SyntaxTree(const SyntaxTree& other)
     {
         root = new TreeNode(other.root);
         root->parent = nullptr;
@@ -413,8 +413,8 @@ public:
     }
 
     /// Copy constructor from reference.
-    /// \param other Pointer to the ConcreteSyntaxTree to be copied.
-    explicit ConcreteSyntaxTree(ConcreteSyntaxTree* other)
+    /// \param other Pointer to the SyntaxTree to be copied.
+    explicit SyntaxTree(SyntaxTree* other)
     {
         root = new TreeNode(other->root);
         root->parent = nullptr;
@@ -422,7 +422,7 @@ public:
         this->ClearEvaluation();
     }
 
-    ~ConcreteSyntaxTree()
+    ~SyntaxTree()
     {
         this->Destroy();
     }
@@ -566,11 +566,11 @@ public:
 
     /// Get subtree starting from subTreeStartNode.
     /// \param subTreeStartNode Root node of subtree.
-    /// \return A new ConcreteSyntaxTree starting from the subTreeStartNode.
+    /// \return A new SyntaxTree starting from the subTreeStartNode.
     [[nodiscard]]
-    static ConcreteSyntaxTree GetSubtree(TreeNode* subTreeStartNode)
+    static SyntaxTree GetSubtree(TreeNode* subTreeStartNode)
     {
-        return ConcreteSyntaxTree(subTreeStartNode, true);
+        return SyntaxTree(subTreeStartNode, true);
     }
 
     /// Insert a copy of the subtree into the position at insertNode.
@@ -701,11 +701,11 @@ public:
     /// Prints the tree in the output stream.
     void PrintTree(std::ostream& stream = std::cout, bool showUUID = false)
     {
-        ConcreteSyntaxTree::PrintNodeAsTree(stream, root, 0, showUUID);
+        SyntaxTree::PrintNodeAsTree(stream, root, 0, showUUID);
         
         for (TreeNode* n : root->children)
         {
-            ConcreteSyntaxTree::PrintNodeAsTree(stream, n, 1, showUUID);
+            SyntaxTree::PrintNodeAsTree(stream, n, 1, showUUID);
             PrintTree(stream, n, 2, showUUID);
         }
     }
@@ -713,35 +713,6 @@ public:
     //***************************
     //*     Tree traversals     *
     //**************************/
-
-    /// Traverses the tree in a depth first pre-order.
-    /// \param node Start node. The default value is the root of the tree.
-    /// \return List of references of the traversed nodes.
-    std::vector<TreeNode*> DepthFirstScanPreorder(TreeNode* node = nullptr)
-    {
-        /*
-          Algorithm Preorder(tree)
-          1. Visit the root.
-          2. Traverse the left subtree, i.e., call Preorder(left-subtree)
-          3. Traverse the right subtree, i.e., call Preorder(right-subtree)
-        */
-        std::vector<TreeNode*> output;
-
-        if (node == nullptr)
-        {
-            node = root;
-            output.push_back(node);
-        }
-
-        for (TreeNode* n : node->children)
-        {
-            output.push_back(n);
-            const std::vector<TreeNode*> childrenTreeNodes = DepthFirstScanPreorder(n);
-            output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
-        }
-
-        return output;
-    }
 
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
