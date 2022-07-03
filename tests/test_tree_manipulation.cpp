@@ -205,3 +205,68 @@ TEST_CASE("Testing subtree insertion")
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
 }
+
+TEST_CASE("Test tree traversals")
+{
+    SyntaxTree ast(
+        TreeNode(
+            rule1,
+            exprNonTerm,
+            {
+                TreeNode(
+                    rule2,
+                    exprNonTerm,
+                    {
+                        TreeNode(
+                            rule4,
+                            termNonTerm,
+                            {
+                                TreeNode(
+                                    rule6,
+                                    factorNonTerm,
+                                    {
+                                            TreeNode(varTerm, "c")
+                                    })
+                            })
+                    }),
+                TreeNode(plusTerm, "+"),
+                TreeNode(
+                    rule3,
+                    termNonTerm,
+                    {
+                        TreeNode(
+                            rule4,
+                            termNonTerm,
+                            {
+                                TreeNode(
+                                    rule6,
+                                    factorNonTerm,
+                                    {
+                                        TreeNode(varTerm, "b")
+                                    })
+                            }),
+                        TreeNode(timesTerm, "*"),
+                        TreeNode(
+                            rule6,
+                            factorNonTerm,
+                            {
+                                TreeNode(varTerm, "b")
+                            })
+                    })
+                })
+    );
+
+    std::vector<TreeNode*> treeTraversal = ast.DepthFirstScanPostorder();
+    std::vector<TreeNode*> copyNodes;
+
+    for (auto node : treeTraversal) copyNodes.push_back(TreeNode::ShallowCopy(node));
+
+    SyntaxTree reconstruction = SyntaxTree::BuildFromTraversal(copyNodes);
+
+    string originalSynth = ast.SynthesizeExpression();
+    string reconstructionSynth = reconstruction.SynthesizeExpression();
+    cout << "Original: " << originalSynth << endl;
+    cout << "Reconstructed: " << reconstructionSynth << endl;
+
+    CHECK(originalSynth == reconstructionSynth);
+}

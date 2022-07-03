@@ -16,7 +16,7 @@ enum Terms
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", {"1", "2", "3" });
+const Terminal varTerm(Var, "var", { "1", "2", "3" });
 
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");

@@ -9,6 +9,7 @@ add_executable(gbgp
         include/individual.h
         include/vector_ops.h
         include/evaluation.h
+        include/tree_node.h
         include/gbgp.h
 
         tests/doctest.h

@@ -8,236 +8,7 @@
 #include <exception>
 #include <utility>
 #include "grammar.h"
-
-//*****************************
-//*    Node implementation    *
-//****************************/
-
-/// A node can be either a Terminal or a NonTerminal. A None type is provided for convenience.
-enum class TreeNodeType
-{
-    None, NonTerminal, Terminal
-};
-
-/// Represents a node of an n-ary tree
-class TreeNode
-{
-private:
-    /// Generate an Unique Identifier for this node.
-    /// \return A std::string containing the generated UUID.
-    static std::string GenerateUUID()
-    {
-        static std::random_device dev;
-        static std::mt19937 rng(dev());
-
-        std::uniform_int_distribution<int> dist(0, 15);
-
-        const char* v = "0123456789abcdef";
-        const bool dash[] = { false, false, false, false, true, false, true, false,
-                              true, false, true, false, false, false, false, false };
-
-        std::string res;
-        for (bool i : dash) {
-            if (i) res += "-";
-            res += v[dist(rng)];
-            res += v[dist(rng)];
-        }
-        return res;
-    }
-public:
-    /// Type of the node.
-    TreeNodeType type;
-
-    /// NonTerminal instance used if the node is of NonTerminal type.
-    NonTerminal nonTermInstance;
-
-    /// Terminal instance used if the node is of Terminal type.
-    Terminal termInstance;
-
-    /// Production rule from which this node is part of.
-    ProductionRule generatorPR;
-
-    /// Parent of the node. If the node is a root, its value will be null.
-    TreeNode* parent;
-
-    /// List of references to the children of this node.
-    std::vector<TreeNode*> children;
-
-    /// Value of the terminal used if the node is of Terminal type.
-    std::string termValue;
-
-    /// Unique identifier of this node.
-    std::string uuid;
-
-    /// Result of the synthesis of this node.
-    std::string expressionSynthesis;
-
-    /// Result of the evaluation of this node.
-    std::string expressionEvaluation;
-
-    /// Constructor of an empty node.
-    TreeNode()
-    {
-        type = TreeNodeType::None;
-        termInstance = Terminal();
-        nonTermInstance = NonTerminal();
-        expressionSynthesis = "";
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-    }
-
-    /// Constructor of a NonTerminal node.
-    explicit TreeNode(const NonTerminal& nt)
-    {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
-        expressionSynthesis = "";
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-    }
-
-    TreeNode(const NonTerminal& nt, const std::vector<TreeNode>& children)
-    {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
-        expressionSynthesis = "";
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-
-        for (const auto& c : children)
-            AddChildNode(new TreeNode(c), this);
-    }
-
-    TreeNode(ProductionRule productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
-    {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
-        expressionSynthesis = "";
-        termValue = "";
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-        generatorPR = std::move(productionRule);
-
-        for (const auto& c : children)
-            AddChildNode(new TreeNode(c), this);
-    }
-
-    /// Constructor of a Terminal node.
-    explicit TreeNode(const Terminal& t)
-    {
-        type = TreeNodeType::Terminal;
-        nonTermInstance = NonTerminal();
-        termInstance = t;
-        expressionSynthesis = "";
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-    }
-
-    TreeNode(const Terminal& t, const std::string& value)
-    {
-        type = TreeNodeType::Terminal;
-        nonTermInstance = NonTerminal();
-        termInstance = t;
-        expressionSynthesis = "";
-        termValue = value;
-        expressionEvaluation = "";
-        parent = nullptr;
-        uuid = GenerateUUID();
-    }
-
-    /// Copy constructor.
-    TreeNode(const TreeNode& other)
-    {
-        type = other.type;
-        nonTermInstance = other.nonTermInstance;
-        termInstance = other.termInstance;
-        generatorPR = other.generatorPR;
-        expressionSynthesis = other.expressionSynthesis;
-        expressionEvaluation = other.expressionEvaluation;
-        termValue = other.termValue;
-        parent = other.parent;
-        children = other.children;
-        uuid = GenerateUUID();
-    }
-
-    /// Copy constructor by reference.
-    explicit TreeNode(TreeNode* other)
-    {
-        type = other->type;
-        nonTermInstance = other->nonTermInstance;
-        termInstance = other->termInstance;
-        generatorPR = other->generatorPR;
-        expressionSynthesis = other->expressionSynthesis;
-        expressionEvaluation = other->expressionEvaluation;
-        termValue = other->termValue;
-        parent = other->parent;
-        uuid = GenerateUUID();
-    }
-
-    ~TreeNode()
-    {
-        parent = nullptr;
-        children.clear();
-    }
-
-    /// Reset the synthesis of this node
-    void ClearSynthesis()
-    {
-        expressionSynthesis.clear();
-    }
-
-    /// Check if this node has been synthesized.
-    [[nodiscard]]
-    bool IsSynthesized() const
-    {
-        return !expressionSynthesis.empty();
-    }
-
-    /// Reset the evaluation of this node
-    void ClearEvaluation()
-    {
-        expressionEvaluation.clear();
-    }
-
-    /// Check if this node has been evaluated..
-    [[nodiscard]]
-    bool IsEvaluated() const
-    {
-        return !expressionEvaluation.empty();
-    }
-
-    /// Add the node as a child.
-    /// \param node Reference to the child node.
-    void AddChildNode(TreeNode* node, TreeNode* nodeParent = nullptr)
-    {
-        if (nodeParent != nullptr)
-            node->parent = nodeParent;
-        children.push_back(node);
-    }
-
-    /// Returns a formatted label of the node.
-    [[nodiscard]]
-    std::string GetLabel(bool showUUID = false) const
-    {
-        std::string label;
-        if (type == TreeNodeType::NonTerminal)
-            label = nonTermInstance.label;
-        else
-            label = termInstance.label + " [" + termValue + "]";
-
-        if (showUUID)
-            label += " UUID: " + uuid;
-        return label;
-    }
-};
+#include "tree_node.h"
 
 //*****************************
 //*    CST Implementation     *
@@ -292,30 +63,6 @@ private:
         return -1;
     }
 
-    /// Find the index of the first non-evaluated non-terminal.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    /// \return The index if the first non-evaluated non-terminal.
-    [[nodiscard]]
-    static unsigned NextToEvaluate(std::vector<TreeNode*>& dfspo)
-    {
-        for (unsigned i = 0; i < dfspo.size(); i++)
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
-                return i;
-        return dfspo.size();
-    }
-
-    /// Find the index of the first non-synthesized non-terminal.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    /// \return The index if the first non-synthesized non-terminal.
-    [[nodiscard]]
-    static unsigned NextToSynthesize(std::vector<TreeNode*>& dfspo)
-    {
-        for (unsigned i = 0; i < dfspo.size(); i++)
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
-                return i;
-        return dfspo.size();
-    }
-
     /// Copy a tree by creating new instances of all the nodes.
     /// \param copyTree Pointer to the tree that holds the copy.
     /// \param originalTree Pointer to the original tree that will be copied.
@@ -343,12 +90,11 @@ private:
     /// \param stream target stream to print.
     /// \param node current node to print.
     /// \param depth level of indent of the printed node.
-    /// \param showUUID whether to show the UUID of the node.
-    static void PrintNodeAsTree(std::ostream& stream, TreeNode* node, int depth, bool showUUID = false)
+    static void PrintNodeAsTree(std::ostream& stream, TreeNode* node, int depth)
     {
         std::string output = "|";
         output.append(depth, '-');
-        output += node->GetLabel(showUUID);
+        output += node->GetLabel();
         std::cout << output << std::endl;
     }
 
@@ -357,12 +103,12 @@ private:
     /// </summary>
     /// <param name="node">Node to print.</param>
     /// <param name="depth">Current depth.</param>
-    void PrintTree(std::ostream& stream, TreeNode* node, int depth, bool showUUID = false) const
+    void PrintTree(std::ostream& stream, TreeNode* node, int depth) const
     {
         for (TreeNode* n : node->children)
         {
-            SyntaxTree::PrintNodeAsTree(stream, n, depth, showUUID);
-            PrintTree(stream, n, depth + 1, showUUID);
+            SyntaxTree::PrintNodeAsTree(stream, n, depth);
+            PrintTree(stream, n, depth + 1);
         }
     }
 
@@ -383,10 +129,15 @@ public:
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
     explicit SyntaxTree(TreeNode* proot, bool deepCopy = false)
     {
-        root = new TreeNode(proot);
-        root->parent = nullptr;
         if (deepCopy)
+        {
+            root = new TreeNode(proot);
+            root->parent = nullptr;
             this->CopyTree(root, proot);
+        }
+        else
+            root = proot;
+
         this->ClearEvaluation();
     }
 
@@ -699,14 +450,14 @@ public:
     }
 
     /// Prints the tree in the output stream.
-    void PrintTree(std::ostream& stream = std::cout, bool showUUID = false)
+    void PrintTree(std::ostream& stream = std::cout)
     {
-        SyntaxTree::PrintNodeAsTree(stream, root, 0, showUUID);
+        SyntaxTree::PrintNodeAsTree(stream, root, 0);
         
         for (TreeNode* n : root->children)
         {
-            SyntaxTree::PrintNodeAsTree(stream, n, 1, showUUID);
-            PrintTree(stream, n, 2, showUUID);
+            SyntaxTree::PrintNodeAsTree(stream, n, 1);
+            PrintTree(stream, n, 2);
         }
     }
 
@@ -747,9 +498,82 @@ public:
         return output;
     }
 
+    /// Find the index of the first non-synthesized non-terminal.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \return The index if the first non-synthesized non-terminal.
+    [[nodiscard]]
+    static unsigned NextToBuild(std::vector<TreeNode*>& dfspo)
+    {
+        for (unsigned i = 0; i < dfspo.size(); i++)
+            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->HasChildren())
+                return i;
+        return dfspo.size();
+    }
+
+    static void BuildFirst(std::vector<TreeNode*>& dfspo)
+    {
+        unsigned nextIndex = NextToBuild(dfspo);
+        if (nextIndex == dfspo.size())
+            return;
+
+        TreeNode* nodeToBuild = dfspo[nextIndex];
+        ProductionRule rule = dfspo[nextIndex]->generatorPR;
+        std::vector<unsigned> toErase;
+
+        for (const ProductionElement& se : rule.to)
+        {
+            const int pos = (se.type == ProductionElementType::NonTerminal) ?
+                    FindIndexOfNonTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
+                    FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+
+            if (pos != -1)
+            {
+                nodeToBuild->AddChildNode(dfspo[pos], nodeToBuild);
+                toErase.push_back(pos);
+            }
+            else
+            {
+                if (se.type == ProductionElementType::NonTerminal)
+                {
+                    std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
+                    errorReport += " during expression evaluation of node: " + dfspo[nextIndex]->ToString();
+                    throw std::runtime_error(errorReport);
+                }
+                else if (se.type == ProductionElementType::Terminal)
+                    throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during expression evaluation");
+            }
+        }
+
+        delete_indexes(dfspo, toErase);
+    }
+
+    static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& dfspo)
+    {
+        std::vector<TreeNode*> copyNodes;
+        for (auto node : dfspo)
+            copyNodes.push_back(TreeNode::ShallowCopy(node));
+
+        while (copyNodes.size() > 1)
+            BuildFirst(copyNodes);
+
+        return SyntaxTree(copyNodes.back());
+    }
+
     //***************************
     //*     Tree evaluation     *
     //**************************/
+
+    /// Find the index of the first non-synthesized non-terminal.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \return The index if the first non-synthesized non-terminal.
+    [[nodiscard]]
+    static unsigned NextToSynthesize(std::vector<TreeNode*>& dfspo)
+    {
+        for (unsigned i = 0; i < dfspo.size(); i++)
+            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
+                return i;
+        return dfspo.size();
+    }
 
     /// Synthesize the first non-synthesized node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
@@ -780,7 +604,7 @@ public:
                 else
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during synthesis of node with UUID: " + dfspo[nextIndex]->uuid;
+                    errorReport += " during synthesis of node : " + dfspo[nextIndex]->ToString();
                     throw std::runtime_error(errorReport);
                 }
             }
@@ -824,6 +648,18 @@ public:
         }
     }
 
+    /// Find the index of the first non-evaluated non-terminal.
+    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \return The index if the first non-evaluated non-terminal.
+    [[nodiscard]]
+    static unsigned NextToEvaluate(std::vector<TreeNode*>& dfspo)
+    {
+        for (unsigned i = 0; i < dfspo.size(); i++)
+            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
+                return i;
+        return dfspo.size();
+    }
+
     /// Evaluate the first non-evaluate node and deletes the consumed nodes.
     /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext pointer to the evaluation context.
@@ -853,7 +689,7 @@ public:
                 else
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during expression evaluation of node with UUID: " + dfspo[nextIndex]->uuid;
+                    errorReport += " during expression evaluation of node: " + dfspo[nextIndex]->ToString();
                     throw std::runtime_error(errorReport);
                 }
             }
