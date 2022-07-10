@@ -1,6 +1,6 @@
 #pragma once
 #include <limits>
-#include "cst_tree.h"
+#include "syntax_tree.h"
 
 template <typename EvaluationContextType = EvaluationContext> class Individual
 {

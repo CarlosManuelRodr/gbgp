@@ -10,9 +10,9 @@
 #include "grammar.h"
 #include "tree_node.h"
 
-//*****************************
-//*    CST Implementation     *
-//****************************/
+//**********************************************
+//*    Concrete syntax tree implementation     *
+//*********************************************/
 
 /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
 /// \tparam TerminalType enum class with the Terminal IDs specified by the user.
@@ -114,7 +114,7 @@ private:
 
 public:
     //***************************************************
-    //*      CST Construction and status management     *
+    //*     Tree construction and state management      *
     //**************************************************/
 
     /// Creates an empty SyntaxTree.
@@ -363,12 +363,11 @@ public:
         }
     }
 
-
     //**********************
     //*      Utilities     *
     //*********************/
 
-    /// Recursive implementation. Create random tree based on the production rules described in the variable grammarRules.
+    /// Recursive implementation. Create random tree based on the production rules described in grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
     /// \param node Node from where the random tree will be created.
@@ -450,7 +449,7 @@ public:
     }
 
     /// Prints the tree in the output stream.
-    void PrintTree(std::ostream& stream = std::cout)
+    void PrintTree(std::ostream& stream = std::cout) const
     {
         SyntaxTree::PrintNodeAsTree(stream, root, 0);
         
@@ -461,6 +460,66 @@ public:
         }
     }
 
+    /// Performs a shallow copy of each node.
+    /// \param other The traversal of the tree to copy.
+    /// \return The traversal of the copied tree.
+    static std::vector<TreeNode*> CopyTreeTraversal(const std::vector<TreeNode*>& other)
+    {
+        std::vector<TreeNode*> copyNodes;
+        for (auto node : other)
+            copyNodes.push_back(TreeNode::ShallowCopy(node));
+        return copyNodes;
+    }
+
+    /// Find the index of a traversal subsequence inside another traversal.
+    /// \param traversal The traversal to perform the search on.
+    /// \param subsequence The traversal subsequence to find.
+    /// \return The distance to the subsequence if found, else the last index of traversal.
+    static unsigned FindIndexOfTraversalSubsequence(const std::vector<TreeNode*>& traversal,
+                                                    const std::vector<TreeNode*>& subsequence)
+    {
+        auto it =  std::search(traversal.begin(), traversal.end(),
+                                          subsequence.begin(), subsequence.end(),
+                                          [](TreeNode* n1, TreeNode* n2) { return n1->SameID(*n2); });
+
+        return std::distance(traversal.begin(), it);
+    }
+
+    /// Replaces a traversal subsequence. Used for pruning the tree.
+    /// \param traversal The traversal to perform the replacement.
+    /// \param replaceFrom The source replacement sequence.
+    /// \param replaceTo The target replacement sequence.
+    /// \return A new traversal with the replaced sequence.
+    static std::vector<TreeNode*> ReplaceTraversalSubsequence(const std::vector<TreeNode*>& traversal,
+                                                              const std::vector<TreeNode*>& replaceFrom,
+                                                              const std::vector<TreeNode*>& replaceTo)
+    {
+        std::vector<TreeNode*> copyNodes = SyntaxTree::CopyTreeTraversal(traversal);
+
+        const unsigned replaceFromLength = replaceFrom.size();
+        const unsigned replaceToLength = replaceTo.size();
+        const unsigned replaceIndex = SyntaxTree::FindIndexOfTraversalSubsequence(copyNodes, replaceFrom);
+
+        // Delete and replace.
+        copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
+        copyNodes.insert(copyNodes.begin() + replaceIndex, replaceTo.begin(), replaceTo.end());
+
+        // Transfer values.
+        for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
+        {
+            for (unsigned j = replaceIndex; j < replaceIndex + replaceFromLength; j++)
+            {
+                if (copyNodes[i]->SameID(traversal[j]))
+                {
+                    copyNodes[i]->termValue = traversal[j]->termValue;
+                    break;
+                }
+            }
+        }
+
+        return copyNodes;
+    }
+
     //***************************
     //*     Tree traversals     *
     //**************************/
@@ -468,7 +527,7 @@ public:
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode*> DepthFirstScanPostorder(TreeNode* node = nullptr)
+    std::vector<TreeNode*> DepthFirstScanPostorder(TreeNode* node = nullptr) const
     {
         /*
           Algorithm Postorder(tree)
@@ -510,6 +569,8 @@ public:
         return dfspo.size();
     }
 
+    /// Builds the first non-terminal node with no children.
+    /// \param dfspo The tree traversal.
     static void BuildFirst(std::vector<TreeNode*>& dfspo)
     {
         unsigned nextIndex = NextToBuild(dfspo);
@@ -547,11 +608,12 @@ public:
         delete_indexes(dfspo, toErase);
     }
 
+    /// Builds a SyntaxTree from a depth first post order traversal.
+    /// \param dfspo The traversal.
+    /// \return The tree built from the traversal.
     static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& dfspo)
     {
-        std::vector<TreeNode*> copyNodes;
-        for (auto node : dfspo)
-            copyNodes.push_back(TreeNode::ShallowCopy(node));
+        std::vector<TreeNode*> copyNodes = CopyTreeTraversal(dfspo);
 
         while (copyNodes.size() > 1)
             BuildFirst(copyNodes);
@@ -629,7 +691,7 @@ public:
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
     /// \return The synthesized expression as a std::string.
     [[nodiscard]]
-    std::string SynthesizeExpression()
+    std::string SynthesizeExpression() const
     {
         std::vector<TreeNode*> dfspo = this->DepthFirstScanPostorder();
         for (auto node : dfspo) node->ClearSynthesis();
@@ -721,7 +783,7 @@ public:
     /// Evaluates the tree using the production rules of the grammar.
     /// \param evaluationContext pointer to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
-    bool Evaluate(EvaluationContext* evaluationContext)
+    bool Evaluate(EvaluationContext* evaluationContext) const
     {
         std::vector<TreeNode*> dfspo = this->DepthFirstScanPostorder();
         for (auto node : dfspo) node->ClearEvaluation();

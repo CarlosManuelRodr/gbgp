@@ -4,12 +4,13 @@ project(gbgp)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(gbgp
-        include/cst_tree.h
+        include/syntax_tree.h
         include/grammar.h
         include/individual.h
         include/vector_ops.h
         include/evaluation.h
         include/tree_node.h
+        include/prune_rule.h
         include/gbgp.h
 
         tests/doctest.h

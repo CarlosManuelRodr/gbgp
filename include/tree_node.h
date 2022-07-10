@@ -5,7 +5,7 @@
 //*    Node implementation    *
 //****************************/
 
-/// A node can be either a Terminal or a NonTerminal. A None type is provided for convenience.
+/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty tree nodes.
 enum class TreeNodeType
 {
     None, NonTerminal, Terminal

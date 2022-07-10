@@ -1,6 +1,6 @@
 #include "doctest.h"
-#include "../include/cst_tree.h"
-#include <algorithm>
+#include "../include/syntax_tree.h"
+#include "../include/prune_rule.h"
 using namespace std;
 
 /****************************
@@ -342,9 +342,6 @@ TEST_CASE("Test tree pruning")
             })
         );
 
-    unprunedTree.PrintTree();
-    cout << unprunedTree.SynthesizeExpression() << endl;
-
     SyntaxTree pruneRuleFrom(
         TreeNode(
             rule5,
@@ -380,44 +377,14 @@ TEST_CASE("Test tree pruning")
             })
     );
 
-    std::vector<TreeNode*> treeTraversal = unprunedTree.DepthFirstScanPostorder();
-    std::vector<TreeNode*> pruneRuleFromTraversal = pruneRuleFrom.DepthFirstScanPostorder();
-    std::vector<TreeNode*> pruneRuleToTraversal = pruneRuleTo.DepthFirstScanPostorder();
-    std::vector<TreeNode*> copyNodes;
+    PruneRule pruneRule(pruneRuleFrom, pruneRuleTo);
+    SyntaxTree prunedTree = pruneRule.Apply(unprunedTree);
 
-    for (auto node : treeTraversal) copyNodes.push_back(TreeNode::ShallowCopy(node));
+    string unprunedSynth = unprunedTree.SynthesizeExpression();
+    string prunedSynth = prunedTree.SynthesizeExpression();
+    cout << "Original: " << unprunedSynth << endl;
+    cout << "Reconstructed: " << prunedSynth << endl;
 
-    // Search for prune rule subsequence.
-    std::vector<TreeNode*>::iterator it;
-    it = std::search(copyNodes.begin(), copyNodes.end(),
-                     pruneRuleFromTraversal.begin(), pruneRuleFromTraversal.end(),
-                     [](TreeNode* n1, TreeNode* n2) { return n1->SameID(*n2); });
-
-    const unsigned replaceIndex = std::distance(copyNodes.begin(), it);
-    const unsigned replaceFromLength = pruneRuleFromTraversal.size();
-    const unsigned replaceToLength = pruneRuleToTraversal.size();
-
-    // Delete and replace
-    copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
-    copyNodes.insert(copyNodes.begin() + replaceIndex, pruneRuleToTraversal.begin(), pruneRuleToTraversal.end());
-
-    // Transfer values.
-    for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
-    {
-        for (unsigned j = replaceIndex; j < replaceIndex + replaceFromLength; j++)
-        {
-            if (copyNodes[i]->SameID(treeTraversal[j]))
-            {
-                copyNodes[i]->termValue = treeTraversal[j]->termValue;
-                break;
-            }
-        }
-    }
-
-    SyntaxTree reconstruction = SyntaxTree::BuildFromTraversal(copyNodes);
-
-    string originalSynth = unprunedTree.SynthesizeExpression();
-    string reconstructionSynth = reconstruction.SynthesizeExpression();
-    cout << "Original: " << originalSynth << endl;
-    cout << "Reconstructed: " << reconstructionSynth << endl;
+    CHECK(unprunedSynth == "a*(b)");
+    CHECK(prunedSynth == "a*b");
 }

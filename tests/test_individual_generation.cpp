@@ -1,6 +1,6 @@
 #include "doctest.h"
 #include "../util/arithmetic_parser.h"
-#include "../include/cst_tree.h"
+#include "../include/syntax_tree.h"
 #include "../include/individual.h"
 using namespace std;
 

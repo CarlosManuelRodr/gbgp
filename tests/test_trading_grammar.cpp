@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/cst_tree.h"
+#include "../include/syntax_tree.h"
 using namespace std;
 
 /****************************
