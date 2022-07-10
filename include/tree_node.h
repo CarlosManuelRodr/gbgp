@@ -77,6 +77,18 @@ public:
             AddChildNode(new TreeNode(c), this);
     }
 
+    TreeNode(ProductionRule productionRule, const NonTerminal& nt)
+    {
+        type = TreeNodeType::NonTerminal;
+        nonTermInstance = nt;
+        termInstance = Terminal();
+        expressionSynthesis = "";
+        termValue = "";
+        expressionEvaluation = "";
+        parent = nullptr;
+        generatorPR = std::move(productionRule);
+    }
+
     TreeNode(ProductionRule productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
     {
         type = TreeNodeType::NonTerminal;
@@ -154,6 +166,40 @@ public:
         children.clear();
     }
 
+    bool operator==(const TreeNode& other) const
+    {
+        const bool sameType = this->type == other.type;
+        const bool sameTerm = this->termInstance == other.termInstance;
+        const bool sameNonTerm = this->nonTermInstance == other.nonTermInstance;
+        const bool sameValue = this->termValue == other.termValue;
+        return sameType && sameTerm && sameNonTerm && sameValue;
+    }
+    bool operator!=(const TreeNode& other) const
+    {
+        return !(*this == other);
+    }
+
+    [[nodiscard]]
+    bool SameID(TreeNode* other) const
+    {
+        return SameID(*other);
+    }
+
+    [[nodiscard]]
+    bool SameID(const TreeNode& other) const
+    {
+        bool sameType = this->type == other.type;
+        if (!sameType)
+            return false;
+
+        if (type == TreeNodeType::NonTerminal)
+            return this->nonTermInstance == other.nonTermInstance;
+        else if (type == TreeNodeType::Terminal)
+            return this->termInstance == other.termInstance;
+        else
+            return false;
+    }
+
     /// Reset the synthesis of this node
     void ClearSynthesis()
     {
@@ -194,6 +240,13 @@ public:
         if (nodeParent != nullptr)
             node->parent = nodeParent;
         children.push_back(node);
+    }
+
+    /// Returns the value of the node.
+    [[nodiscard]]
+    std::string GetValue() const
+    {
+        return termValue;
     }
 
     /// Returns a formatted label of the node.

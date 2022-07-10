@@ -134,15 +134,6 @@ struct ProductionElement
         term = Terminal();
         nonterm = pnonterm;
     }
-
-    bool operator==(const ProductionElement& other) const
-    {
-        return type == other.type && nonterm == other.nonterm && term == other.term;
-    }
-    bool operator!=(const ProductionElement& other) const
-    {
-        return type != other.type || nonterm != other.nonterm || term != other.term;
-    }
 };
 
 //*********************************
@@ -182,15 +173,6 @@ struct SemanticElement
         term = Terminal();
         nonterm = NonTerminal();
         string = pstring;
-    }
-
-    bool operator==(const SemanticElement& other) const
-    {
-        return type == other.type && nonterm == other.nonterm && term == other.term && string == other.string;
-    }
-    bool operator!=(const SemanticElement& other) const
-    {
-        return type != other.type || nonterm != other.nonterm || term != other.term || string == other.string;
     }
 
     [[nodiscard]]
@@ -245,22 +227,18 @@ struct ProductionRule
         return static_cast<int>(to.size());
     }
 
-    bool operator==(const ProductionRule& other) const
-    {
-        return from == other.from && to == other.to && semanticRules == other.semanticRules;
-    }
-    bool operator!=(const ProductionRule& other) const
-    {
-        return from != other.from || to != other.to || semanticRules != other.semanticRules;
-    }
-
     [[nodiscard]]
     std::string ToString() const
     {
         std::string output = from.label;
         output += " -> ";
+
+        int index = 0;
         for (const auto& prodElement: semanticRules)
-            output += prodElement.ToString() + ((prodElement == semanticRules.back()) ? "" : " ");
+        {
+            output += prodElement.ToString() + ((index == semanticRules.size() - 1) ? "" : " ");
+            index++;
+        }
         return output;
     }
 };

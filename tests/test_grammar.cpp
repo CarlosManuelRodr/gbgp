@@ -17,7 +17,6 @@ enum Terms
 
 // Term/Nonterm declaration.
 const Terminal varTerm(Var, "var", { "1", "2", "3" });
-
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -91,9 +90,9 @@ const ProductionRule rule6(
         }
 );
 
-/****************************
-*       Test routines       *
-****************************/
+//*****************************
+//*       Test routines       *
+//****************************/
 TEST_CASE("Test rule representation")
 {
     string rule1String = rule1.ToString();
