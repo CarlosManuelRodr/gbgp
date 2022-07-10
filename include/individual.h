@@ -31,16 +31,16 @@ public:
         evaluator = other.evaluator;
         expression = other.expression;
     }
-    explicit Individual(SyntaxTree& cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(SyntaxTree& syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
-        tree = &cst;
-        expression = cst.SynthesizeExpression();
+        tree = &syntaxTree;
+        expression = syntaxTree.SynthesizeExpression();
         evaluator = pevaluator;
     }
-    explicit Individual(SyntaxTree* cst, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(SyntaxTree* syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
-        tree = cst;
-        expression = cst->SynthesizeExpression();
+        tree = syntaxTree;
+        expression = syntaxTree->SynthesizeExpression();
         evaluator = pevaluator;
     }
     ~Individual()

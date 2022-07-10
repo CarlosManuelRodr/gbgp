@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "production_rule.h"
 
 //*****************************
 //*    Node implementation    *
@@ -149,6 +150,7 @@ public:
         parent = other->parent;
     }
 
+    /// Performs a copy of the node term without children.
     static TreeNode* ShallowCopy(TreeNode* other)
     {
         auto* copyNode = new TreeNode();
@@ -179,12 +181,18 @@ public:
         return !(*this == other);
     }
 
+    /// Check if both nodes have the same term ID.
+    /// \param other The other node.
+    /// \return Whether nodes have the same ID.
     [[nodiscard]]
     bool SameID(TreeNode* other) const
     {
         return SameID(*other);
     }
 
+    /// Check if both nodes have the same term ID.
+    /// \param other The other node.
+    /// \return Whether nodes have the same ID.
     [[nodiscard]]
     bool SameID(const TreeNode& other) const
     {
@@ -258,6 +266,7 @@ public:
                termInstance.label + " [" + termValue + "]";
     }
 
+    /// Get node representation as string.
     [[nodiscard]]
     std::string ToString() const
     {

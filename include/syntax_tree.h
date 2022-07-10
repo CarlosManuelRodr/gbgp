@@ -7,8 +7,9 @@
 #include <string>
 #include <exception>
 #include <utility>
-#include "grammar.h"
 #include "tree_node.h"
+#include "vector_ops.h"
+#include "grammar.h"
 
 //**********************************************
 //*    Concrete syntax tree implementation     *
@@ -24,39 +25,39 @@ private:
     TreeNode* root;
 
     /// Find the first position of a NonTerminal of type id.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \param id Identifier of the non terminal.
     /// \param avoid List of positions to avoid.
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    static int FindIndexOfNonTerm(const std::vector<TreeNode*>& dfspo, int id, const std::vector<unsigned>& avoid,
+    static int FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<unsigned>& avoid,
                                   unsigned currentPosition, int elementsToSynthesize)
     {
-        for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
+        for (unsigned i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
-            if (dfspo[i]->type == TreeNodeType::NonTerminal &&
-                dfspo[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
+            if (treeTraversal[i]->type == TreeNodeType::NonTerminal &&
+                treeTraversal[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
                 return static_cast<int>(i);
         }
         return -1;
     }
 
     /// Find the first position of a term of type id.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \param id Identifier of the term.
     /// \param avoid List of positions to avoid.
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    static int FindIndexOfTerm(const std::vector<TreeNode*>& dfspo, int id, const std::vector<unsigned>& avoid,
+    static int FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<unsigned>& avoid,
                                unsigned currentPosition, int elementsToSynthesize)
     {
-        for (unsigned i = currentPosition - elementsToSynthesize; i < dfspo.size(); i++)
+        for (unsigned i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
-            if (dfspo[i]->type == TreeNodeType::Terminal && dfspo[i]->termInstance.id == id &&
+            if (treeTraversal[i]->type == TreeNodeType::Terminal && treeTraversal[i]->termInstance.id == id &&
                 !vector_contains_q(avoid, i))
                 return static_cast<int>(i);
         }
@@ -190,7 +191,7 @@ public:
     {
         if (root != nullptr)
         {
-            std::vector<TreeNode*> nodeList = DepthFirstScanPostorder();
+            std::vector<TreeNode*> nodeList = GetTreeTraversal();
             for (TreeNode* n : nodeList)
             {
                 if (n != nullptr)
@@ -209,7 +210,7 @@ public:
     {
         if (root != nullptr)
         {
-            std::vector<TreeNode*> nodeList = this->DepthFirstScanPostorder(root);
+            std::vector<TreeNode*> nodeList = this->GetTreeTraversal(root);
             for (TreeNode*& n : nodeList)
             {
                 if (n != nullptr)
@@ -225,7 +226,7 @@ public:
     /// Clear the expressionSynthesis and expressionEvaluation of every node.
     void ClearEvaluation()
     {
-        std::vector<TreeNode*> nodeList = this->DepthFirstScanPostorder(root);
+        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(root);
         for (TreeNode* n : nodeList)
         {
             if (n->type == TreeNodeType::NonTerminal)
@@ -301,7 +302,7 @@ public:
     /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
     void RemoveSubtree(TreeNode* rootOfSubtree)
     {
-        std::vector<TreeNode*> nodeList = this->DepthFirstScanPostorder(rootOfSubtree);
+        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(rootOfSubtree);
         nodeList.pop_back();
         for (TreeNode*& n : nodeList)
         {
@@ -471,6 +472,12 @@ public:
         return copyNodes;
     }
 
+    static void DeleteTreeTraversal(const std::vector<TreeNode*>& traversal)
+    {
+        for (auto node : traversal)
+            delete node;
+    }
+
     /// Find the index of a traversal subsequence inside another traversal.
     /// \param traversal The traversal to perform the search on.
     /// \param subsequence The traversal subsequence to find.
@@ -500,6 +507,12 @@ public:
         const unsigned replaceToLength = replaceTo.size();
         const unsigned replaceIndex = SyntaxTree::FindIndexOfTraversalSubsequence(copyNodes, replaceFrom);
 
+        if (replaceIndex == copyNodes.size() - 1) // No subsequence to replace. Return source traversal.
+        {
+            DeleteTreeTraversal(copyNodes);
+            return traversal;
+        }
+
         // Delete and replace.
         copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
         copyNodes.insert(copyNodes.begin() + replaceIndex, replaceTo.begin(), replaceTo.end());
@@ -527,7 +540,7 @@ public:
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode*> DepthFirstScanPostorder(TreeNode* node = nullptr) const
+    std::vector<TreeNode*> GetTreeTraversal(TreeNode* node = nullptr) const
     {
         /*
           Algorithm Postorder(tree)
@@ -535,7 +548,7 @@ public:
           2. Traverse the right subtree, i.e., call Postorder(right-subtree)
           3. Visit the root.
         */
-
+        // TODO: Replace recursive implementation with iterative.
         std::vector<TreeNode*> output;
 
         if (node == nullptr)
@@ -549,7 +562,7 @@ public:
 
         for (TreeNode* n : node->children)
         {
-            const std::vector<TreeNode*> childrenTreeNodes = DepthFirstScanPostorder(n);
+            const std::vector<TreeNode*> childrenTreeNodes = GetTreeTraversal(n);
             output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
         }
         output.push_back(node);
@@ -558,38 +571,38 @@ public:
     }
 
     /// Find the index of the first non-synthesized non-terminal.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
     [[nodiscard]]
-    static unsigned NextToBuild(std::vector<TreeNode*>& dfspo)
+    static unsigned NextToBuild(std::vector<TreeNode*>& treeTraversal)
     {
-        for (unsigned i = 0; i < dfspo.size(); i++)
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->HasChildren())
+        for (unsigned i = 0; i < treeTraversal.size(); i++)
+            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->HasChildren())
                 return i;
-        return dfspo.size();
+        return treeTraversal.size();
     }
 
     /// Builds the first non-terminal node with no children.
-    /// \param dfspo The tree traversal.
-    static void BuildFirst(std::vector<TreeNode*>& dfspo)
+    /// \param treeTraversal The tree traversal.
+    static void BuildFirst(std::vector<TreeNode*>& treeTraversal)
     {
-        unsigned nextIndex = NextToBuild(dfspo);
-        if (nextIndex == dfspo.size())
+        unsigned nextIndex = NextToBuild(treeTraversal);
+        if (nextIndex == treeTraversal.size())
             return;
 
-        TreeNode* nodeToBuild = dfspo[nextIndex];
-        ProductionRule rule = dfspo[nextIndex]->generatorPR;
+        TreeNode* nodeToBuild = treeTraversal[nextIndex];
+        ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
         std::vector<unsigned> toErase;
 
         for (const ProductionElement& se : rule.to)
         {
             const int pos = (se.type == ProductionElementType::NonTerminal) ?
-                    FindIndexOfNonTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
-                    FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                    FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
+                    FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
 
             if (pos != -1)
             {
-                nodeToBuild->AddChildNode(dfspo[pos], nodeToBuild);
+                nodeToBuild->AddChildNode(treeTraversal[pos], nodeToBuild);
                 toErase.push_back(pos);
             }
             else
@@ -597,7 +610,7 @@ public:
                 if (se.type == ProductionElementType::NonTerminal)
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during expression evaluation of node: " + dfspo[nextIndex]->ToString();
+                    errorReport += " during expression evaluation of node: " + treeTraversal[nextIndex]->ToString();
                     throw std::runtime_error(errorReport);
                 }
                 else if (se.type == ProductionElementType::Terminal)
@@ -605,15 +618,15 @@ public:
             }
         }
 
-        delete_indexes(dfspo, toErase);
+        delete_indexes(treeTraversal, toErase);
     }
 
     /// Builds a SyntaxTree from a depth first post order traversal.
-    /// \param dfspo The traversal.
+    /// \param treeTraversal The traversal.
     /// \return The tree built from the traversal.
-    static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& dfspo)
+    static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& treeTraversal)
     {
-        std::vector<TreeNode*> copyNodes = CopyTreeTraversal(dfspo);
+        std::vector<TreeNode*> copyNodes = CopyTreeTraversal(treeTraversal);
 
         while (copyNodes.size() > 1)
             BuildFirst(copyNodes);
@@ -626,56 +639,56 @@ public:
     //**************************/
 
     /// Find the index of the first non-synthesized non-terminal.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
     [[nodiscard]]
-    static unsigned NextToSynthesize(std::vector<TreeNode*>& dfspo)
+    static unsigned NextToSynthesize(std::vector<TreeNode*>& treeTraversal)
     {
-        for (unsigned i = 0; i < dfspo.size(); i++)
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsSynthesized())
+        for (unsigned i = 0; i < treeTraversal.size(); i++)
+            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->IsSynthesized())
                 return i;
-        return dfspo.size();
+        return treeTraversal.size();
     }
 
     /// Synthesize the first non-synthesized node and deletes the consumed nodes.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
-    static void SynthesizeFirst(std::vector<TreeNode*>& dfspo)
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
+    static void SynthesizeFirst(std::vector<TreeNode*>& treeTraversal)
     {
         // Get the rule of the element to be evaluated.
-        unsigned nextIndex = NextToSynthesize(dfspo);
-        if (nextIndex == dfspo.size())
+        unsigned nextIndex = NextToSynthesize(treeTraversal);
+        if (nextIndex == treeTraversal.size())
             return;
 
-        ProductionRule rule = dfspo[nextIndex]->generatorPR;
+        ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
         std::string synthesis;
         std::vector<unsigned> toErase;
 
-        // Process the elements of dfspo that match the semantic rules.
+        // Process the elements of treeTraversal that match the semantic rules.
         for (const SemanticElement& se : rule.semanticRules)
         {
             if (se.type == SemanticElementType::String)
                 synthesis += se.string;
             else if (se.type == SemanticElementType::NonTerminal)
             {
-                const int pos = FindIndexOfNonTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const int pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    synthesis += dfspo[pos]->expressionSynthesis;
+                    synthesis += treeTraversal[pos]->expressionSynthesis;
                     toErase.push_back(pos);
                 }
                 else
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during synthesis of node : " + dfspo[nextIndex]->ToString();
+                    errorReport += " during synthesis of node : " + treeTraversal[nextIndex]->ToString();
                     throw std::runtime_error(errorReport);
                 }
             }
             else if (se.type == SemanticElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const int pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    synthesis += dfspo[pos]->termValue;
+                    synthesis += treeTraversal[pos]->termValue;
                     toErase.push_back(pos);
                 }
                 else
@@ -684,8 +697,8 @@ public:
         }
 
         // Consume and delete
-        dfspo[nextIndex]->expressionSynthesis = synthesis;
-        delete_indexes(dfspo, toErase);
+        treeTraversal[nextIndex]->expressionSynthesis = synthesis;
+        delete_indexes(treeTraversal, toErase);
     }
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
@@ -693,15 +706,15 @@ public:
     [[nodiscard]]
     std::string SynthesizeExpression() const
     {
-        std::vector<TreeNode*> dfspo = this->DepthFirstScanPostorder();
-        for (auto node : dfspo) node->ClearSynthesis();
+        std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
+        for (auto node : treeTraversal) node->ClearSynthesis();
 
         try
         {
-            while (dfspo.size() > 1)
-                SynthesizeFirst(dfspo);
+            while (treeTraversal.size() > 1)
+                SynthesizeFirst(treeTraversal);
 
-            return dfspo.back()->expressionSynthesis;
+            return treeTraversal.back()->expressionSynthesis;
         }
         catch (std::runtime_error& e)
         {
@@ -711,56 +724,56 @@ public:
     }
 
     /// Find the index of the first non-evaluated non-terminal.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-evaluated non-terminal.
     [[nodiscard]]
-    static unsigned NextToEvaluate(std::vector<TreeNode*>& dfspo)
+    static unsigned NextToEvaluate(std::vector<TreeNode*>& treeTraversal)
     {
-        for (unsigned i = 0; i < dfspo.size(); i++)
-            if (dfspo[i]->type == TreeNodeType::NonTerminal && !dfspo[i]->IsEvaluated())
+        for (unsigned i = 0; i < treeTraversal.size(); i++)
+            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->IsEvaluated())
                 return i;
-        return dfspo.size();
+        return treeTraversal.size();
     }
 
     /// Evaluate the first non-evaluate node and deletes the consumed nodes.
-    /// \param dfspo List of nodes traversed in DepthFirst PostOrder.
+    /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext pointer to the evaluation context.
-    static void EvaluateFirst(std::vector<TreeNode*>& dfspo, EvaluationContext* evaluationContext)
+    static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext* evaluationContext)
     {
         // Get the rule of the element to be evaluated.
-        unsigned nextIndex = NextToEvaluate(dfspo);
-        if (nextIndex == dfspo.size())
+        unsigned nextIndex = NextToEvaluate(treeTraversal);
+        if (nextIndex == treeTraversal.size())
             return;
 
-        ProductionRule rule = dfspo[nextIndex]->generatorPR;
+        ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
         std::vector<unsigned> toErase;
 
         evaluationContext->Prepare();
 
-        // Push to the context the elements of dfspo that match the production rules.
+        // Push to the context the elements of treeTraversal that match the production rules.
         for (const ProductionElement& se : rule.to)
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const int pos = FindIndexOfNonTerm(dfspo, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const int pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    evaluationContext->PushSemanticValue(dfspo[pos]->expressionEvaluation);
+                    evaluationContext->PushSemanticValue(treeTraversal[pos]->expressionEvaluation);
                     toErase.push_back(pos);
                 }
                 else
                 {
                     std::string errorReport = "Could not find any NonTerm node of type " + se.nonterm.label;
-                    errorReport += " during expression evaluation of node: " + dfspo[nextIndex]->ToString();
+                    errorReport += " during expression evaluation of node: " + treeTraversal[nextIndex]->ToString();
                     throw std::runtime_error(errorReport);
                 }
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(dfspo, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const int pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    evaluationContext->PushSemanticValue(dfspo[pos]->termValue);
+                    evaluationContext->PushSemanticValue(treeTraversal[pos]->termValue);
                     toErase.push_back(pos);
                 }
                 else
@@ -772,12 +785,12 @@ public:
         if (rule.semanticAction != nullptr)
         {
             rule.semanticAction(evaluationContext);
-            dfspo[nextIndex]->expressionEvaluation = evaluationContext->result();
+            treeTraversal[nextIndex]->expressionEvaluation = evaluationContext->result();
         }
         else
             throw std::runtime_error("There is no semantic action for rule " + rule.ToString());
 
-        delete_indexes(dfspo, toErase);
+        delete_indexes(treeTraversal, toErase);
     }
 
     /// Evaluates the tree using the production rules of the grammar.
@@ -785,13 +798,13 @@ public:
     /// \return true if expression was evaluated correctly, false if not.
     bool Evaluate(EvaluationContext* evaluationContext) const
     {
-        std::vector<TreeNode*> dfspo = this->DepthFirstScanPostorder();
-        for (auto node : dfspo) node->ClearEvaluation();
+        std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
+        for (auto node : treeTraversal) node->ClearEvaluation();
 
         try
         {
-            while (dfspo.size() > 1)
-                EvaluateFirst(dfspo, evaluationContext);
+            while (treeTraversal.size() > 1)
+                EvaluateFirst(treeTraversal, evaluationContext);
 
             return true;
         }

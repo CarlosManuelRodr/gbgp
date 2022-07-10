@@ -107,3 +107,16 @@ TEST_CASE("Test memory allocation/deallocation")
     auto* ind = Individual<>::NewRandomIndividual(grammar);
     delete ind;
 }
+
+TEST_CASE("Test traversal copy/delete")
+{
+    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6};
+
+    SyntaxTree tree;
+    tree.CreateRandomTree(grammar, 20);
+
+    std::vector<TreeNode*> traversal = tree.GetTreeTraversal();
+    std::vector<TreeNode*> copy = SyntaxTree::CopyTreeTraversal(traversal);
+
+    SyntaxTree::DeleteTreeTraversal(copy);
+}

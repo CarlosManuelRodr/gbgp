@@ -11,6 +11,8 @@ add_executable(gbgp
         include/evaluation.h
         include/tree_node.h
         include/prune_rule.h
+        include/production_rule.h
+        include/terms.h
         include/gbgp.h
 
         tests/doctest.h
