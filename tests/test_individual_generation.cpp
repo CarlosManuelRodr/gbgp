@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "../util/arithmetic_parser.h"
-#include "../include/syntax_tree.h"
 #include "../include/individual.h"
 using namespace std;
 
@@ -120,12 +119,15 @@ const ProductionRule rule6(
 TEST_CASE("Test individual evaluation")
 {
     // GP Generator grammar
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
     SyntaxTree cst;
     EvaluationContext evaluationContext;
-    cst.CreateRandomTree(grammar, 100);
+    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+
+    grammar.CreateRandomTree(cst, 100);
     cst.PrintTree();
+
     cout << cst.SynthesizeExpression() << endl;
+
     bool evaluationState = cst.Evaluate(&evaluationContext);
     if (evaluationState)
         cout << evaluationContext.result() << endl;
@@ -143,15 +145,15 @@ TEST_CASE("Test individual generation")
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        auto ind = Individual<>::NewRandomIndividual(grammar);
+        auto ind = Individual(grammar);
+        ind.CreateRandom();
 
-        string expression = ind->GetExpression();
-        string evaluationResult = ind->Evaluate();
+        string expression = ind.GetExpression();
+        string evaluationResult = ind.Evaluate();
         string parserResult = std::to_string(evaluate_arithmetic_expression(expression));
         cout << "Generated expression: " << expression << endl;
         cout << "Evaluation: " << evaluationResult << endl;
 
         CHECK(evaluationResult == parserResult);
-        delete ind;
     }
 }

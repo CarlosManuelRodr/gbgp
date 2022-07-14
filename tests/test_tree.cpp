@@ -1,6 +1,5 @@
 #include "doctest.h"
-#include "../include/syntax_tree.h"
-#include "../include/prune_rule.h"
+#include "../include/grammar.h"
 using namespace std;
 
 /****************************
@@ -292,9 +291,9 @@ TEST_CASE("Test tree traversals")
     CHECK(originalSynth == reconstructionSynth);
 }
 
-TEST_CASE("Test tree pruning")
+TEST_CASE("Test single pass pruning")
 {
-    SyntaxTree unprunedTree(
+    SyntaxTree tree(
         TreeNode(
             rule2,
             exprNonTerm,
@@ -378,13 +377,74 @@ TEST_CASE("Test tree pruning")
     );
 
     PruneRule pruneRule(pruneRuleFrom, pruneRuleTo);
-    SyntaxTree prunedTree = pruneRule.Apply(unprunedTree);
 
-    string unprunedSynth = unprunedTree.SynthesizeExpression();
-    string prunedSynth = prunedTree.SynthesizeExpression();
+    string unprunedSynth = tree.SynthesizeExpression();
+    pruneRule.Apply(tree);
+    string prunedSynth = tree.SynthesizeExpression();
+
     cout << "Original: " << unprunedSynth << endl;
     cout << "Reconstructed: " << prunedSynth << endl;
 
     CHECK(unprunedSynth == "a*(b)");
     CHECK(prunedSynth == "a*b");
+}
+
+TEST_CASE("Test multiple pass pruning")
+{
+    SyntaxTree pruneRuleFrom(
+        TreeNode(
+            rule5,
+            factorNonTerm,
+            {
+                TreeNode(leftParenthesisTerm, "("),
+                TreeNode(
+                    rule2,
+                    exprNonTerm,
+                    {
+                        TreeNode(
+                            rule4,
+                            termNonTerm,
+                            {
+                                TreeNode(
+                                    rule6,
+                                    factorNonTerm,
+                                    {
+                                        TreeNode(varTerm)
+                                    })
+                            })
+                    }),
+                TreeNode(rightParenthesisTerm, ")")
+            })
+    );
+
+    SyntaxTree pruneRuleTo(
+        TreeNode(
+            rule6,
+            factorNonTerm,
+            {
+                TreeNode(varTerm)
+            })
+    );
+
+    PruneRule pruneRule(pruneRuleFrom, pruneRuleTo);
+    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+
+    SyntaxTree tree;
+    grammar.CreateRandomTree(tree, 20);
+
+    string unprunedSynth = tree.SynthesizeExpression();
+    cout << "Expression before pruning: " << unprunedSynth << endl;
+
+    int i = 1;
+    while (pruneRule.CanBeApplied(tree))
+    {
+        pruneRule.Apply(tree);
+        cout << "Pruning iteration " << i << ": " << tree.SynthesizeExpression() << endl;
+        i++;
+    }
+
+    string prunedSynth = tree.SynthesizeExpression();
+    cout << "Expression after pruning: " << prunedSynth << endl;
+
+    CHECK(prunedSynth.size() <= unprunedSynth.size());
 }

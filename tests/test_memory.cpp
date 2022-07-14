@@ -100,11 +100,12 @@ TEST_CASE("Test memory allocation/deallocation")
 
     cout << "Testing CST Creation/destruction" << endl;
     auto* newTree = new SyntaxTree();
-    newTree->CreateRandomTree(grammar);
+    grammar.CreateRandomTree(*newTree);
     delete newTree;
 
     cout << "Testing Individual Creation/destruction" << endl;
-    auto* ind = Individual<>::NewRandomIndividual(grammar);
+    auto* ind = new Individual(grammar);
+    ind->CreateRandom();
     delete ind;
 }
 
@@ -113,7 +114,7 @@ TEST_CASE("Test traversal copy/delete")
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6};
 
     SyntaxTree tree;
-    tree.CreateRandomTree(grammar, 20);
+    grammar.CreateRandomTree(tree, 20);
 
     std::vector<TreeNode*> traversal = tree.GetTreeTraversal();
     std::vector<TreeNode*> copy = SyntaxTree::CopyTreeTraversal(traversal);

@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/syntax_tree.h"
+#include "../include/grammar.h"
 using namespace std;
 
 /****************************

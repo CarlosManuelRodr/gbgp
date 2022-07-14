@@ -8,8 +8,6 @@
 #include <exception>
 #include <utility>
 #include "tree_node.h"
-#include "vector_ops.h"
-#include "grammar.h"
 
 //**********************************************
 //*    Concrete syntax tree implementation     *
@@ -245,7 +243,7 @@ public:
     [[nodiscard]]
     bool IsEmpty() const
     {
-        return root->children.empty();
+        return root == nullptr;
     }
 
     /// Returns a reference to the root.
@@ -368,87 +366,6 @@ public:
     //*      Utilities     *
     //*********************/
 
-    /// Recursive implementation. Create random tree based on the production rules described in grammarRules.
-    /// \param maxDepth Maximum allowed tree depth.
-    /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
-    /// \param node Node from where the random tree will be created.
-    /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(const Grammar& treeGrammar, int maxDepth, int depth, TreeNode* node)
-    {
-        if (node->type == TreeNodeType::NonTerminal)
-        {
-            // Create children nodes based on the current node production rule.
-            std::vector<TreeNode*> newNodes;
-            for (const ProductionElement& pe : node->generatorPR.to)
-            {
-                if (pe.type == ProductionElementType::NonTerminal)
-                    newNodes.push_back(AddNode(node, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
-                if (pe.type == ProductionElementType::Terminal)
-                    newNodes.push_back(AddNode(node, pe.term));
-                if (pe.type == ProductionElementType::Unassigned)
-                    throw std::runtime_error("Unassigned production element type");
-            }
-
-            // Create subtrees for children nodes.
-            if (depth != maxDepth)
-            {
-                for (TreeNode* n : newNodes)
-                {
-                    bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, depth + 1, n);
-                    if (!branchCreationSuccess)
-                        return false;
-                }
-            }
-            else
-                return false;
-        }
-        else
-            node->termValue = node->termInstance.GetValue();
-
-        return true;
-    }
-
-    /// Create random tree based on the production rules described in the variable grammarRules.
-    /// \param maxDepth Maximum allowed tree depth.
-    /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(const Grammar& treeGrammar, int maxDepth = 10)
-    {
-        this->SetRootRule(treeGrammar.GetRootRule());
-
-        // Create children nodes based on the selected rule
-        std::vector<TreeNode*> newNodes;
-        for (const ProductionElement& pe : root->generatorPR.to)
-        {
-            if (pe.type == ProductionElementType::NonTerminal)
-                newNodes.push_back(AddNode(root, pe.nonterm, treeGrammar.GetRandomCompatibleRule(pe.nonterm.id)));
-            if (pe.type == ProductionElementType::Terminal)
-                newNodes.push_back(AddNode(root, pe.term));
-            if (pe.type == ProductionElementType::Unassigned)
-                throw std::runtime_error("Unassigned production element type");
-        }
-
-        for (TreeNode* n : newNodes)
-        {
-            bool branchCreationSuccess = TryCreateRandomTree(treeGrammar, maxDepth, 1, n);
-            if (!branchCreationSuccess)
-                return false;
-        }
-
-        return true;
-    }
-
-    /// Ensure the creation of a random tree by creating random trees until there is a success.
-    /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(const Grammar& treeGrammar, int maxDepth = 10)
-    {
-        bool success = false;
-        while (!success)
-        {
-            this->Reset();
-            success = this->TryCreateRandomTree(treeGrammar, maxDepth);
-        }
-    }
-
     /// Prints the tree in the output stream.
     void PrintTree(std::ostream& stream = std::cout) const
     {
@@ -507,7 +424,7 @@ public:
         const unsigned replaceToLength = replaceTo.size();
         const unsigned replaceIndex = SyntaxTree::FindIndexOfTraversalSubsequence(copyNodes, replaceFrom);
 
-        if (replaceIndex == copyNodes.size() - 1) // No subsequence to replace. Return source traversal.
+        if (replaceIndex == copyNodes.size()) // No subsequence to replace. Return source traversal.
         {
             DeleteTreeTraversal(copyNodes);
             return traversal;

@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/syntax_tree.h"
+#include "../include/grammar.h"
 using namespace std;
 
 /****************************
@@ -242,7 +242,7 @@ TEST_CASE("Testing random individual generation")
                     rule9, rule10, rule11, rule12, rule13, rule14 };
 
     SyntaxTree cst;
-    cst.CreateRandomTree(grammar, 100);
+    grammar.CreateRandomTree(cst, 100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
     CHECK(cst.SynthesizeExpression().size() > 0);

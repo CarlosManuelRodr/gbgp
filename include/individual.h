@@ -1,51 +1,36 @@
 #pragma once
 #include <limits>
-#include "syntax_tree.h"
+#include "grammar.h"
 
 template <typename EvaluationContextType = EvaluationContext> class Individual
 {
 private:
-    SyntaxTree* tree;
+    Grammar grammar;
+    SyntaxTree tree;
 
-public:
     std::string expression;
     std::function<std::string(std::string)> evaluator;
 
-    static Individual<EvaluationContextType>*
-    NewRandomIndividual(const Grammar& grammar, const std::function<std::string(std::string)>& pevaluator = nullptr,
-                        int maxDepth = 100)
+public:
+    explicit Individual(const Grammar& pgrammar)
     {
-        auto* newTree = new SyntaxTree();
-        newTree->CreateRandomTree(grammar, maxDepth);
-        return new Individual(newTree, pevaluator);
-    }
-
-    Individual()
-    {
-        tree = nullptr;
+        grammar = pgrammar;
         evaluator = nullptr;
     }
-    Individual(const Individual<EvaluationContextType>& other)
+    explicit Individual(const Grammar& pgrammar, const SyntaxTree& syntaxTree,
+                        const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
-        tree = other.tree;
-        evaluator = other.evaluator;
-        expression = other.expression;
-    }
-    explicit Individual(SyntaxTree& syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
-    {
-        tree = &syntaxTree;
+        grammar = pgrammar;
+        tree = syntaxTree;
         expression = syntaxTree.SynthesizeExpression();
         evaluator = pevaluator;
     }
-    explicit Individual(SyntaxTree* syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    Individual(const Individual<EvaluationContextType>& other)
     {
-        tree = syntaxTree;
-        expression = syntaxTree->SynthesizeExpression();
-        evaluator = pevaluator;
-    }
-    ~Individual()
-    {
-        delete tree;
+        grammar = other.grammar;
+        tree = other.tree;
+        evaluator = other.evaluator;
+        expression = other.expression;
     }
 
     void SetEvaluator(const std::function<std::string(std::string)>& pevaluator)
@@ -58,7 +43,7 @@ public:
         if (evaluator == nullptr)
         {
             EvaluationContextType evaluationContext;
-            tree->Evaluate(&evaluationContext);
+            tree.Evaluate(&evaluationContext);
             return evaluationContext.result();
         }
         else
@@ -66,14 +51,20 @@ public:
     }
 
     [[nodiscard]]
-    SyntaxTree GetTree() const
+    SyntaxTree& GetTree()
     {
-        return *tree;
+        return tree;
     }
 
     [[nodiscard]]
     std::string GetExpression() const
     {
         return expression;
+    }
+
+    void CreateRandom()
+    {
+        grammar.CreateRandomTree(tree);
+        expression = tree.SynthesizeExpression();
     }
 };
