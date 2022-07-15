@@ -177,6 +177,20 @@ public:
         this->Destroy();
     }
 
+    SyntaxTree& operator=(const SyntaxTree& other)
+    {
+        // self-assignment check
+        if (this == &other)
+            return *this;
+
+        root = new TreeNode(other.root);
+        root->parent = nullptr;
+        this->CopyTree(root, other.root);
+        this->ClearEvaluation();
+
+        return *this;
+    }
+
     void SetRootRule(const ProductionRule& startRule)
     {
         root = new TreeNode(startRule.from);
