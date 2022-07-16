@@ -13,6 +13,7 @@ add_executable(gbgp
         include/prune_rule.h
         include/production_rule.h
         include/terms.h
+        include/population.h
         include/gbgp.h
 
         tests/doctest.h

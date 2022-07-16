@@ -14,8 +14,6 @@
 //*********************************************/
 
 /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
-/// \tparam TerminalType enum class with the Terminal IDs specified by the user.
-/// \tparam NonTerminalType enum class with the NonTerminal IDs specified by the user.
 class SyntaxTree
 {
 private:

@@ -18,7 +18,7 @@ public:
     {
         evaluator = nullptr;
     }
-    explicit Individual(const SyntaxTree& syntaxTree,const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(const SyntaxTree& syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
     {
         tree = syntaxTree;
         evaluator = pevaluator;
