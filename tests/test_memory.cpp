@@ -104,8 +104,8 @@ TEST_CASE("Test memory allocation/deallocation")
     delete newTree;
 
     cout << "Testing Individual Creation/destruction" << endl;
-    auto* ind = new Individual(grammar);
-    ind->CreateRandom();
+    auto* ind = new Individual();
+    ind->CreateRandom(grammar);
     delete ind;
 }
 

@@ -145,8 +145,8 @@ TEST_CASE("Test individual generation")
     cout << "Testing random Individual generation" << endl;
     for (int i = 0; i < 100; i++)
     {
-        auto ind = Individual(grammar);
-        ind.CreateRandom();
+        auto ind = Individual();
+        ind.CreateRandom(grammar);
 
         string expression = ind.GetExpression();
         string evaluationResult = ind.Evaluate();

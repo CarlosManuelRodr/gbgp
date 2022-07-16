@@ -84,7 +84,7 @@ public:
     /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
     /// \param node Node from where the random tree will be created.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(int maxDepth, int depth, TreeNode* node)
+    bool TryCreateRandomTree(int maxDepth, int depth, TreeNode* node) const
     {
         if (node->type == TreeNodeType::NonTerminal)
         {
@@ -122,7 +122,7 @@ public:
     /// Create random tree based on the production rules described in the variable grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10)
+    bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10) const
     {
         syntaxTree.SetRootRule(GetRootRule());
 
@@ -150,7 +150,7 @@ public:
 
     /// Ensure the creation of a random tree by creating random trees until there is a success.
     /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10)
+    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10) const
     {
         bool success = false;
         while (!success)
@@ -163,7 +163,7 @@ public:
     /// Applies sequentially all the prune rules of the grammar.
     /// \param syntaxTree The target syntax tree that will be pruned.
     /// \return True if a prune rule could be applied, false otherwise.
-    bool ApplyPruneRules(SyntaxTree& syntaxTree)
+    bool ApplyPruneRules(SyntaxTree& syntaxTree) const
     {
         bool wasPruned = false;
         for (auto pruneRule : pruneRules)
@@ -179,7 +179,7 @@ public:
 
     /// Applies the grammar prune rules repeatedly until no further simplification can be performed.
     /// \param syntaxTree The target syntax tree that will be pruned.
-    void PruneTree(SyntaxTree& syntaxTree)
+    void PruneTree(SyntaxTree& syntaxTree) const
     {
         bool canBePruned = false;
         do
