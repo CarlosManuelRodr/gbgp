@@ -377,9 +377,10 @@ TEST_CASE("Test single pass pruning")
     );
 
     PruneRule pruneRule(pruneRuleFrom, pruneRuleTo);
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 }, { pruneRule });
 
     string unprunedSynth = tree.SynthesizeExpression();
-    pruneRule.Apply(tree);
+    grammar.PruneTree(tree);
     string prunedSynth = tree.SynthesizeExpression();
 
     cout << "Original: " << unprunedSynth << endl;
@@ -427,24 +428,30 @@ TEST_CASE("Test multiple pass pruning")
     );
 
     PruneRule pruneRule(pruneRuleFrom, pruneRuleTo);
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
 
-    SyntaxTree tree;
-    grammar.CreateRandomTree(tree, 20);
-
-    string unprunedSynth = tree.SynthesizeExpression();
-    cout << "Expression before pruning: " << unprunedSynth << endl;
-
-    int i = 1;
-    while (pruneRule.CanBeApplied(tree))
+    for (int rep = 0; rep <= 20; rep++)
     {
-        pruneRule.Apply(tree);
-        cout << "Pruning iteration " << i << ": " << tree.SynthesizeExpression() << endl;
-        i++;
+        cout << "Pruning test #" << rep << endl;
+        cout << "================" << endl;
+
+        SyntaxTree tree;
+        grammar.CreateRandomTree(tree, 20);
+
+        string unprunedSynth = tree.SynthesizeExpression();
+        cout << "Expression before pruning: " << unprunedSynth << endl;
+
+        int i = 1;
+        while (pruneRule.CanBeApplied(tree)) {
+            pruneRule.Apply(tree);
+            cout << "Pruning iteration " << i << ": " << tree.SynthesizeExpression() << endl;
+            i++;
+        }
+
+        string prunedSynth = tree.SynthesizeExpression();
+        cout << "Expression after pruning: " << prunedSynth << endl;
+
+        CHECK(prunedSynth.size() <= unprunedSynth.size());
+        cout << endl;
     }
-
-    string prunedSynth = tree.SynthesizeExpression();
-    cout << "Expression after pruning: " << prunedSynth << endl;
-
-    CHECK(prunedSynth.size() <= unprunedSynth.size());
 }

@@ -549,7 +549,7 @@ public:
             }
         }
 
-        delete_indexes(treeTraversal, toErase);
+        delete_elements_at_index(treeTraversal, toErase);
     }
 
     /// Builds a SyntaxTree from a depth first post order traversal.
@@ -629,7 +629,7 @@ public:
 
         // Consume and delete
         treeTraversal[nextIndex]->expressionSynthesis = synthesis;
-        delete_indexes(treeTraversal, toErase);
+        delete_elements_at_index(treeTraversal, toErase);
     }
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
@@ -721,7 +721,7 @@ public:
         else
             throw std::runtime_error("There is no semantic action for rule " + rule.ToString());
 
-        delete_indexes(treeTraversal, toErase);
+        delete_elements_at_index(treeTraversal, toErase);
     }
 
     /// Evaluates the tree using the production rules of the grammar.

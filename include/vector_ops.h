@@ -57,7 +57,7 @@ template<typename Iter> Iter random_choice(Iter start, Iter end)
 }
 
 // Source: https://stackoverflow.com/a/3487814
-template<typename T> void delete_indexes(std::vector<T>& data, const std::vector<unsigned>& deleteIndexes)
+template<typename T> void delete_elements_at_index(std::vector<T>& data, const std::vector<unsigned>& deleteIndexes)
 {
     std::vector<bool> markedElements(data.size(), false);
     std::vector<T> tempBuffer;

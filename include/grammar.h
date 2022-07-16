@@ -159,4 +159,31 @@ public:
             success = this->TryCreateRandomTree(syntaxTree, maxDepth);
         }
     }
+
+    /// Applies sequentially all the prune rules of the grammar.
+    /// \param syntaxTree The target syntax tree that will be pruned.
+    /// \return True if a prune rule could be applied, false otherwise.
+    bool ApplyPruneRules(SyntaxTree& syntaxTree)
+    {
+        bool wasPruned = false;
+        for (auto pruneRule : pruneRules)
+        {
+            if (pruneRule.CanBeApplied(syntaxTree))
+            {
+                pruneRule.Apply(syntaxTree);
+                wasPruned = true;
+            }
+        }
+        return wasPruned;
+    }
+
+    /// Applies the grammar prune rules repeatedly until no further simplification can be performed.
+    /// \param syntaxTree The target syntax tree that will be pruned.
+    void PruneTree(SyntaxTree& syntaxTree)
+    {
+        bool canBePruned = false;
+        do
+            canBePruned = ApplyPruneRules(syntaxTree);
+        while (canBePruned);
+    }
 };
