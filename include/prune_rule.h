@@ -35,5 +35,6 @@ public:
                                                                                            pruneRuleFromTraversal,
                                                                                            pruneRuleToTraversal);
         target = SyntaxTree::BuildFromTraversal(replacedTraversal);
+        SyntaxTree::DeleteTreeTraversal(treeTraversal);
     }
 };

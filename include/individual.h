@@ -40,6 +40,7 @@ public:
     /// \return The evaluation result.
     std::string Evaluate()
     {
+        // TODO: Problem, fitness function will need to set-up the evaluation context
         if (evaluator == nullptr)
         {
             EvaluationContextType evaluationContext;

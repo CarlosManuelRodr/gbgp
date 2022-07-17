@@ -431,6 +431,7 @@ public:
                                                               const std::vector<TreeNode*>& replaceTo)
     {
         std::vector<TreeNode*> copyNodes = SyntaxTree::CopyTreeTraversal(traversal);
+        std::vector<TreeNode*> replacementNodes = SyntaxTree::CopyTreeTraversal(replaceTo);
 
         const unsigned replaceFromLength = replaceFrom.size();
         const unsigned replaceToLength = replaceTo.size();
@@ -444,7 +445,7 @@ public:
 
         // Delete and replace.
         copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
-        copyNodes.insert(copyNodes.begin() + replaceIndex, replaceTo.begin(), replaceTo.end());
+        copyNodes.insert(copyNodes.begin() + replaceIndex, replacementNodes.begin(), replacementNodes.end());
 
         // Transfer values.
         for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
@@ -520,7 +521,7 @@ public:
             return;
 
         TreeNode* nodeToBuild = treeTraversal[nextIndex];
-        ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
+        ProductionRule rule = nodeToBuild->generatorPR;
         std::vector<unsigned> toErase;
 
         for (const ProductionElement& se : rule.to)
@@ -555,12 +556,10 @@ public:
     /// \return The tree built from the traversal.
     static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& treeTraversal)
     {
-        std::vector<TreeNode*> copyNodes = CopyTreeTraversal(treeTraversal);
+        while (treeTraversal.size() > 1)
+            BuildFirst(treeTraversal);
 
-        while (copyNodes.size() > 1)
-            BuildFirst(copyNodes);
-
-        return SyntaxTree(copyNodes.back());
+        return SyntaxTree(treeTraversal.back());
     }
 
     //***************************
