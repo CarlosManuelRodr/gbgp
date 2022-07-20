@@ -1,7 +1,22 @@
 #include "doctest.h"
-#include "../util/arithmetic_parser.h"
-#include "../include/individual.h"
+#include "../include/grammar.h"
+#include <numeric>
 using namespace std;
+
+//*****************************
+//*    Evaluation context     *
+//****************************/
+
+class ArithmeticContext : public EvaluationContext
+{
+public:
+    int x{}, y{};
+
+    int GetResult()
+    {
+        return stoi(result());
+    }
+};
 
 //*****************************
 //*     Types declaration     *
@@ -17,7 +32,7 @@ enum Terms
 //****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", { "1", "2", "3" });
+const Terminal varTerm(Var, "var", { "x", "y" });
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -109,54 +124,76 @@ const ProductionRule rule6(
                 SemanticElement(varTerm)
         },
         [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+            auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
+            string var = ctx->SemanticValue(0);
+            int varValue = var == "x" ? arithmeticContext->x : arithmeticContext->y;
+            ctx->result() = to_string(varValue);
         }
 );
 
 //*****************************
 //*       Test routines       *
 //****************************/
-TEST_CASE("Test individual evaluation")
+int target_func(int x, int y)
 {
-    // GP Generator grammar
-    SyntaxTree cst;
-    EvaluationContext evaluationContext;
-    Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-
-    grammar.CreateRandomTree(cst, 100);
-    cst.PrintTree();
-
-    cout << cst.SynthesizeExpression() << endl;
-
-    bool evaluationState = cst.Evaluate(evaluationContext);
-    if (evaluationState)
-        cout << evaluationContext.result() << endl;
-
-    CHECK(evaluationState == true);
+    return 1 + 2*x + y*y*y;
 }
 
-TEST_CASE("Test individual generation")
+double fitness_function(SyntaxTree& solution)
 {
-    initialize_arithmetic_parser();
+    vector<int> diff;
+    for (int x = 0; x <= 10; x++)
+    {
+        for (int y = 0; y <= 10; y++)
+        {
+            ArithmeticContext arithmeticContext;
+            arithmeticContext.x = x;
+            arithmeticContext.y = y;
 
+            solution.Evaluate(arithmeticContext);
+
+            int solutionValue = arithmeticContext.GetResult();
+            int expectedValue = target_func(x, y);
+
+            diff.push_back(abs(solutionValue - expectedValue));
+        }
+    }
+
+    int sum = std::accumulate(diff.begin(), diff.end(), 0);
+    double error = (double) sum / (double) diff.size();
+
+    return 1.0 / (1.0 + error);
+}
+
+TEST_CASE("Test fitness function")
+{
     // GP Generator grammar
     Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
+    SyntaxTree tree;
+    grammar.CreateRandomTree(tree, 100);
+    cout << tree.SynthesizeExpression() << endl;
 
-    cout << "Testing random Individual generation" << endl;
-    for (int i = 0; i < 100; i++)
-    {
-        auto ind = Individual();
-        ind.CreateRandom(grammar);
+    double fitness = fitness_function(tree);
+    cout << "Fitness: " << fitness << endl;
+}
 
-        EvaluationContext context;
-        ind.GetTree().Evaluate(context);
+TEST_CASE("Test arithmetic evaluation")
+{
+    // GP Generator grammar
+    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    SyntaxTree cst;
 
-        string expression = ind.GetExpression();
-        string evaluationResult = context.result();
-        string parserResult = std::to_string(evaluate_arithmetic_expression(expression));
-        cout << "Generated expression: " << expression << endl;
-        cout << "Evaluation: " << evaluationResult << endl;
+    ArithmeticContext arithmeticContext;
+    arithmeticContext.x = 4;
+    arithmeticContext.y = 5;
 
-        CHECK(evaluationResult == parserResult);
-    }
+    grammar.CreateRandomTree(cst, 100);
+
+    cst.PrintTree();
+    cout << cst.SynthesizeExpression() << endl;
+    bool evaluationState = cst.Evaluate(arithmeticContext);
+    if (evaluationState)
+        cout << arithmeticContext.result() << endl;
+
+    CHECK(evaluationState == true);
 }

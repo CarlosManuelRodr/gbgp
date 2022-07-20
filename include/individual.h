@@ -5,7 +5,7 @@
 /// An individual is a container for a syntax tree that can be evaluated. It also provides an interface for
 /// generating random syntax tree and it is the target of genetic operators.
 /// \tparam EvaluationContextType
-template <typename EvaluationContextType = EvaluationContext> class Individual
+class Individual
 {
 private:
     SyntaxTree tree;
@@ -23,7 +23,7 @@ public:
         tree = syntaxTree;
         evaluator = pevaluator;
     }
-    Individual(const Individual<EvaluationContextType>& other)
+    Individual(const Individual& other)
     {
         tree = other.tree;
         evaluator = other.evaluator;
@@ -34,24 +34,6 @@ public:
     void SetEvaluator(const std::function<std::string(std::string)>& pevaluator)
     {
         evaluator = pevaluator;
-    }
-
-    /// Evaluates the syntax tree using either semantic actions of the tree or an external evaluator.
-    /// \return The evaluation result.
-    std::string Evaluate()
-    {
-        // TODO: Problem, fitness function will need to set-up the evaluation context
-        if (evaluator == nullptr)
-        {
-            EvaluationContextType evaluationContext;
-            tree.Evaluate(&evaluationContext);
-            return evaluationContext.result();
-        }
-        else
-        {
-            std::string expression = tree.SynthesizeExpression();
-            return evaluator(expression);
-        }
     }
 
     /// Returns a reference to the syntax tree.

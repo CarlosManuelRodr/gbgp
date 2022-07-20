@@ -3,16 +3,6 @@
 using namespace std;
 
 //*****************************
-//*    Evaluation context     *
-//****************************/
-
-class ArithmeticContext : public EvaluationContext
-{
-public:
-    int x{}, y{};
-};
-
-//*****************************
 //*     Types declaration     *
 //****************************/
 
@@ -42,11 +32,6 @@ const ProductionRule rule1(
                 SemanticElement(exprNonTerm),
                 SemanticElement("+"),
                 SemanticElement(termNonTerm)
-        },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 + n2);
         }
 );
 
@@ -57,9 +42,6 @@ const ProductionRule rule2(
         },
         {
                 SemanticElement(termNonTerm)
-        },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
         }
 );
 
@@ -73,11 +55,6 @@ const ProductionRule rule3(
                 SemanticElement(termNonTerm),
                 SemanticElement("*"),
                 SemanticElement(factorNonTerm)
-        },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 * n2);
         }
 );
 
@@ -88,9 +65,6 @@ const ProductionRule rule4(
         },
         {
                 SemanticElement(factorNonTerm)
-        },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
         }
 );
 
@@ -103,9 +77,6 @@ const ProductionRule rule5(
                 SemanticElement("("),
                 SemanticElement(exprNonTerm),
                 SemanticElement(")")
-        },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
         }
 );
 
@@ -116,35 +87,27 @@ const ProductionRule rule6(
         },
         {
                 SemanticElement(varTerm)
-        },
-        [](EvaluationContext* ctx) {
-            auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
-            string var = ctx->SemanticValue(0);
-            int varValue = var == "x" ? arithmeticContext->x : arithmeticContext->y;
-            ctx->result() = to_string(varValue);
         }
 );
 
 //*****************************
 //*       Test routines       *
 //****************************/
-TEST_CASE("Test arithmetic evaluation")
+TEST_CASE("Test simple evaluation")
 {
     // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
     SyntaxTree cst;
 
-    ArithmeticContext arithmeticContext;
-    arithmeticContext.x = 4;
-    arithmeticContext.y = 5;
+    EvaluationContext context;
 
     grammar.CreateRandomTree(cst, 100);
 
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
-    bool evaluationState = cst.Evaluate(&arithmeticContext);
+    bool evaluationState = cst.Evaluate(context);
     if (evaluationState)
-        cout << arithmeticContext.result() << endl;
+        cout << context.result() << endl;
 
     CHECK(evaluationState == true);
 }

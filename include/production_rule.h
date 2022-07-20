@@ -137,7 +137,8 @@ struct ProductionRule
         semanticAction = std::move(pSemanticAction);
     }
 
-    [[nodiscard]] int NumberOfRules() const
+    [[nodiscard]]
+    int NumberOfRules() const
     {
         return static_cast<int>(to.size());
     }

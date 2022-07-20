@@ -666,7 +666,7 @@ public:
     /// Evaluate the first non-evaluate node and deletes the consumed nodes.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext pointer to the evaluation context.
-    static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext* evaluationContext)
+    static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext& evaluationContext)
     {
         // Get the rule of the element to be evaluated.
         unsigned nextIndex = NextToEvaluate(treeTraversal);
@@ -676,7 +676,7 @@ public:
         ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
         std::vector<unsigned> toErase;
 
-        evaluationContext->Prepare();
+        evaluationContext.Prepare();
 
         // Push to the context the elements of treeTraversal that match the production rules.
         for (const ProductionElement& se : rule.to)
@@ -686,7 +686,7 @@ public:
                 const int pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    evaluationContext->PushSemanticValue(treeTraversal[pos]->expressionEvaluation);
+                    evaluationContext.PushSemanticValue(treeTraversal[pos]->expressionEvaluation);
                     toErase.push_back(pos);
                 }
                 else
@@ -701,7 +701,7 @@ public:
                 const int pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    evaluationContext->PushSemanticValue(treeTraversal[pos]->termValue);
+                    evaluationContext.PushSemanticValue(treeTraversal[pos]->termValue);
                     toErase.push_back(pos);
                 }
                 else
@@ -712,8 +712,8 @@ public:
         // Execute semantic action and delete.
         if (rule.semanticAction != nullptr)
         {
-            rule.semanticAction(evaluationContext);
-            treeTraversal[nextIndex]->expressionEvaluation = evaluationContext->result();
+            rule.semanticAction(&evaluationContext);
+            treeTraversal[nextIndex]->expressionEvaluation = evaluationContext.result();
         }
         else
             throw std::runtime_error("There is no semantic action for rule " + rule.ToString());
@@ -724,7 +724,7 @@ public:
     /// Evaluates the tree using the production rules of the grammar.
     /// \param evaluationContext pointer to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
-    bool Evaluate(EvaluationContext* evaluationContext) const
+    bool Evaluate(EvaluationContext& evaluationContext) const
     {
         std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
         for (auto node : treeTraversal) node->ClearEvaluation();
@@ -740,6 +740,23 @@ public:
         {
             std::cout << "Failed to evaluate expression: " << e.what() << std::endl;
             return false;
+        }
+    }
+
+    /// Evaluates the tree using an external evaluator.
+    /// \tparam ReturnType The return type of the evaluator.
+    /// \param evaluator The function pointer to the evaluator.
+    /// \param result Reference to the variable where the result will be stored.
+    /// \return true if expression was evaluated correctly, false if not.
+    template<typename ReturnType> bool Evaluate(std::function<ReturnType(std::string)> evaluator, ReturnType& result)
+    {
+        std::string synthesis = SynthesizeExpression();
+        if (synthesis.empty())
+            return false;
+        else
+        {
+            result = evaluator(synthesis);
+            return true;
         }
     }
 };

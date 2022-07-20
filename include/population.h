@@ -1,7 +1,7 @@
 #pragma once
 #include "individual.h"
 
-template <typename EvaluationContextType = EvaluationContext> class Population
+/*template <typename EvaluationContextType = EvaluationContext> class Population
 {
 private:
     Grammar generatingGrammar;
@@ -31,4 +31,4 @@ public:
             individuals.push_back(newIndividual);
         }
     }
-};
+};*/

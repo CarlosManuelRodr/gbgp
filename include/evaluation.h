@@ -32,6 +32,12 @@ public:
         semanticValues.push_back(value);
     }
 
+    [[nodiscard]]
+    unsigned NumberOfSemanticValues() const
+    {
+        return semanticValues.size();
+    }
+
     /// Virtual function that is executed before each evaluation of a semantic action.
     virtual void Prepare()
     {
