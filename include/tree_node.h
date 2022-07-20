@@ -6,13 +6,13 @@
 //*    Node implementation    *
 //****************************/
 
-/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty tree nodes.
+/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty _tree nodes.
 enum class TreeNodeType
 {
     None, NonTerminal, Terminal
 };
 
-/// Represents a node of an n-ary tree
+/// Represents a node of an n-ary _tree
 class TreeNode
 {
 public:
@@ -28,7 +28,7 @@ public:
     /// Production rule from which this node is part of.
     ProductionRule generatorPR;
 
-    /// Parent of the node. If the node is a root, its value will be null.
+    /// Parent of the node. If the node is a _root, its value will be null.
     TreeNode* parent;
 
     /// List of references to the children of this node.

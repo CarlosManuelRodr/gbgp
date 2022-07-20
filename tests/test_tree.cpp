@@ -103,7 +103,7 @@ const ProductionRule rule6(
 /****************************
 *       Test routines       *
 ****************************/
-TEST_CASE("Test tree node")
+TEST_CASE("Test _tree node")
 {
     auto termNode1 = TreeNode(varTerm, "b");
     auto termNode2 = TreeNode(varTerm, "b");
@@ -125,7 +125,7 @@ TEST_CASE("Test tree node")
 
 TEST_CASE("Testing subtree insertion")
 {
-    // First tree. Procedural construction.
+    // First _tree. Procedural construction.
     SyntaxTree ast1;
     ast1.SetRootRule(rule1);
     auto leftExpr1 = SyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
@@ -145,7 +145,7 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar1 = SyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
 
-    // Second tree. Procedural construction.
+    // Second _tree. Procedural construction.
     SyntaxTree ast2;
     ast2.SetRootRule(rule1);
     auto leftExpr2 = SyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
@@ -165,7 +165,7 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar2 = SyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
 
-    // Third tree. Declarative construction.
+    // Third _tree. Declarative construction.
     SyntaxTree ast3(
         TreeNode(
                 rule1,
@@ -226,7 +226,7 @@ TEST_CASE("Testing subtree insertion")
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
 }
 
-TEST_CASE("Test tree traversals")
+TEST_CASE("Test _tree traversals")
 {
     SyntaxTree ast(
         TreeNode(

@@ -7,7 +7,7 @@
 //*         Terminal          *
 //****************************/
 
-/// Terminal term. A terminal is a leaf node in the expression tree that contains a value.
+/// Terminal term. A terminal is a leaf node in the expression _tree that contains a value.
 struct Terminal
 {
     /// The term type.
@@ -65,7 +65,7 @@ struct Terminal
 //*        NonTerminal        *
 //****************************/
 
-/// Non-Terminal term. A non-terminal is a part of the expression tree that contains other children nodes.
+/// Non-Terminal term. A non-terminal is a part of the expression _tree that contains other children nodes.
 struct NonTerminal
 {
     /// The term type.

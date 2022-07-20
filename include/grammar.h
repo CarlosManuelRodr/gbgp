@@ -10,28 +10,28 @@
 class Grammar
 {
 private:
-    std::vector<ProductionRule> grammarRules;
-    std::vector<PruneRule> pruneRules;
+    std::vector<ProductionRule> _grammarRules;
+    std::vector<PruneRule> _pruneRules;
 
 public:
     Grammar() = default;
 
-    Grammar(std::initializer_list<ProductionRule> productionRuleList) : grammarRules(productionRuleList) {}
+    Grammar(std::initializer_list<ProductionRule> productionRuleList) : _grammarRules(productionRuleList) {}
 
     Grammar(std::initializer_list<ProductionRule> productionRuleList,
             std::initializer_list<PruneRule> pruneRuleList)
-            : grammarRules(productionRuleList), pruneRules(pruneRuleList) {}
+            : _grammarRules(productionRuleList), _pruneRules(pruneRuleList) {}
 
-    Grammar(const Grammar& other) : grammarRules(other.grammarRules), pruneRules(other.pruneRules) {}
+    Grammar(const Grammar& other) : _grammarRules(other._grammarRules), _pruneRules(other._pruneRules) {}
 
     explicit Grammar(const std::vector<ProductionRule>& productionRuleList)
     {
-        grammarRules = productionRuleList;
+        _grammarRules = productionRuleList;
     }
     Grammar(const std::vector<ProductionRule>& productionRuleList, const std::vector<PruneRule>& pruneRuleList)
     {
-        grammarRules = productionRuleList;
-        pruneRules = pruneRuleList;
+        _grammarRules = productionRuleList;
+        _pruneRules = pruneRuleList;
     }
 
     /// Get the root rule of the grammar.
@@ -39,7 +39,7 @@ public:
     [[nodiscard]]
     ProductionRule GetRootRule() const
     {
-        return grammarRules.front();
+        return _grammarRules.front();
     }
 
     /// Finds all the rules compatible with the specified Non-Terminal type.
@@ -49,7 +49,7 @@ public:
     std::vector<ProductionRule> GetCompatibleRules(int fromNonTermType) const
     {
         std::vector<ProductionRule> compatibleRules;
-        for (const ProductionRule& rule : grammarRules)
+        for (const ProductionRule& rule : _grammarRules)
         {
             if (rule.from.id == fromNonTermType)
                 compatibleRules.push_back(rule);
@@ -62,7 +62,7 @@ public:
     [[nodiscard]]
     unsigned Size() const
     {
-        return static_cast<unsigned>(grammarRules.size());
+        return static_cast<unsigned>(_grammarRules.size());
     }
 
     //*******************************
@@ -79,7 +79,7 @@ public:
         return *random_choice(compatibleRules.begin(), compatibleRules.end());
     }
 
-    /// Recursive implementation. Create random tree based on the production rules described in grammarRules.
+    /// Recursive implementation. Create random tree based on the production rules described in _grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \param depth Current depth. If while creating a random tree, the depth reaches the maxDepth value, it will fail and return false.
     /// \param node Node from where the random tree will be created.
@@ -119,7 +119,7 @@ public:
         return true;
     }
 
-    /// Create random tree based on the production rules described in the variable grammarRules.
+    /// Create random tree based on the production rules described in the variable _grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
     bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10) const
@@ -166,7 +166,7 @@ public:
     bool ApplyPruneRules(SyntaxTree& syntaxTree) const
     {
         bool wasPruned = false;
-        for (auto pruneRule : pruneRules)
+        for (auto pruneRule : _pruneRules)
         {
             if (pruneRule.CanBeApplied(syntaxTree))
             {

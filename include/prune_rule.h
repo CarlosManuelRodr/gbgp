@@ -5,23 +5,23 @@
 class PruneRule
 {
 private:
-    std::vector<TreeNode*> pruneRuleFromTraversal;
-    std::vector<TreeNode*> pruneRuleToTraversal;
+    std::vector<TreeNode*> _pruneRuleFromTraversal;
+    std::vector<TreeNode*> _pruneRuleToTraversal;
 
 public:
     /// Constructor by SyntaxTree.
-    /// \param pruneRuleFrom Prune rule from as SyntaxTree.
-    /// \param pruneRuleTo Prune rule to as SyntaxTree.
-    PruneRule(const SyntaxTree& pruneRuleFrom, const SyntaxTree& pruneRuleTo)
+    /// \param pruneRuleFromTraversal Prune rule from as SyntaxTree.
+    /// \param pruneRuleToTraversal Prune rule to as SyntaxTree.
+    PruneRule(const SyntaxTree& pruneRuleFromTraversal, const SyntaxTree& pruneRuleToTraversal)
     {
-        pruneRuleFromTraversal = pruneRuleFrom.GetTreeTraversal();
-        pruneRuleToTraversal = pruneRuleTo.GetTreeTraversal();
+        _pruneRuleFromTraversal = pruneRuleFromTraversal.GetTreeTraversal();
+        _pruneRuleToTraversal = pruneRuleToTraversal.GetTreeTraversal();
     }
 
     bool CanBeApplied(const SyntaxTree& target)
     {
         std::vector<TreeNode*> treeTraversal = target.GetTreeTraversal();
-        unsigned index = SyntaxTree::FindIndexOfTraversalSubsequence(treeTraversal, pruneRuleFromTraversal);
+        unsigned index = SyntaxTree::FindIndexOfTraversalSubsequence(treeTraversal, _pruneRuleFromTraversal);
         return index != treeTraversal.size();
     }
 
@@ -32,8 +32,8 @@ public:
     {
         std::vector<TreeNode*> treeTraversal = target.GetTreeTraversal();
         std::vector<TreeNode*> replacedTraversal = SyntaxTree::ReplaceTraversalSubsequence(treeTraversal,
-                                                                                           pruneRuleFromTraversal,
-                                                                                           pruneRuleToTraversal);
+                                                                                           _pruneRuleFromTraversal,
+                                                                                           _pruneRuleToTraversal);
         target = SyntaxTree::BuildFromTraversal(replacedTraversal);
         SyntaxTree::DeleteTreeTraversal(treeTraversal);
     }

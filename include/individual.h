@@ -2,59 +2,54 @@
 #include <limits>
 #include "grammar.h"
 
-/// An individual is a container for a syntax tree that can be evaluated. It also provides an interface for
-/// generating random syntax tree and it is the target of genetic operators.
-/// \tparam EvaluationContextType
+/// An individual is a container for a syntax _tree that can be evaluated. It also provides an interface for
+/// generating random syntax _tree and it is the target of genetic operators.
 class Individual
 {
 private:
-    SyntaxTree tree;
-
-    /// External evaluator. Used when there are no semantic actions on the syntax tree to perform an evaluation.
-    std::function<std::string(std::string)> evaluator;
+    SyntaxTree _tree;
+    std::function<double(SyntaxTree&)> _fitnessFunction;
 
 public:
     Individual()
     {
-        evaluator = nullptr;
+        _fitnessFunction = nullptr;
     }
-    explicit Individual(const SyntaxTree& syntaxTree, const std::function<std::string(std::string)>& pevaluator = nullptr)
+    explicit Individual(const SyntaxTree& syntaxTree, const std::function<double(SyntaxTree&)>& fitnessFunction = nullptr)
     {
-        tree = syntaxTree;
-        evaluator = pevaluator;
+        _tree = syntaxTree;
+        _fitnessFunction = fitnessFunction;
     }
     Individual(const Individual& other)
     {
-        tree = other.tree;
-        evaluator = other.evaluator;
+        _tree = other._tree;
+        _fitnessFunction = other._fitnessFunction;
     }
 
-    /// Set-up an external evaluator. Used when there are no semantic actions on the syntax tree to perform an evaluation.
-    /// \param pevaluator Function pointer to the external evaluator.
-    void SetEvaluator(const std::function<std::string(std::string)>& pevaluator)
+    void SetEvaluator(const std::function<double(SyntaxTree&)>& fitnessFunction)
     {
-        evaluator = pevaluator;
+        _fitnessFunction = fitnessFunction;
     }
 
-    /// Returns a reference to the syntax tree.
+    /// Returns a reference to the syntax _tree.
     [[nodiscard]]
     SyntaxTree& GetTree()
     {
-        return tree;
+        return _tree;
     }
 
-    /// Synthesizes the tree expression.
+    /// Synthesizes the _tree expression.
     [[nodiscard]]
     std::string GetExpression() const
     {
-        return tree.SynthesizeExpression();
+        return _tree.SynthesizeExpression();
     }
 
     /// Generates a random individual using the production rules and prune rules of the grammar.
     /// \param grammar The generating grammar.
     void CreateRandom(const Grammar& grammar)
     {
-        grammar.CreateRandomTree(tree);
-        grammar.PruneTree(tree);
+        grammar.CreateRandomTree(_tree);
+        grammar.PruneTree(_tree);
     }
 };

@@ -18,7 +18,7 @@ class SyntaxTree
 {
 private:
     /// Root of the tree.
-    TreeNode* root;
+    TreeNode* _root;
 
     /// Find the first position of a NonTerminal of type id.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
@@ -118,7 +118,7 @@ public:
     /// \param grammar The formal grammar of the SyntaxTree.
     SyntaxTree()
     {
-        root = nullptr;
+        _root = nullptr;
     }
 
     /// Builds a tree from a root node.
@@ -128,12 +128,12 @@ public:
     {
         if (deepCopy)
         {
-            root = new TreeNode(proot);
-            root->parent = nullptr;
-            this->CopyTree(root, proot);
+            _root = new TreeNode(proot);
+            _root->parent = nullptr;
+            this->CopyTree(_root, proot);
         }
         else
-            root = proot;
+            _root = proot;
 
         this->ClearEvaluation();
     }
@@ -143,10 +143,10 @@ public:
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
     explicit SyntaxTree(TreeNode proot, bool deepCopy = false)
     {
-        root = new TreeNode(proot);
-        root->parent = nullptr;
+        _root = new TreeNode(proot);
+        _root->parent = nullptr;
         if (deepCopy)
-            this->CopyTree(root, &proot);
+            this->CopyTree(_root, &proot);
         this->ClearEvaluation();
     }
 
@@ -154,9 +154,9 @@ public:
     /// \param other SyntaxTree to be copied.
     SyntaxTree(const SyntaxTree& other)
     {
-        root = new TreeNode(other.root);
-        root->parent = nullptr;
-        this->CopyTree(root, other.root);
+        _root = new TreeNode(other._root);
+        _root->parent = nullptr;
+        this->CopyTree(_root, other._root);
         this->ClearEvaluation();
     }
 
@@ -164,9 +164,9 @@ public:
     /// \param other Pointer to the SyntaxTree to be copied.
     explicit SyntaxTree(SyntaxTree* other)
     {
-        root = new TreeNode(other->root);
-        root->parent = nullptr;
-        this->CopyTree(root, other->root);
+        _root = new TreeNode(other->_root);
+        _root->parent = nullptr;
+        this->CopyTree(_root, other->_root);
         this->ClearEvaluation();
     }
 
@@ -181,9 +181,9 @@ public:
         if (this == &other)
             return *this;
 
-        root = new TreeNode(other.root);
-        root->parent = nullptr;
-        this->CopyTree(root, other.root);
+        _root = new TreeNode(other._root);
+        _root->parent = nullptr;
+        this->CopyTree(_root, other._root);
         this->ClearEvaluation();
 
         return *this;
@@ -191,15 +191,15 @@ public:
 
     void SetRootRule(const ProductionRule& startRule)
     {
-        root = new TreeNode(startRule.from);
-        root->parent = nullptr;
-        root->generatorPR = startRule;
+        _root = new TreeNode(startRule.from);
+        _root->parent = nullptr;
+        _root->generatorPR = startRule;
     }
 
     /// Reset the tree to its empty state.
     void Reset()
     {
-        if (root != nullptr)
+        if (_root != nullptr)
         {
             std::vector<TreeNode*> nodeList = GetTreeTraversal();
             for (TreeNode* n : nodeList)
@@ -211,16 +211,16 @@ public:
                 }
             }
 
-            root = nullptr;
+            _root = nullptr;
         }
     }
 
     /// Destroy the tree by deleting all its nodes.
     void Destroy()
     {
-        if (root != nullptr)
+        if (_root != nullptr)
         {
-            std::vector<TreeNode*> nodeList = this->GetTreeTraversal(root);
+            std::vector<TreeNode*> nodeList = this->GetTreeTraversal(_root);
             for (TreeNode*& n : nodeList)
             {
                 if (n != nullptr)
@@ -229,14 +229,14 @@ public:
                     n = nullptr;
                 }
             }
-            root = nullptr;
+            _root = nullptr;
         }
     }
 
     /// Clear the expressionSynthesis and expressionEvaluation of every node.
     void ClearEvaluation()
     {
-        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(root);
+        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(_root);
         for (TreeNode* n : nodeList)
         {
             if (n->type == TreeNodeType::NonTerminal)
@@ -255,7 +255,7 @@ public:
     [[nodiscard]]
     bool IsEmpty() const
     {
-        return root == nullptr;
+        return _root == nullptr;
     }
 
     /// Returns a reference to the root.
@@ -263,7 +263,7 @@ public:
     [[nodiscard]]
     TreeNode* Root() const
     {
-        return root;
+        return _root;
     }
 
     /// Add child NonTerminal node to the target.
@@ -381,9 +381,9 @@ public:
     /// Prints the tree in the output stream.
     void PrintTree(std::ostream& stream = std::cout) const
     {
-        SyntaxTree::PrintNodeAsTree(stream, root, 0);
+        SyntaxTree::PrintNodeAsTree(stream, _root, 0);
         
-        for (TreeNode* n : root->children)
+        for (TreeNode* n : _root->children)
         {
             SyntaxTree::PrintNodeAsTree(stream, n, 1);
             PrintTree(stream, n, 2);
@@ -482,7 +482,7 @@ public:
         std::vector<TreeNode*> output;
 
         if (node == nullptr)
-            node = root;
+            node = _root;
 
         if (node->children.empty())
         {
@@ -665,7 +665,7 @@ public:
 
     /// Evaluate the first non-evaluate node and deletes the consumed nodes.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
-    /// \param evaluationContext pointer to the evaluation context.
+    /// \param evaluationContext reference to the evaluation context.
     static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext& evaluationContext)
     {
         // Get the rule of the element to be evaluated.
@@ -722,7 +722,7 @@ public:
     }
 
     /// Evaluates the tree using the production rules of the grammar.
-    /// \param evaluationContext pointer to the evaluation context.
+    /// \param evaluationContext reference to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
     bool Evaluate(EvaluationContext& evaluationContext) const
     {
