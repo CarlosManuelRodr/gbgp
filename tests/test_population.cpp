@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/population.h"
+#include "../include/genetic_operators.h"
 #include <numeric>
 using namespace std;
 
@@ -172,6 +172,12 @@ TEST_CASE("Test population initialization")
     Population population(grammar, fitnessFunction);
     population.Initialize(100);
 
+    cout << "Initial population scores" << endl;
     for (auto fitness : population.GetFitness())
+        cout << fitness << endl;
+
+    cout << "Population scores after selection" << endl;
+    Population selected = GeneticOperators::Selection(population, 10);
+    for (auto fitness : selected.GetFitness())
         cout << fitness << endl;
 }
