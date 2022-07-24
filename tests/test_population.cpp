@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/grammar.h"
+#include "../include/population.h"
 #include <numeric>
 using namespace std;
 
@@ -134,12 +134,12 @@ const ProductionRule rule6(
 //*****************************
 //*       Test routines       *
 //****************************/
-int s_target_func(int x, int y)
+int target_func(int x, int y)
 {
     return 1 + 2*x + y*y*y;
 }
 
-double s_fitness_function(SyntaxTree& solution)
+double fitness_function(SyntaxTree& solution)
 {
     vector<int> diff;
     for (int x = 0; x <= 10; x++)
@@ -153,7 +153,7 @@ double s_fitness_function(SyntaxTree& solution)
             solution.Evaluate(arithmeticContext);
 
             int solutionValue = arithmeticContext.GetResult();
-            int expectedValue = s_target_func(x, y);
+            int expectedValue = target_func(x, y);
 
             diff.push_back(abs(solutionValue - expectedValue));
         }
@@ -165,35 +165,13 @@ double s_fitness_function(SyntaxTree& solution)
     return 1.0 / (1.0 + error);
 }
 
-TEST_CASE("Test fitness function")
+TEST_CASE("Test population initialization")
 {
-    // GP Generator grammar
-    Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
-    SyntaxTree tree;
-    grammar.CreateRandomTree(tree, 100);
-    cout << tree.SynthesizeExpression() << endl;
-
-    double fitness = s_fitness_function(tree);
-    cout << "Fitness: " << fitness << endl;
-}
-
-TEST_CASE("Test arithmetic evaluation")
-{
-    // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    SyntaxTree cst;
+    FitnessFunction fitnessFunction(fitness_function, FitnessFunctionType::Deterministic);
+    Population population(grammar, fitnessFunction);
+    population.Initialize(100);
 
-    ArithmeticContext arithmeticContext;
-    arithmeticContext.x = 4;
-    arithmeticContext.y = 5;
-
-    grammar.CreateRandomTree(cst, 100);
-
-    cst.PrintTree();
-    cout << cst.SynthesizeExpression() << endl;
-    bool evaluationState = cst.Evaluate(arithmeticContext);
-    if (evaluationState)
-        cout << arithmeticContext.result() << endl;
-
-    CHECK(evaluationState == true);
+    for (auto fitness : population.GetFitness())
+        cout << fitness << endl;
 }

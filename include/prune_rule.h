@@ -1,5 +1,5 @@
 #pragma once
-#include "syntax_tree.h"
+#include "fitness_function.h"
 
 /// Contains a rule and logic for simplifying a SyntaxTree.
 class PruneRule

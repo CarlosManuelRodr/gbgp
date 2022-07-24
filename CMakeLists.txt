@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(gbgp
         include/syntax_tree.h
+        include/fitness_function.h
         include/grammar.h
         include/individual.h
         include/vector_ops.h
@@ -14,6 +15,7 @@ add_executable(gbgp
         include/production_rule.h
         include/terms.h
         include/population.h
+        include/genetic_operators.h
         include/gbgp.h
 
         tests/doctest.h
@@ -25,6 +27,7 @@ add_executable(gbgp
         tests/test_grammar.cpp
         tests/test_simple_evaluation.cpp
         tests/test_semantic_evaluation.cpp
+        tests/test_population.cpp
 
         util/peglib.h
         util/arithmetic_parser.h

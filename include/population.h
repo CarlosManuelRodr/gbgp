@@ -1,34 +1,61 @@
 #pragma once
 #include "individual.h"
 
-/*template <typename EvaluationContextType = EvaluationContext> class Population
+class Population
 {
 private:
-    Grammar generatingGrammar;
-    std::vector<Individual<EvaluationContextType>*> individuals;
-
-    int populationSize;
+    Grammar _generatingGrammar;
+    FitnessFunction _fitnessFunction;
+    std::vector<Individual> _individuals;
 
 public:
-    explicit Population(const Grammar& grammar, int population)
+    Population(const Grammar& grammar, const FitnessFunction& fitnessFunction)
     {
-        generatingGrammar = grammar;
-        populationSize = population;
-        individuals.reserve(populationSize);
+        _generatingGrammar = grammar;
+        _fitnessFunction = fitnessFunction;
     }
-    ~Population()
+    Population(const Grammar& grammar, const FitnessFunction& fitnessFunction, const std::vector<Individual>& individuals)
     {
-        for (int i = 0; i < individuals.size(); i++)
-            delete individuals[i];
+        _generatingGrammar = grammar;
+        _fitnessFunction = fitnessFunction;
+        _individuals = individuals;
     }
 
-    void Initialize()
+    void Initialize(int populationSize)
     {
+        _individuals.reserve(populationSize);
+
         for (int i = 0; i < populationSize; i++)
         {
-            auto* newIndividual = new Individual<EvaluationContextType>();
-            newIndividual->CreateRandom(generatingGrammar);
-            individuals.push_back(newIndividual);
+            Individual newIndividual;
+            newIndividual.CreateRandom(_generatingGrammar);
+            newIndividual.SetFitnessFunction(_fitnessFunction);
+            _individuals.push_back(newIndividual);
         }
     }
-};*/
+
+    [[nodiscard]]
+    std::vector<double> GetFitness() const
+    {
+        std::vector<double> fitnessValues;
+        fitnessValues.reserve(_individuals.size());
+
+        for (auto ind : _individuals)
+            fitnessValues.push_back(ind.GetFitness());
+
+        return fitnessValues;
+    }
+
+    [[nodiscard]]
+    std::vector<Individual> GetIndividuals() const
+    {
+        return _individuals;
+    }
+
+    [[nodiscard]]
+    Population SelectIndividuals(const std::vector<size_t>& indexes) const
+    {
+        std::vector<Individual> selectedIndividuals = extract_elements_at_indexes(_individuals, indexes);
+        return { _generatingGrammar, _fitnessFunction, selectedIndividuals };
+    }
+};

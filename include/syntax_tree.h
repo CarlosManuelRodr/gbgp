@@ -28,10 +28,10 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    static int FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<unsigned>& avoid,
+    static int FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
                                   unsigned currentPosition, int elementsToSynthesize)
     {
-        for (unsigned i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
+        for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
             if (treeTraversal[i]->type == TreeNodeType::NonTerminal &&
                 treeTraversal[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
@@ -48,10 +48,10 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns -1.
     [[nodiscard]]
-    static int FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<unsigned>& avoid,
+    static int FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
                                unsigned currentPosition, int elementsToSynthesize)
     {
-        for (unsigned i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
+        for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
             if (treeTraversal[i]->type == TreeNodeType::Terminal && treeTraversal[i]->termInstance.id == id &&
                 !vector_contains_q(avoid, i))
@@ -522,11 +522,11 @@ public:
 
         TreeNode* nodeToBuild = treeTraversal[nextIndex];
         ProductionRule rule = nodeToBuild->generatorPR;
-        std::vector<unsigned> toErase;
+        std::vector<size_t> toErase;
 
         for (const ProductionElement& se : rule.to)
         {
-            const int pos = (se.type == ProductionElementType::NonTerminal) ?
+            const size_t pos = (se.type == ProductionElementType::NonTerminal) ?
                     FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
                     FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
 
@@ -548,7 +548,7 @@ public:
             }
         }
 
-        delete_elements_at_index(treeTraversal, toErase);
+        delete_elements_at_indexes(treeTraversal, toErase);
     }
 
     /// Builds a SyntaxTree from a depth first post order traversal.
@@ -589,7 +589,7 @@ public:
 
         ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
         std::string synthesis;
-        std::vector<unsigned> toErase;
+        std::vector<size_t> toErase;
 
         // Process the elements of treeTraversal that match the semantic rules.
         for (const SemanticElement& se : rule.semanticRules)
@@ -598,7 +598,7 @@ public:
                 synthesis += se.string;
             else if (se.type == SemanticElementType::NonTerminal)
             {
-                const int pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const size_t pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     synthesis += treeTraversal[pos]->expressionSynthesis;
@@ -613,7 +613,7 @@ public:
             }
             else if (se.type == SemanticElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const size_t pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     synthesis += treeTraversal[pos]->termValue;
@@ -626,7 +626,7 @@ public:
 
         // Consume and delete
         treeTraversal[nextIndex]->expressionSynthesis = synthesis;
-        delete_elements_at_index(treeTraversal, toErase);
+        delete_elements_at_indexes(treeTraversal, toErase);
     }
 
     /// Synthesizes the tree into an expression using the semantic rules of the grammar.
@@ -674,7 +674,7 @@ public:
             return;
 
         ProductionRule rule = treeTraversal[nextIndex]->generatorPR;
-        std::vector<unsigned> toErase;
+        std::vector<size_t> toErase;
 
         evaluationContext.Prepare();
 
@@ -683,7 +683,7 @@ public:
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const int pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const size_t pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos]->expressionEvaluation);
@@ -698,7 +698,7 @@ public:
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const int pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const size_t pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos]->termValue);
@@ -718,7 +718,7 @@ public:
         else
             throw std::runtime_error("There is no semantic action for rule " + rule.ToString());
 
-        delete_elements_at_index(treeTraversal, toErase);
+        delete_elements_at_indexes(treeTraversal, toErase);
     }
 
     /// Evaluates the tree using the production rules of the grammar.
