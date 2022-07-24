@@ -103,7 +103,7 @@ const ProductionRule rule6(
 /****************************
 *       Test routines       *
 ****************************/
-TEST_CASE("Test _tree node")
+TEST_CASE("Test tree node")
 {
     auto termNode1 = TreeNode(varTerm, "b");
     auto termNode2 = TreeNode(varTerm, "b");
@@ -125,7 +125,7 @@ TEST_CASE("Test _tree node")
 
 TEST_CASE("Testing subtree insertion")
 {
-    // First _tree. Procedural construction.
+    // First tree. Procedural construction.
     SyntaxTree ast1;
     ast1.SetRootRule(rule1);
     auto leftExpr1 = SyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
@@ -145,7 +145,7 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar1 = SyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
 
-    // Second _tree. Procedural construction.
+    // Second tree. Procedural construction.
     SyntaxTree ast2;
     ast2.SetRootRule(rule1);
     auto leftExpr2 = SyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
@@ -221,12 +221,42 @@ TEST_CASE("Testing subtree insertion")
 
     ast1.RemoveSubtree(rightTerm1);
     SyntaxTree subtree = SyntaxTree::GetSubtree(rightTerm2);
-    ast1.InsertSubtree(rightTerm1, subtree.Root());
+    ast1.InsertSubtree(rightTerm1, subtree);
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
 }
 
-TEST_CASE("Test _tree traversals")
+TEST_CASE("Test random subtree replacement")
+{
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
+
+    // Original tree
+    SyntaxTree tree;
+    tree.SetRootRule(rule1);
+    auto leftExpr = SyntaxTree::AddNode(tree.Root(), exprNonTerm, rule2);
+    auto middleSum = SyntaxTree::AddNode(tree.Root(), plusTerm);
+    auto rightTerm = SyntaxTree::AddNode(tree.Root(), termNonTerm, rule3);
+
+    auto leftTerm = SyntaxTree::AddNode(leftExpr, termNonTerm, rule4);
+    auto leftFactor = SyntaxTree::AddNode(leftTerm, factorNonTerm, rule6);
+    auto leftVar = SyntaxTree::AddNode(leftFactor, varTerm, "a");
+
+    auto rightLeftTerm = SyntaxTree::AddNode(rightTerm, termNonTerm, rule4);
+    auto rightMultiplication = SyntaxTree::AddNode(rightTerm, timesTerm);
+    auto rightRightFactor = SyntaxTree::AddNode(rightTerm, factorNonTerm, rule6);
+
+    auto rightLeftFactor = SyntaxTree::AddNode(rightLeftTerm, factorNonTerm, rule6);
+    auto rightLeftVar = SyntaxTree::AddNode(rightLeftFactor, varTerm, "a");
+
+    auto rightRightVar = SyntaxTree::AddNode(rightRightFactor, varTerm, "a");
+
+    tree.RemoveSubtree(rightTerm);
+
+    // Replacement tree
+    SyntaxTree replacement;
+}
+
+TEST_CASE("Test tree traversals")
 {
     SyntaxTree ast(
         TreeNode(
@@ -281,7 +311,8 @@ TEST_CASE("Test _tree traversals")
 
     for (auto node : treeTraversal) copyNodes.push_back(TreeNode::ShallowCopy(node));
 
-    SyntaxTree reconstruction = SyntaxTree::BuildFromTraversal(copyNodes);
+    SyntaxTree reconstruction;
+    SyntaxTree::BuildFromTraversal(reconstruction, copyNodes);
 
     string originalSynth = ast.SynthesizeExpression();
     string reconstructionSynth = reconstruction.SynthesizeExpression();

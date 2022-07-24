@@ -39,27 +39,22 @@ public:
         _functionPointer = functionPointer;
     }
 
+    [[nodiscard]]
     double Evaluate(SyntaxTree& tree)
     {
         if (_type == FitnessFunctionType::Deterministic)
         {
             std::string treeExpression = tree.SynthesizeExpression();
-            if (treeExpression == _expression)
-            {
-                if (_fitnessValue != std::nullopt)
-                    return _fitnessValue.value();
-                else
-                {
-                    _fitnessValue = _functionPointer(tree);
-                    return _fitnessValue.value();
-                }
-            }
-            else
+
+            if (treeExpression != _expression)
             {
                 _expression = treeExpression;
                 _fitnessValue = _functionPointer(tree);
-                return _fitnessValue.value();
             }
+            else if (_fitnessValue == std::nullopt)
+                _fitnessValue = _functionPointer(tree);
+
+            return _fitnessValue.value();
         }
         else if (_type == FitnessFunctionType::NonDeterministic)
             return _functionPointer(tree);

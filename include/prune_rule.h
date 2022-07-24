@@ -34,7 +34,6 @@ public:
         std::vector<TreeNode*> replacedTraversal = SyntaxTree::ReplaceTraversalSubsequence(treeTraversal,
                                                                                            _pruneRuleFromTraversal,
                                                                                            _pruneRuleToTraversal);
-        target = SyntaxTree::BuildFromTraversal(replacedTraversal);
-        SyntaxTree::DeleteTreeTraversal(treeTraversal);
+        SyntaxTree::BuildFromTraversal(target, replacedTraversal);
     }
 };

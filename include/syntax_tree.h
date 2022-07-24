@@ -92,7 +92,7 @@ private:
         std::string output = "|";
         output.append(depth, '-');
         output += node->GetLabel();
-        std::cout << output << std::endl;
+        stream << output << "\n";
     }
 
     /// <summary>
@@ -141,12 +141,10 @@ public:
     /// Builds a tree from a root node.
     /// \param proot Root of the tree.
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
-    explicit SyntaxTree(TreeNode proot, bool deepCopy = false)
+    explicit SyntaxTree(const TreeNode& proot)
     {
         _root = new TreeNode(proot);
         _root->parent = nullptr;
-        if (deepCopy)
-            this->CopyTree(_root, &proot);
         this->ClearEvaluation();
     }
 
@@ -196,31 +194,12 @@ public:
         _root->generatorPR = startRule;
     }
 
-    /// Reset the tree to its empty state.
-    void Reset()
-    {
-        if (_root != nullptr)
-        {
-            std::vector<TreeNode*> nodeList = GetTreeTraversal();
-            for (TreeNode* n : nodeList)
-            {
-                if (n != nullptr)
-                {
-                    delete n;
-                    n = nullptr;
-                }
-            }
-
-            _root = nullptr;
-        }
-    }
-
     /// Destroy the tree by deleting all its nodes.
     void Destroy()
     {
         if (_root != nullptr)
         {
-            std::vector<TreeNode*> nodeList = this->GetTreeTraversal(_root);
+            std::vector<TreeNode*> nodeList = GetTreeTraversal(_root);
             for (TreeNode*& n : nodeList)
             {
                 if (n != nullptr)
@@ -264,6 +243,14 @@ public:
     TreeNode* Root() const
     {
         return _root;
+    }
+
+    void SetRoot(TreeNode* rootNode)
+    {
+        if (_root != nullptr)
+            Destroy();
+
+        _root = rootNode;
     }
 
     /// Add child NonTerminal node to the target.
@@ -372,6 +359,14 @@ public:
             if (subtreeStartNode->type != TreeNodeType::NonTerminal)
                 throw std::runtime_error("Cannot insert subtree of type Terminal " + subtreeStartNode->termInstance.label);
         }
+    }
+
+    /// Insert a copy of the subtree into the position at insertNode.
+    /// \param insertNode Node where the subtree will be inserted.
+    /// \param subtree Reference to the subtree to copy and insert.
+    void InsertSubtree(TreeNode* insertNode, const SyntaxTree& subtree)
+    {
+        InsertSubtree(insertNode, subtree.Root());
     }
 
     //**********************
@@ -554,12 +549,12 @@ public:
     /// Builds a SyntaxTree from a depth first post order traversal.
     /// \param treeTraversal The traversal.
     /// \return The tree built from the traversal.
-    static SyntaxTree BuildFromTraversal(std::vector<TreeNode*>& treeTraversal)
+    static void BuildFromTraversal(SyntaxTree& targetTree, std::vector<TreeNode*>& treeTraversal)
     {
         while (treeTraversal.size() > 1)
             BuildFirst(treeTraversal);
 
-        return SyntaxTree(treeTraversal.back());
+        targetTree.SetRoot(treeTraversal.back());
     }
 
     //***************************
@@ -637,18 +632,10 @@ public:
         std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
         for (auto node : treeTraversal) node->ClearSynthesis();
 
-        try
-        {
-            while (treeTraversal.size() > 1)
-                SynthesizeFirst(treeTraversal);
+        while (treeTraversal.size() > 1)
+            SynthesizeFirst(treeTraversal);
 
-            return treeTraversal.back()->expressionSynthesis;
-        }
-        catch (std::runtime_error& e)
-        {
-            std::cout << "Failed to synthesize expression: " << e.what() << std::endl;
-            return "";
-        }
+        return treeTraversal.back()->expressionSynthesis;
     }
 
     /// Find the index of the first non-evaluated non-terminal.
@@ -729,18 +716,10 @@ public:
         std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
         for (auto node : treeTraversal) node->ClearEvaluation();
 
-        try
-        {
-            while (treeTraversal.size() > 1)
-                EvaluateFirst(treeTraversal, evaluationContext);
+        while (treeTraversal.size() > 1)
+            EvaluateFirst(treeTraversal, evaluationContext);
 
-            return true;
-        }
-        catch (std::runtime_error& e)
-        {
-            std::cout << "Failed to evaluate expression: " << e.what() << std::endl;
-            return false;
-        }
+        return true;
     }
 
     /// Evaluates the tree using an external evaluator.

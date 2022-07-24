@@ -15,14 +15,13 @@ private:
 
 public:
     Grammar() = default;
+    Grammar(const Grammar& other) = default;
 
     Grammar(std::initializer_list<ProductionRule> productionRuleList) : _grammarRules(productionRuleList) {}
 
     Grammar(std::initializer_list<ProductionRule> productionRuleList,
             std::initializer_list<PruneRule> pruneRuleList)
             : _grammarRules(productionRuleList), _pruneRules(pruneRuleList) {}
-
-    Grammar(const Grammar& other) : _grammarRules(other._grammarRules), _pruneRules(other._pruneRules) {}
 
     explicit Grammar(const std::vector<ProductionRule>& productionRuleList)
     {
@@ -155,7 +154,7 @@ public:
         bool success = false;
         while (!success)
         {
-            syntaxTree.Reset();
+            syntaxTree.Destroy();
             success = this->TryCreateRandomTree(syntaxTree, maxDepth);
         }
     }
