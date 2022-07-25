@@ -126,14 +126,13 @@ public:
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
     explicit SyntaxTree(TreeNode* proot)
     {
-        _root = new TreeNode(proot);
+        _root = proot;
         _root->parent = nullptr;
         this->ClearEvaluation();
     }
 
     /// Builds a tree from a root node.
     /// \param proot Root of the tree.
-    /// \param deepCopy If set to true, it will copy the tree into a new instance.
     explicit SyntaxTree(const TreeNode& proot)
     {
         _root = new TreeNode(proot);
@@ -315,7 +314,6 @@ public:
         auto* subtreeRoot = new TreeNode(subTreeStartNode);
         subtreeRoot->parent = nullptr;
         CopyTree(subtreeRoot, subTreeStartNode);
-
         return SyntaxTree(subtreeRoot);
     }
 
