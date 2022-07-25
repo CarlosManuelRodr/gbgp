@@ -63,7 +63,7 @@ private:
     /// Copy a tree by creating new instances of all the nodes.
     /// \param copyTree Pointer to the tree that holds the copy.
     /// \param originalTree Pointer to the original tree that will be copied.
-    void CopyTree(TreeNode* copyTree, TreeNode* originalTree) const
+    static void CopyTree(TreeNode* copyTree, TreeNode* originalTree)
     {
         if (originalTree != nullptr)
         {
@@ -124,17 +124,10 @@ public:
     /// Builds a tree from a root node.
     /// \param proot Pointer to the root of the tree.
     /// \param deepCopy If set to true, it will copy the tree into a new instance.
-    explicit SyntaxTree(TreeNode* proot, bool deepCopy = false)
+    explicit SyntaxTree(TreeNode* proot)
     {
-        if (deepCopy)
-        {
-            _root = new TreeNode(proot);
-            _root->parent = nullptr;
-            this->CopyTree(_root, proot);
-        }
-        else
-            _root = proot;
-
+        _root = new TreeNode(proot);
+        _root->parent = nullptr;
         this->ClearEvaluation();
     }
 
@@ -154,7 +147,7 @@ public:
     {
         _root = new TreeNode(other._root);
         _root->parent = nullptr;
-        this->CopyTree(_root, other._root);
+        CopyTree(_root, other._root);
         this->ClearEvaluation();
     }
 
@@ -164,7 +157,7 @@ public:
     {
         _root = new TreeNode(other->_root);
         _root->parent = nullptr;
-        this->CopyTree(_root, other->_root);
+        CopyTree(_root, other->_root);
         this->ClearEvaluation();
     }
 
@@ -181,7 +174,7 @@ public:
 
         _root = new TreeNode(other._root);
         _root->parent = nullptr;
-        this->CopyTree(_root, other._root);
+        CopyTree(_root, other._root);
         this->ClearEvaluation();
 
         return *this;
@@ -319,7 +312,11 @@ public:
     [[nodiscard]]
     static SyntaxTree GetSubtree(TreeNode* subTreeStartNode)
     {
-        return SyntaxTree(subTreeStartNode, true);
+        auto* subtreeRoot = new TreeNode(subTreeStartNode);
+        subtreeRoot->parent = nullptr;
+        CopyTree(subtreeRoot, subTreeStartNode);
+
+        return SyntaxTree(subtreeRoot);
     }
 
     /// Insert a copy of the subtree into the position at insertNode.

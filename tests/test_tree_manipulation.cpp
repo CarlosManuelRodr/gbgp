@@ -230,7 +230,7 @@ TEST_CASE("Test random subtree replacement")
 {
     Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
 
-    // Original tree
+    // Original tree.
     SyntaxTree tree;
     tree.SetRootRule(rule1);
     auto leftExpr = SyntaxTree::AddNode(tree.Root(), exprNonTerm, rule2);
@@ -250,10 +250,18 @@ TEST_CASE("Test random subtree replacement")
 
     auto rightRightVar = SyntaxTree::AddNode(rightRightFactor, varTerm, "a");
 
-    tree.RemoveSubtree(rightTerm);
+    string originalSynth = tree.SynthesizeExpression();
+    cout << "Original: " << originalSynth << endl;
 
-    // Replacement tree
+    // Remove branch and create subtree.
+    tree.RemoveSubtree(rightTerm);
     SyntaxTree replacement;
+    grammar.CreateRandomTree(replacement, 50, rightTerm->generatorPR);
+    tree.InsertSubtree(rightTerm, replacement);
+
+    string replacedSynth = tree.SynthesizeExpression();
+    cout << "Replaced: " << replacedSynth << endl;
+
 }
 
 TEST_CASE("Test tree traversals")

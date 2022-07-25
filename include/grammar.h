@@ -121,11 +121,11 @@ public:
     /// Create random tree based on the production rules described in the variable _grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
     /// \return True if creation is successful, false if not.
-    bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10) const
+    bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth, const std::optional<ProductionRule>& rootRule) const
     {
-        syntaxTree.SetRootRule(GetRootRule());
+        syntaxTree.SetRootRule(rootRule != std::nullopt ? rootRule.value() : GetRootRule());
 
-        // Create children nodes based on the selected rule
+        // Create children nodes based on the selected rule.
         std::vector<TreeNode*> newNodes;
         for (const ProductionElement& pe : syntaxTree.Root()->generatorPR.to)
         {
@@ -149,13 +149,13 @@ public:
 
     /// Ensure the creation of a random tree by creating random trees until there is a success.
     /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 10) const
+    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 50, const std::optional<ProductionRule>& rootRule = std::nullopt) const
     {
         bool success = false;
         while (!success)
         {
             syntaxTree.Destroy();
-            success = this->TryCreateRandomTree(syntaxTree, maxDepth);
+            success = this->TryCreateRandomTree(syntaxTree, maxDepth, rootRule);
         }
     }
 
