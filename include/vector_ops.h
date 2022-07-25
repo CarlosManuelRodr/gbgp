@@ -165,3 +165,18 @@ bool vector_contains_q(const std::vector<T>& v, const T& key)
 {
     return std::find(v.begin(), v.end(), key) != v.end();
 }
+
+template<typename T, class UnaryPredicate>
+std::vector<size_t> find_indexes_if(const std::vector<T>& v, UnaryPredicate pred)
+{
+    std::vector<size_t> indexes;
+    auto it = v.begin();
+
+    while ((it = std::find_if(it, v.end(), pred)) != v.end())
+    {
+        indexes.push_back(std::distance(v.begin(), it));
+        it++;
+    }
+
+    return indexes;
+}

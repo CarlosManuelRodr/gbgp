@@ -490,6 +490,15 @@ public:
         return output;
     }
 
+    [[nodiscard]]
+    std::vector<TreeNode*> GetTermsOfType(TreeNodeType type) const
+    {
+        std::vector<TreeNode*> traversal = GetTreeTraversal();
+        std::vector<size_t> terminalIndexes = find_indexes_if(traversal, [type](TreeNode* node) { return node->type == type; });
+
+        return extract_elements_at_indexes(traversal, terminalIndexes);
+    }
+
     /// Find the index of the first non-synthesized non-terminal.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \return The index if the first non-synthesized non-terminal.
