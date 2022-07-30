@@ -28,6 +28,7 @@ add_executable(gbgp
         tests/test_simple_evaluation.cpp
         tests/test_semantic_evaluation.cpp
         tests/test_population.cpp
+        tests/test_genetic_operators.cpp
 
         util/peglib.h
         util/arithmetic_parser.h

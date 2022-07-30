@@ -109,18 +109,18 @@ TEST_CASE("Test tree node")
     auto termNode2 = TreeNode(varTerm, "b");
     auto termNode3 = TreeNode(varTerm);
 
-    CHECK(termNode1 == termNode2);
-    CHECK(termNode1 != termNode3);
+    CHECK((termNode1 == termNode2));
+    CHECK((termNode1 != termNode3));
 
     auto nonTermNode1 = TreeNode(factorNonTerm,{ TreeNode(varTerm, "b") });
     auto nonTermNode2 = TreeNode(factorNonTerm,{ TreeNode(varTerm, "c") });
     auto nonTermNode3 = TreeNode(factorNonTerm);
     auto nonTermNode4 = TreeNode(exprNonTerm);
 
-    CHECK(nonTermNode1 == nonTermNode2);
-    CHECK(nonTermNode1 == nonTermNode3);
-    CHECK(nonTermNode2 == nonTermNode3);
-    CHECK(nonTermNode4 != nonTermNode1);
+    CHECK((nonTermNode1 == nonTermNode2));
+    CHECK((nonTermNode1 == nonTermNode3));
+    CHECK((nonTermNode2 == nonTermNode3));
+    CHECK((nonTermNode4 != nonTermNode1));
 }
 
 TEST_CASE("Testing subtree insertion")
@@ -253,11 +253,15 @@ TEST_CASE("Test random subtree replacement")
     string originalSynth = tree.SynthesizeExpression();
     cout << "Original: " << originalSynth << endl;
 
+    // Select random branch.
+    std::vector<TreeNode*> nonTerminals = tree.GetTermsOfType(TreeNodeType::NonTerminal);
+    TreeNode* randomNonTerm = *random_choice(nonTerminals.begin(), nonTerminals.end());
+
     // Remove branch and create subtree.
-    tree.RemoveSubtree(rightTerm);
+    tree.RemoveSubtree(randomNonTerm);
     SyntaxTree replacement;
-    grammar.CreateRandomTree(replacement, 50, rightTerm->generatorPR);
-    tree.InsertSubtree(rightTerm, replacement);
+    grammar.CreateRandomTree(replacement, 50, randomNonTerm->generatorPR);
+    tree.InsertSubtree(randomNonTerm, replacement);
 
     string replacedSynth = tree.SynthesizeExpression();
     cout << "Replaced: " << replacedSynth << endl;
@@ -327,7 +331,7 @@ TEST_CASE("Test tree traversals")
     cout << "Original: " << originalSynth << endl;
     cout << "Reconstructed: " << reconstructionSynth << endl;
 
-    CHECK(originalSynth == reconstructionSynth);
+    CHECK((originalSynth == reconstructionSynth));
 }
 
 TEST_CASE("Test single pass pruning")
@@ -425,8 +429,8 @@ TEST_CASE("Test single pass pruning")
     cout << "Original: " << unprunedSynth << endl;
     cout << "Reconstructed: " << prunedSynth << endl;
 
-    CHECK(unprunedSynth == "a*(b)");
-    CHECK(prunedSynth == "a*b");
+    CHECK((unprunedSynth == "a*(b)"));
+    CHECK((prunedSynth == "a*b"));
 }
 
 TEST_CASE("Test multiple pass pruning")
@@ -490,7 +494,7 @@ TEST_CASE("Test multiple pass pruning")
         string prunedSynth = tree.SynthesizeExpression();
         cout << "Expression after pruning: " << prunedSynth << endl;
 
-        CHECK(prunedSynth.size() <= unprunedSynth.size());
+        CHECK((prunedSynth.size() <= unprunedSynth.size()));
         cout << endl;
     }
 }

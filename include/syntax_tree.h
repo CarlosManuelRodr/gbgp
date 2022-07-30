@@ -7,6 +7,7 @@
 #include <string>
 #include <exception>
 #include <utility>
+#include <optional>
 #include "tree_node.h"
 
 //**********************************************
@@ -26,18 +27,18 @@ private:
     /// \param avoid List of positions to avoid.
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
-    /// \return Position as index. If the search fails, returns -1.
+    /// \return Position as index. If the search fails, returns nullopt.
     [[nodiscard]]
-    static int FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
-                                  unsigned currentPosition, int elementsToSynthesize)
+    static std::optional<size_t> FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
+                                                    unsigned currentPosition, int elementsToSynthesize)
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
             if (treeTraversal[i]->type == TreeNodeType::NonTerminal &&
                 treeTraversal[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
-                return static_cast<int>(i);
+                return i;
         }
-        return -1;
+        return std::nullopt;
     }
 
     /// Find the first position of a term of type id.
@@ -46,18 +47,18 @@ private:
     /// \param avoid List of positions to avoid.
     /// \param currentPosition Current position of the cursor.
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
-    /// \return Position as index. If the search fails, returns -1.
+    /// \return Position as index. If the search fails, returns nullopt.
     [[nodiscard]]
-    static int FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
-                               unsigned currentPosition, int elementsToSynthesize)
+    static std::optional<size_t> FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
+                                                 unsigned currentPosition, int elementsToSynthesize)
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
             if (treeTraversal[i]->type == TreeNodeType::Terminal && treeTraversal[i]->termInstance.id == id &&
                 !vector_contains_q(avoid, i))
-                return static_cast<int>(i);
+                return i;
         }
-        return -1;
+        return std::nullopt;
     }
 
     /// Copy a tree by creating new instances of all the nodes.
@@ -525,14 +526,14 @@ public:
 
         for (const ProductionElement& se : rule.to)
         {
-            const size_t pos = (se.type == ProductionElementType::NonTerminal) ?
+            const std::optional<size_t> pos = (se.type == ProductionElementType::NonTerminal) ?
                     FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
                     FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
 
-            if (pos != -1)
+            if (pos != std::nullopt)
             {
-                nodeToBuild->AddChildNode(treeTraversal[pos], nodeToBuild);
-                toErase.push_back(pos);
+                nodeToBuild->AddChildNode(treeTraversal[pos.value()], nodeToBuild);
+                toErase.push_back(pos.value());
             }
             else
             {
@@ -597,11 +598,11 @@ public:
                 synthesis += se.string;
             else if (se.type == SemanticElementType::NonTerminal)
             {
-                const size_t pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
-                if (pos != -1)
+                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                if (pos != std::nullopt)
                 {
-                    synthesis += treeTraversal[pos]->expressionSynthesis;
-                    toErase.push_back(pos);
+                    synthesis += treeTraversal[pos.value()]->expressionSynthesis;
+                    toErase.push_back(pos.value());
                 }
                 else
                 {
@@ -612,11 +613,11 @@ public:
             }
             else if (se.type == SemanticElementType::Terminal)
             {
-                const size_t pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
-                if (pos != -1)
+                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                if (pos != std::nullopt)
                 {
-                    synthesis += treeTraversal[pos]->termValue;
-                    toErase.push_back(pos);
+                    synthesis += treeTraversal[pos.value()]->termValue;
+                    toErase.push_back(pos.value());
                 }
                 else
                     throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during expressionSynthesis");
@@ -674,11 +675,11 @@ public:
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const size_t pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
-                if (pos != -1)
+                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                if (pos != std::nullopt)
                 {
-                    evaluationContext.PushSemanticValue(treeTraversal[pos]->expressionEvaluation);
-                    toErase.push_back(pos);
+                    evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->expressionEvaluation);
+                    toErase.push_back(pos.value());
                 }
                 else
                 {
@@ -689,11 +690,11 @@ public:
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const size_t pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != -1)
                 {
-                    evaluationContext.PushSemanticValue(treeTraversal[pos]->termValue);
-                    toErase.push_back(pos);
+                    evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->termValue);
+                    toErase.push_back(pos.value());
                 }
                 else
                     throw std::runtime_error("Could not find any Term node of type " + se.term.label + " during expression evaluation");
