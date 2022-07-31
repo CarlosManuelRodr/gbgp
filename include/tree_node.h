@@ -13,9 +13,8 @@ enum class TreeNodeType
 };
 
 /// Represents a node of an n-ary _tree
-class TreeNode
+struct TreeNode
 {
-public:
     /// Type of the node.
     TreeNodeType type;
 

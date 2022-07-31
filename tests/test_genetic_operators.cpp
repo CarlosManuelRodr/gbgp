@@ -107,16 +107,19 @@ TEST_CASE("Test Term mutation")
 {
     Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
 
-    auto ind = Individual();
-    ind.CreateRandom(grammar);
+    for (int i = 0; i < 100; i++)
+    {
+        auto ind = Individual();
+        ind.CreateRandom(grammar);
 
-    string originalSynth = ind.GetExpression();
-    cout << "Original: " << originalSynth << endl;
+        string originalSynth = ind.GetExpression();
+        cout << "Original: " << originalSynth << endl;
 
-    GeneticOperators::MutateIndividualTerminal(ind);
+        GeneticOperators::MutateIndividual(ind, grammar, 0.0);
 
-    string replacedSynth = ind.GetExpression();
-    cout << "Replaced: " << replacedSynth << endl;
+        string replacedSynth = ind.GetExpression();
+        cout << "Replaced: " << replacedSynth << endl;
+    }
 
 }
 
@@ -124,15 +127,41 @@ TEST_CASE("Test NonTerm mutation")
 {
     Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
 
-    auto ind = Individual();
-    ind.CreateRandom(grammar);
+    for (int i = 0; i < 100; i++)
+    {
+        auto ind = Individual();
+        ind.CreateRandom(grammar);
 
-    string originalSynth = ind.GetExpression();
-    cout << "Original: " << originalSynth << endl;
+        string originalSynth = ind.GetExpression();
+        cout << "Original: " << originalSynth << endl;
 
-    GeneticOperators::MutateIndividualNonTerminal(ind, grammar);
+        try {
+            GeneticOperators::MutateIndividual(ind, grammar, 1.0);
+        }
+        catch (std::runtime_error &e) {
+            cout << e.what() << endl;
+        }
 
-    string replacedSynth = ind.GetExpression();
-    cout << "Replaced: " << replacedSynth << endl;
+        string replacedSynth = ind.GetExpression();
+        cout << "Replaced: " << replacedSynth << endl;
+    }
+}
 
+TEST_CASE("Test mutation")
+{
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
+
+    for (int i = 0; i < 100; i++)
+    {
+        auto ind = Individual();
+        ind.CreateRandom(grammar);
+
+        string originalSynth = ind.GetExpression();
+        cout << "Original: " << originalSynth << endl;
+
+        GeneticOperators::MutateIndividual(ind, grammar);
+
+        string replacedSynth = ind.GetExpression();
+        cout << "Replaced: " << replacedSynth << endl;
+    }
 }

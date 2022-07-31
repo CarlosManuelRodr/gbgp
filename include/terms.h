@@ -53,17 +53,12 @@ struct Terminal
     }
 
     [[nodiscard]]
-    std::string GetValue() const
+    std::string GetRandomValue() const
     {
         if (values.size() == 1)
             return values.front();
         else
-        {
-            // Select a terminal value randomly.
-            std::vector<size_t> applicableTerminals = range<size_t>(values.size());
-            const size_t r = *random_choice(applicableTerminals.begin(), applicableTerminals.end());
-            return values[r];
-        }
+            return *random_choice(values.begin(), values.end());
     }
 };
 

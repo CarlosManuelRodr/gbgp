@@ -113,7 +113,7 @@ public:
                 return false;
         }
         else
-            node->termValue = node->termInstance.GetValue();
+            node->termValue = node->termInstance.GetRandomValue();
 
         return true;
     }

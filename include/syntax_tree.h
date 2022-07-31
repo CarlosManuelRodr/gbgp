@@ -268,7 +268,7 @@ public:
     static TreeNode* AddNode(TreeNode* target, const Terminal& term)
     {
         auto* newNode = new TreeNode(term);
-        newNode->termValue = term.GetValue();
+        newNode->termValue = term.GetRandomValue();
         newNode->parent = target;
         target->AddChildNode(newNode);
         return newNode;
