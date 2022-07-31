@@ -132,7 +132,7 @@ TEST_CASE("Test individual evaluation")
     if (evaluationState)
         cout << evaluationContext.result() << endl;
 
-    CHECK(evaluationState == true);
+    CHECK((evaluationState == true));
 }
 
 TEST_CASE("Test individual generation")
@@ -157,6 +157,6 @@ TEST_CASE("Test individual generation")
         cout << "Generated expression: " << expression << endl;
         cout << "Evaluation: " << evaluationResult << endl;
 
-        CHECK(evaluationResult == parserResult);
+        CHECK((evaluationResult == parserResult));
     }
 }

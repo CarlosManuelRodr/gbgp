@@ -195,5 +195,5 @@ TEST_CASE("Test arithmetic evaluation")
     if (evaluationState)
         cout << arithmeticContext.result() << endl;
 
-    CHECK(evaluationState == true);
+    CHECK((evaluationState == true));
 }

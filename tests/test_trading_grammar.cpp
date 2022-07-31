@@ -245,5 +245,5 @@ TEST_CASE("Testing random individual generation")
     grammar.CreateRandomTree(cst, 100);
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
-    CHECK(cst.SynthesizeExpression().size() > 0);
+    CHECK((!cst.SynthesizeExpression().empty()));
 }

@@ -109,5 +109,5 @@ TEST_CASE("Test simple evaluation")
     if (evaluationState)
         cout << context.result() << endl;
 
-    CHECK(evaluationState == true);
+    CHECK((evaluationState == true));
 }

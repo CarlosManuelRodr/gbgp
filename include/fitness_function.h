@@ -1,6 +1,5 @@
 #pragma once
 #include "syntax_tree.h"
-#include <optional>
 
 enum class FitnessFunctionType
 {

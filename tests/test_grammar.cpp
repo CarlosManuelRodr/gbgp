@@ -109,10 +109,10 @@ TEST_CASE("Test rule representation")
     cout << "Rule 5: " << rule5String << endl;
     cout << "Rule 6: " << rule6String << endl;
 
-    CHECK(rule1String == "EXPR -> EXPR + TERM");
-    CHECK(rule2String == "EXPR -> TERM");
-    CHECK(rule3String == "TERM -> TERM * FACTOR");
-    CHECK(rule4String == "TERM -> FACTOR");
-    CHECK(rule5String == "FACTOR -> ( EXPR )");
-    CHECK(rule6String == "FACTOR -> var");
+    CHECK((rule1String == "EXPR -> EXPR + TERM"));
+    CHECK((rule2String == "EXPR -> TERM"));
+    CHECK((rule3String == "TERM -> TERM * FACTOR"));
+    CHECK((rule4String == "TERM -> FACTOR"));
+    CHECK((rule5String == "FACTOR -> ( EXPR )"));
+    CHECK((rule6String == "FACTOR -> var"));
 }
