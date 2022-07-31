@@ -26,6 +26,12 @@ public:
         _fitnessFunction = fitnessFunction;
     }
 
+    [[nodiscard]]
+    FitnessFunction GetFitnessFunction() const
+    {
+        return _fitnessFunction;
+    }
+
     /// Returns a reference to the syntax tree.
     [[nodiscard]]
     SyntaxTree& GetTree()

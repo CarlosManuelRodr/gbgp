@@ -135,12 +135,7 @@ TEST_CASE("Test NonTerm mutation")
         string originalSynth = ind.GetExpression();
         cout << "Original: " << originalSynth << endl;
 
-        try {
-            GeneticOperators::MutateIndividual(ind, grammar, 1.0);
-        }
-        catch (std::runtime_error &e) {
-            cout << e.what() << endl;
-        }
+        GeneticOperators::MutateIndividual(ind, grammar, 1.0);
 
         string replacedSynth = ind.GetExpression();
         cout << "Replaced: " << replacedSynth << endl;
@@ -165,3 +160,24 @@ TEST_CASE("Test mutation")
         cout << "Replaced: " << replacedSynth << endl;
     }
 }
+
+TEST_CASE("Test crossover")
+{
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
+
+    auto parent1 = Individual();
+    auto parent2 = Individual();
+    parent1.CreateRandom(grammar);
+    parent2.CreateRandom(grammar);
+
+    string originalSynthParent1 = parent1.GetExpression();
+    string originalSynthParent2 = parent2.GetExpression();
+    cout << "Parent 1 original: " << originalSynthParent1 << endl;
+    cout << "Parent 2 original: " << originalSynthParent2 << endl;
+
+    Individual offspring = GeneticOperators::Crossover(parent1, parent2);
+
+    string offspringSynth = offspring.GetExpression();
+    cout << "Offspring: " << offspringSynth << endl;
+}
+

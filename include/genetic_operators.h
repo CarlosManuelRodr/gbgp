@@ -32,13 +32,18 @@ private:
         return mutableNodes;
     }
 
+    static std::vector<TreeNode*> GetMutableTermsOfType(const SyntaxTree& tree, TreeNodeType type)
+    {
+        std::vector<TreeNode*> terms = tree.GetTermsOfType(type);
+        std::vector<TreeNode*> mutableTerms = type == TreeNodeType::NonTerminal ?
+                GetMutableNonTerminalNodes(terms) : GetMutableTerminalNodes(terms);
+        return mutableTerms;
+    }
+
     static void MutateIndividualTerminal(Individual& individual)
     {
-        SyntaxTree& tree = individual.GetTree();
-
-        // Select random term.
-        std::vector<TreeNode*> terminals = tree.GetTermsOfType(TreeNodeType::Terminal);
-        std::vector<TreeNode*> mutableTerminals = GetMutableTerminalNodes(terminals);
+        // Select random terminal.
+        std::vector<TreeNode*> mutableTerminals = GetMutableTermsOfType(individual.GetTree(), TreeNodeType::Terminal);
         TreeNode* randomTerminalNode = *random_choice(mutableTerminals.begin(), mutableTerminals.end());
         Terminal randomTerminal = randomTerminalNode->termInstance;
 
@@ -49,9 +54,8 @@ private:
     {
         SyntaxTree& tree = individual.GetTree();
 
-        // Select random non-term.
-        std::vector<TreeNode*> nonTerminals = tree.GetTermsOfType(TreeNodeType::NonTerminal);
-        std::vector<TreeNode*> mutableNonTerminals = GetMutableNonTerminalNodes(nonTerminals);
+        // Select random non-terminal.
+        std::vector<TreeNode*> mutableNonTerminals = GetMutableTermsOfType(tree, TreeNodeType::NonTerminal);
         TreeNode* randomNonTerm = *random_choice(mutableNonTerminals.begin(), mutableNonTerminals.end());
 
         // Remove branch and create subtree.
@@ -62,6 +66,10 @@ private:
     }
 
 public:
+    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
+    /// \param population
+    /// \param size
+    /// \return
     static Population Selection(const Population& population, int size)
     {
         std::vector<double> fitnessScores = population.GetFitness();
@@ -81,5 +89,24 @@ public:
             MutateIndividualNonTerminal(individual, grammar);
         else
             MutateIndividualTerminal(individual);
+    }
+
+    static Individual Crossover(Individual& parent1, Individual& parent2)
+    {
+        SyntaxTree treeParent1 = parent1.GetTree();
+        SyntaxTree treeParent2 = parent2.GetTree();
+
+        std::vector<TreeNode*> mutableNonTerminalsParent1 = GetMutableTermsOfType(treeParent1, TreeNodeType::NonTerminal);
+        std::vector<TreeNode*> mutableNonTerminalsParent2 = GetMutableTermsOfType(treeParent2, TreeNodeType::NonTerminal);
+
+        TreeNode* randomNonTermParent1 = *random_choice(mutableNonTerminalsParent1.begin(), mutableNonTerminalsParent1.end());
+
+        // TODO: Get compatible nonterm
+        TreeNode* randomNonTermParent2;
+
+        treeParent1.RemoveSubtree(randomNonTermParent1);
+        treeParent1.InsertSubtree(randomNonTermParent1, randomNonTermParent2);
+
+        return Individual(treeParent1, parent1.GetFitnessFunction());
     }
 };
