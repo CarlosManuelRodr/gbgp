@@ -103,6 +103,23 @@ const ProductionRule rule6(
 /****************************
 *       Test routines       *
 ****************************/
+TEST_CASE("Test Term mutation")
+{
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
+
+    auto ind = Individual();
+    ind.CreateRandom(grammar);
+
+    string originalSynth = ind.GetExpression();
+    cout << "Original: " << originalSynth << endl;
+
+    GeneticOperators::MutateIndividualTerminal(ind);
+
+    string replacedSynth = ind.GetExpression();
+    cout << "Replaced: " << replacedSynth << endl;
+
+}
+
 TEST_CASE("Test NonTerm mutation")
 {
     Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 });
@@ -113,7 +130,7 @@ TEST_CASE("Test NonTerm mutation")
     string originalSynth = ind.GetExpression();
     cout << "Original: " << originalSynth << endl;
 
-    GeneticOperators::MutateIndividualNonTerm(ind, grammar);
+    GeneticOperators::MutateIndividualNonTerminal(ind, grammar);
 
     string replacedSynth = ind.GetExpression();
     cout << "Replaced: " << replacedSynth << endl;

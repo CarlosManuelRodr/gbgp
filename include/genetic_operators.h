@@ -3,6 +3,17 @@
 
 class GeneticOperators
 {
+private:
+    static std::vector<TreeNode*> GetMutableTerminalNodes(const std::vector<TreeNode*>& terminalNodes)
+    {
+        std::vector<TreeNode*> mutableNodes;
+        for (auto node : terminalNodes)
+            if (node->termInstance.IsMutable())
+                mutableNodes.push_back(node);
+
+        return mutableNodes;
+    }
+
 public:
     static Population Selection(const Population& population, int size)
     {
@@ -17,7 +28,20 @@ public:
         return population.SelectIndividuals(sampledIndexes);
     }
 
-    static void MutateIndividualNonTerm(Individual& individual, const Grammar& grammar)
+    static void MutateIndividualTerminal(Individual& individual)
+    {
+        SyntaxTree& tree = individual.GetTree();
+
+        // Select random term.
+        std::vector<TreeNode*> terminals = tree.GetTermsOfType(TreeNodeType::Terminal);
+        std::vector<TreeNode*> mutableTerminals = GetMutableTerminalNodes(terminals);
+        TreeNode* randomTerminalNode = *random_choice(mutableTerminals.begin(), mutableTerminals.end());
+        Terminal randomTerminal = randomTerminalNode->termInstance;
+
+        randomTerminalNode->termValue = *random_choice(randomTerminal.values.begin(), randomTerminal.values.end());
+    }
+
+    static void MutateIndividualNonTerminal(Individual& individual, const Grammar& grammar)
     {
         SyntaxTree tree = individual.GetTree();
 

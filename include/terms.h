@@ -47,6 +47,12 @@ struct Terminal
     }
 
     [[nodiscard]]
+    bool IsMutable() const
+    {
+        return values.size() > 1;
+    }
+
+    [[nodiscard]]
     std::string GetValue() const
     {
         if (values.size() == 1)

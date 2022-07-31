@@ -66,7 +66,7 @@ public:
 
     //*******************************
     //*   Random tree generation    *
-    //*****************************/
+    //******************************/
 
     /// Gets a random rule that is compatible with the specified Non-Terminal type.
     /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
