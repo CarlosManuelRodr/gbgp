@@ -165,7 +165,7 @@ TEST_CASE("Testing subtree insertion")
 
     auto rightRightVar2 = SyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
 
-    // Third _tree. Declarative construction.
+    // Third tree. Declarative construction.
     SyntaxTree ast3(
         TreeNode(
                 rule1,

@@ -91,6 +91,41 @@ public:
             MutateIndividualTerminal(individual);
     }
 
+    static std::vector<NonTerminal> GetSharedNonTerminals(const std::vector<TreeNode*>& nodesParent1,
+                                                          const std::vector<TreeNode*>& nodesParent2)
+    {
+        std::vector<NonTerminal> shared;
+        for (auto n1 : nodesParent1)
+        {
+            if (!vector_contains_q(shared, n1->nonTermInstance))
+            {
+                for (auto n2 : nodesParent2)
+                {
+                    if (n1->nonTermInstance == n2->nonTermInstance)
+                    {
+                        shared.push_back(n1->nonTermInstance);
+                        break;
+                    }
+                }
+            }
+        }
+        return shared;
+    }
+
+    static TreeNode* GetRandomNodeOfType(const std::vector<TreeNode*>& nodes, const NonTerminal& type)
+    {
+        std::vector<size_t> indexes = find_indexes_if(nodes,[type](TreeNode* node){ return  type == node->nonTermInstance; });
+        size_t randomSelection = *random_choice(indexes.begin(), indexes.end());
+        return nodes[randomSelection];
+    }
+
+    static TreeNode* GetRandomNodeOfType(const std::vector<TreeNode*>& nodes, const std::vector<NonTerminal>& types)
+    {
+        std::vector<size_t> indexes = find_indexes_if(nodes,[types](TreeNode* node){ return vector_contains_q(types, node->nonTermInstance); });
+        size_t randomSelection = *random_choice(indexes.begin(), indexes.end());
+        return nodes[randomSelection];
+    }
+
     static Individual Crossover(Individual& parent1, Individual& parent2)
     {
         SyntaxTree treeParent1 = parent1.GetTree();
@@ -99,10 +134,9 @@ public:
         std::vector<TreeNode*> mutableNonTerminalsParent1 = GetMutableTermsOfType(treeParent1, TreeNodeType::NonTerminal);
         std::vector<TreeNode*> mutableNonTerminalsParent2 = GetMutableTermsOfType(treeParent2, TreeNodeType::NonTerminal);
 
-        TreeNode* randomNonTermParent1 = *random_choice(mutableNonTerminalsParent1.begin(), mutableNonTerminalsParent1.end());
-
-        // TODO: Get compatible nonterm
-        TreeNode* randomNonTermParent2;
+        std::vector<NonTerminal> sharedNonTerminals = GetSharedNonTerminals(mutableNonTerminalsParent1, mutableNonTerminalsParent2);
+        TreeNode* randomNonTermParent1 = GetRandomNodeOfType(mutableNonTerminalsParent1, sharedNonTerminals);
+        TreeNode* randomNonTermParent2 = GetRandomNodeOfType(mutableNonTerminalsParent2, randomNonTermParent1->nonTermInstance);
 
         treeParent1.RemoveSubtree(randomNonTermParent1);
         treeParent1.InsertSubtree(randomNonTermParent1, randomNonTermParent2);
