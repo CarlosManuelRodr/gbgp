@@ -77,7 +77,7 @@ struct TreeNode
             AddChildNode(new TreeNode(c), this);
     }
 
-    TreeNode(ProductionRule productionRule, const NonTerminal& nt)
+    TreeNode(const ProductionRule& productionRule, const NonTerminal& nt)
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
@@ -86,10 +86,15 @@ struct TreeNode
         termValue = "";
         expressionEvaluation = "";
         parent = nullptr;
-        generatorPR = std::move(productionRule);
+        generatorPR = productionRule;
     }
 
-    TreeNode(ProductionRule productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
+    /// Constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own
+    /// children nodes.
+    /// \param productionRule The production rule that builds this node.
+    /// \param nt The NonTerminal type.
+    /// \param children Children instances that tells this node how to build its children.
+    TreeNode(const ProductionRule& productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
     {
         type = TreeNodeType::NonTerminal;
         nonTermInstance = nt;
@@ -98,7 +103,7 @@ struct TreeNode
         termValue = "";
         expressionEvaluation = "";
         parent = nullptr;
-        generatorPR = std::move(productionRule);
+        generatorPR = productionRule;
 
         for (const auto& c : children)
             AddChildNode(new TreeNode(c), this);
@@ -134,19 +139,10 @@ struct TreeNode
         termInstance = other.termInstance;
         generatorPR = other.generatorPR;
         termValue = other.termValue;
-        parent = other.parent;
-        children = other.children;
-    }
+        parent = nullptr;
 
-    /// Copy constructor by reference.
-    explicit TreeNode(TreeNode* other)
-    {
-        type = other->type;
-        nonTermInstance = other->nonTermInstance;
-        termInstance = other->termInstance;
-        generatorPR = other->generatorPR;
-        termValue = other->termValue;
-        parent = other->parent;
+        for (auto c : other.children)
+            AddChildNode(new TreeNode(*c), this);
     }
 
     /// Performs a copy of the node term without children.

@@ -77,7 +77,7 @@ private:
 
             for (TreeNode* n : originalTree->children)
             {
-                auto* copyNode = new TreeNode(n);
+                auto* copyNode = TreeNode::ShallowCopy(n);
                 copyTree->AddChildNode(copyNode);
                 CopyTree(copyNode, n);
             }
@@ -145,7 +145,7 @@ public:
     /// \param other SyntaxTree to be copied.
     SyntaxTree(const SyntaxTree& other)
     {
-        _root = new TreeNode(other._root);
+        _root = TreeNode::ShallowCopy(other._root);
         _root->parent = nullptr;
         CopyTree(_root, other._root);
         this->ClearEvaluation();
@@ -155,7 +155,7 @@ public:
     /// \param other Pointer to the SyntaxTree to be copied.
     explicit SyntaxTree(SyntaxTree* other)
     {
-        _root = new TreeNode(other->_root);
+        _root = TreeNode::ShallowCopy(other->_root);
         _root->parent = nullptr;
         CopyTree(_root, other->_root);
         this->ClearEvaluation();
@@ -172,7 +172,7 @@ public:
         if (this == &other)
             return *this;
 
-        _root = new TreeNode(other._root);
+        _root = TreeNode::ShallowCopy(other._root);
         _root->parent = nullptr;
         CopyTree(_root, other._root);
         this->ClearEvaluation();
@@ -312,7 +312,7 @@ public:
     [[nodiscard]]
     static SyntaxTree GetSubtree(TreeNode* subTreeStartNode)
     {
-        auto* subtreeRoot = new TreeNode(subTreeStartNode);
+        auto* subtreeRoot = TreeNode::ShallowCopy(subTreeStartNode);
         subtreeRoot->parent = nullptr;
         CopyTree(subtreeRoot, subTreeStartNode);
         return SyntaxTree(subtreeRoot);
