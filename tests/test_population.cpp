@@ -177,7 +177,7 @@ TEST_CASE("Test population initialization")
         cout << fitness << endl;
 
     cout << "Population scores after selection" << endl;
-    Population selected = GeneticOperators::Selection(population, 10);
-    for (auto fitness : selected.GetFitness())
+    GeneticOperators::Selection(population, 10);
+    for (auto fitness : population.GetFitness())
         cout << fitness << endl;
 }

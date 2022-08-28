@@ -175,7 +175,7 @@ TEST_CASE("Test crossover")
     cout << "Parent 1 original: " << originalSynthParent1 << endl;
     cout << "Parent 2 original: " << originalSynthParent2 << endl;
 
-    Individual offspring = GeneticOperators::Crossover(parent1, parent2);
+    Individual offspring = GeneticOperators::IndividualsCrossover(parent1, parent2);
 
     string offspringSynth = offspring.GetExpression();
     cout << "Offspring: " << offspringSynth << endl;

@@ -101,23 +101,6 @@ private:
     }
 
 public:
-    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
-    /// \param population
-    /// \param size
-    /// \return
-    static Population Selection(const Population& population, int size)
-    {
-        std::vector<double> fitnessScores = population.GetFitness();
-        const int populationSize = static_cast<int>(fitnessScores.size());
-        sort(fitnessScores.begin(), fitnessScores.end());
-
-        // Weighted sample
-        std::vector<int> weights = range(populationSize, 0, -1);
-        std::vector<size_t> sampledIndexes = random_weighted_sample_indexes(weights, size);
-
-        return population.SelectIndividualsByIndex(sampledIndexes);
-    }
-
     static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
     {
         if (RandomBool(nonTermMutationProb))
@@ -126,7 +109,7 @@ public:
             MutateIndividualTerminal(individual);
     }
 
-    static Individual Crossover(Individual& parent1, Individual& parent2)
+    static Individual IndividualsCrossover(Individual& parent1, Individual& parent2)
     {
         SyntaxTree treeParent1 = parent1.GetTree();
         SyntaxTree treeParent2 = parent2.GetTree();
@@ -142,5 +125,33 @@ public:
         treeParent1.InsertSubtree(randomNonTermParent1, randomNonTermParent2);
 
         return Individual(treeParent1, parent1.GetFitnessFunction());
+    }
+
+    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
+    /// \param population
+    /// \param size
+    /// \param eliteIndividuals
+    /// \return
+    static void Selection(Population& population, int size, int eliteIndividuals = 0)
+    {
+        std::vector<double> fitnessScores = population.GetFitness();
+        const int populationSize = static_cast<int>(fitnessScores.size());
+        sort(fitnessScores.begin(), fitnessScores.end());
+
+        // Weighted sample
+        std::vector<int> weights = range(populationSize, 0, -1);
+        std::vector<size_t> sampledIndexes = random_weighted_sample_indexes(weights, size);
+
+        population.SelectIndividuals(sampledIndexes);
+    }
+
+    static void Crossover(Population& population)
+    {
+
+    }
+
+    static void Mutation(Population& population, double mutationProbability, double nonTermMutationProbability = 0.5)
+    {
+
     }
 };

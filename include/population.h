@@ -28,6 +28,8 @@ public:
         _individuals = individuals;
     }
 
+    /// Initializes a population of randomly generated individuals.
+    /// \param populationSize The size of the population.
     void Initialize(int populationSize)
     {
         _individuals.reserve(populationSize);
@@ -39,6 +41,13 @@ public:
             newIndividual.SetFitnessFunction(_fitnessFunction);
             _individuals.push_back(newIndividual);
         }
+    }
+
+    /// Reduce the population to the selected indexes.
+    /// \param indexes The indexes of the individuals selected to survive on the next generation.
+    void SelectIndividuals(const std::vector<size_t>& selectIndexes)
+    {
+        _individuals = extract_elements_at_indexes(_individuals, selectIndexes);
     }
 
     [[nodiscard]]
@@ -59,10 +68,4 @@ public:
         return _individuals;
     }
 
-    [[nodiscard]]
-    Population SelectIndividualsByIndex(const std::vector<size_t>& indexes) const
-    {
-        std::vector<Individual> selectedIndividuals = extract_elements_at_indexes(_individuals, indexes);
-        return { _generatingGrammar, _fitnessFunction, selectedIndividuals };
-    }
 };

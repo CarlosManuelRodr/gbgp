@@ -29,8 +29,9 @@ public:
 
         for (int i = 0; i < generations; i++)
         {
-            Population fittestOfGeneration = GeneticOperators::Selection(_population, _survivorsPerGeneration);
-
+            GeneticOperators::Selection(_population, _survivorsPerGeneration, _eliteIndividuals);
+            GeneticOperators::Crossover(_population);
+            GeneticOperators::Mutation(_population, _mutationProbability);
         }
     }
 };
