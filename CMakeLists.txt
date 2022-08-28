@@ -16,6 +16,7 @@ add_executable(gbgp
         include/terms.h
         include/population.h
         include/genetic_operators.h
+        include/environment.h
         include/gbgp.h
 
         tests/doctest.h

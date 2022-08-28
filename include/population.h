@@ -1,11 +1,18 @@
 #pragma once
 #include "individual.h"
 
+/// A container for a collection of individuals. Handles their initialization and provides an interface for
+/// manipulating them.
 class Population
 {
 private:
+    /// The grammar that contains rules for generating an individual.
     Grammar _generatingGrammar;
+
+    /// The fitness function for individuals of this population.
     FitnessFunction _fitnessFunction;
+
+    /// The collection of individuals.
     std::vector<Individual> _individuals;
 
 public:
@@ -53,7 +60,7 @@ public:
     }
 
     [[nodiscard]]
-    Population SelectIndividuals(const std::vector<size_t>& indexes) const
+    Population SelectIndividualsByIndex(const std::vector<size_t>& indexes) const
     {
         std::vector<Individual> selectedIndividuals = extract_elements_at_indexes(_individuals, indexes);
         return { _generatingGrammar, _fitnessFunction, selectedIndividuals };

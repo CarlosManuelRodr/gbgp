@@ -65,32 +65,6 @@ private:
         tree.InsertSubtree(randomNonTerm, replacement);
     }
 
-public:
-    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
-    /// \param population
-    /// \param size
-    /// \return
-    static Population Selection(const Population& population, int size)
-    {
-        std::vector<double> fitnessScores = population.GetFitness();
-        const int populationSize = static_cast<int>(fitnessScores.size());
-        sort(fitnessScores.begin(), fitnessScores.end());
-
-        // Weighted sample
-        std::vector<int> weights = range(populationSize, 0, -1);
-        std::vector<size_t> sampledIndexes = random_weighted_sample_indexes(weights, size);
-
-        return population.SelectIndividuals(sampledIndexes);
-    }
-
-    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
-    {
-        if (RandomBool(nonTermMutationProb))
-            MutateIndividualNonTerminal(individual, grammar);
-        else
-            MutateIndividualTerminal(individual);
-    }
-
     static std::vector<NonTerminal> GetSharedNonTerminals(const std::vector<TreeNode*>& nodesParent1,
                                                           const std::vector<TreeNode*>& nodesParent2)
     {
@@ -124,6 +98,32 @@ public:
         std::vector<size_t> indexes = find_indexes_if(nodes,[types](TreeNode* node){ return vector_contains_q(types, node->nonTermInstance); });
         size_t randomSelection = *random_choice(indexes.begin(), indexes.end());
         return nodes[randomSelection];
+    }
+
+public:
+    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
+    /// \param population
+    /// \param size
+    /// \return
+    static Population Selection(const Population& population, int size)
+    {
+        std::vector<double> fitnessScores = population.GetFitness();
+        const int populationSize = static_cast<int>(fitnessScores.size());
+        sort(fitnessScores.begin(), fitnessScores.end());
+
+        // Weighted sample
+        std::vector<int> weights = range(populationSize, 0, -1);
+        std::vector<size_t> sampledIndexes = random_weighted_sample_indexes(weights, size);
+
+        return population.SelectIndividualsByIndex(sampledIndexes);
+    }
+
+    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
+    {
+        if (RandomBool(nonTermMutationProb))
+            MutateIndividualNonTerminal(individual, grammar);
+        else
+            MutateIndividualTerminal(individual);
     }
 
     static Individual Crossover(Individual& parent1, Individual& parent2)

@@ -5,7 +5,10 @@
 class Individual
 {
 private:
+    /// The tree that contains the genome of the individual.
     SyntaxTree _tree;
+
+    /// The fitness function for evaluating the individual.
     FitnessFunction _fitnessFunction;
 
 public:
