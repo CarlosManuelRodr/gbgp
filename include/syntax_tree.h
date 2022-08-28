@@ -61,29 +61,6 @@ private:
         return std::nullopt;
     }
 
-    /// Copy a tree by creating new instances of all the nodes.
-    /// \param copyTree Pointer to the tree that holds the copy.
-    /// \param originalTree Pointer to the original tree that will be copied.
-    static void CopyTree(TreeNode* copyTree, TreeNode* originalTree)
-    {
-        if (originalTree != nullptr)
-        {
-            copyTree->type = originalTree->type;
-            copyTree->termInstance = originalTree->termInstance;
-            copyTree->termValue = originalTree->termValue;
-            copyTree->nonTermInstance = originalTree->nonTermInstance;
-            copyTree->generatorPR = originalTree->generatorPR;
-            copyTree->expressionSynthesis = copyTree->expressionSynthesis;
-
-            for (TreeNode* n : originalTree->children)
-            {
-                auto* copyNode = TreeNode::ShallowCopy(n);
-                copyTree->AddChildNode(copyNode);
-                CopyTree(copyNode, n);
-            }
-        }
-    }
-
     /// Print node in the terminal with the specified depth.
     /// \param stream target stream to print.
     /// \param node current node to print.
@@ -145,9 +122,8 @@ public:
     /// \param other SyntaxTree to be copied.
     SyntaxTree(const SyntaxTree& other)
     {
-        _root = TreeNode::ShallowCopy(other._root);
+        _root = new TreeNode(*other._root);
         _root->parent = nullptr;
-        CopyTree(_root, other._root);
         this->ClearEvaluation();
     }
 
@@ -155,9 +131,8 @@ public:
     /// \param other Pointer to the SyntaxTree to be copied.
     explicit SyntaxTree(SyntaxTree* other)
     {
-        _root = TreeNode::ShallowCopy(other->_root);
+        _root = new TreeNode(*other->_root);
         _root->parent = nullptr;
-        CopyTree(_root, other->_root);
         this->ClearEvaluation();
     }
 
@@ -172,9 +147,8 @@ public:
         if (this == &other)
             return *this;
 
-        _root = TreeNode::ShallowCopy(other._root);
+        _root = new TreeNode(*other._root);
         _root->parent = nullptr;
-        CopyTree(_root, other._root);
         this->ClearEvaluation();
 
         return *this;
@@ -312,9 +286,8 @@ public:
     [[nodiscard]]
     static SyntaxTree GetSubtree(TreeNode* subTreeStartNode)
     {
-        auto* subtreeRoot = TreeNode::ShallowCopy(subTreeStartNode);
+        auto* subtreeRoot = new TreeNode(*subTreeStartNode);
         subtreeRoot->parent = nullptr;
-        CopyTree(subtreeRoot, subTreeStartNode);
         return SyntaxTree(subtreeRoot);
     }
 
@@ -329,8 +302,7 @@ public:
             // Check that both nodes are of the same type.
             if (insertNode->nonTermInstance.id == subtreeStartNode->nonTermInstance.id)
             {
-                auto* copySubtreeStartNode = new TreeNode();
-                CopyTree(copySubtreeStartNode, subtreeStartNode);
+                auto* copySubtreeStartNode = new TreeNode(*subtreeStartNode);
 
                 // Find parent and replace child reference of insertNode to subtreeStartNode.
                 for (TreeNode*& child : insertNode->parent->children)
