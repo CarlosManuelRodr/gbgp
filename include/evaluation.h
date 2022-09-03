@@ -6,14 +6,22 @@
 //*      Evaluation context       *
 //********************************/
 
+/// An evaluation context is used to evaluate the tree using the production rules of the grammar. To extend
+/// its functionality, inherit from this base class.
 class EvaluationContext
 {
 private:
+    /// The result value of each semantic action.
     std::string _result;
+
+    /// The semantic values used at each semantic action.
     std::vector<std::string> _semanticValues;
 
 public:
+    /// Result getter.
     auto result()                     -> std::string&       { return _result; }
+
+    /// Result setter.
     [[nodiscard]] auto result() const -> const std::string& { return _result; }
 
     /// Get semantic value of the associated ProductionRule at the specified index.

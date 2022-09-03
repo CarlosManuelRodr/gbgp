@@ -118,7 +118,7 @@ struct ProductionRule
     NonTerminal from;
     std::vector<ProductionElement> to;
     std::vector<SemanticElement> semanticRules;
-    std::function<void(EvaluationContext*)> semanticAction;
+    std::function<void(EvaluationContext*)> semanticAction {};
 
     ProductionRule()
     {

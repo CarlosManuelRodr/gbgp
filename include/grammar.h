@@ -2,10 +2,6 @@
 #include <utility>
 #include "prune_rule.h"
 
-//*********************************
-//*   Formal grammar container    *
-//********************************/
-
 /// Defines a formal grammar that contains the rules needed to build, synthesize and evaluate syntax trees.
 class Grammar
 {

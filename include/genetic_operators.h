@@ -1,9 +1,14 @@
 #pragma once
 #include "population.h"
 
+/// Genetic operators are applied over a population to modify its state according to the rules
+/// of genetic optimization.
 class GeneticOperators
 {
 private:
+    /// Get a random bool with probability p of being true.
+    /// \param p The probability of returning true.
+    /// \return The random bool.
     static bool RandomBool(const double p = 0.5)
     {
         static auto dev = std::random_device();
@@ -12,6 +17,10 @@ private:
         return (dist(gen) < p);
     }
 
+    /// Get a list of the mutable terminal nodes. For a terminal node to be mutable it needs to have more than one
+    /// possible value.
+    /// \param terminalNodes A list of terminals.
+    /// \return The subset of terminalNodes that are mutable.
     static std::vector<TreeNode*> GetMutableTerminalNodes(const std::vector<TreeNode*>& terminalNodes)
     {
         std::vector<TreeNode*> mutableNodes;
@@ -22,6 +31,9 @@ private:
         return mutableNodes;
     }
 
+    /// Get a list of the mutable non-terminal nodes. For a non-terminal node to be mutable it needs to have a parent.
+    /// \param nonTerminalNodes A list of non-terminals.
+    /// \return The subset of nonTerminalNodes that are mutable.
     static std::vector<TreeNode*> GetMutableNonTerminalNodes(const std::vector<TreeNode*>& nonTerminalNodes)
     {
         std::vector<TreeNode*> mutableNodes;
@@ -32,6 +44,10 @@ private:
         return mutableNodes;
     }
 
+    /// Get mutable nodes of the specified type.
+    /// \param tree The tree.
+    /// \param type Can be Terminal or NonTerminal.
+    /// \return A list of mutable nodes.
     static std::vector<TreeNode*> GetMutableTermsOfType(const SyntaxTree& tree, TreeNodeType type)
     {
         std::vector<TreeNode*> terms = tree.GetTermsOfType(type);
@@ -40,6 +56,8 @@ private:
         return mutableTerms;
     }
 
+    /// Operator to mutate a random terminal from an individual.
+    /// \param individual The target individual.
     static void MutateIndividualTerminal(Individual& individual)
     {
         // Select random terminal.
@@ -50,6 +68,9 @@ private:
         randomTerminalNode->termValue = randomTerminal.GetRandomValue();
     }
 
+    /// Operator to mutate a random non-terminal from an individual.
+    /// \param individual The target individual.
+    /// \param grammar The grammar rules to build the mutated branch.
     static void MutateIndividualNonTerminal(Individual& individual, const Grammar& grammar)
     {
         SyntaxTree& tree = individual.GetTree();
@@ -65,6 +86,10 @@ private:
         tree.InsertSubtree(randomNonTerm, replacement);
     }
 
+    /// Returns the common type non-terminals from both parents.
+    /// \param nodesParent1 Traversal of parent 1.
+    /// \param nodesParent2 Traversal of parent 2.
+    /// \return A list of non-terminals that are shared by both parents.
     static std::vector<NonTerminal> GetSharedNonTerminals(const std::vector<TreeNode*>& nodesParent1,
                                                           const std::vector<TreeNode*>& nodesParent2)
     {
@@ -86,6 +111,10 @@ private:
         return shared;
     }
 
+    /// Returns a random node of the specified type.
+    /// \param nodes The list of nodes.
+    /// \param type The node type (Terminal/NonTerminal).
+    /// \return A randomly selected node of the specified type.
     static TreeNode* GetRandomNodeOfType(const std::vector<TreeNode*>& nodes, const NonTerminal& type)
     {
         std::vector<size_t> indexes = find_indexes_if(nodes,[type](TreeNode* node){ return  type == node->nonTermInstance; });
@@ -93,6 +122,10 @@ private:
         return nodes[randomSelection];
     }
 
+    /// Returns a random node from any of the specified type.
+    /// \param nodes The list of nodes.
+    /// \param types The node type (Terminal/NonTerminal).
+    /// \return A randomly selected node with any of the specified types.
     static TreeNode* GetRandomNodeOfType(const std::vector<TreeNode*>& nodes, const std::vector<NonTerminal>& types)
     {
         std::vector<size_t> indexes = find_indexes_if(nodes,[types](TreeNode* node){ return vector_contains_q(types, node->nonTermInstance); });
@@ -101,14 +134,11 @@ private:
     }
 
 public:
-    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
-    {
-        if (RandomBool(nonTermMutationProb))
-            MutateIndividualNonTerminal(individual, grammar);
-        else
-            MutateIndividualTerminal(individual);
-    }
 
+    /// Generates a new offspring individual that combines genome features from both parents.
+    /// \param parent1 The first parent.
+    /// \param parent2 The second parent.
+    /// \return A new offspring individual.
     static Individual IndividualsCrossover(Individual& parent1, Individual& parent2)
     {
         SyntaxTree treeParent1 = parent1.GetTree();
@@ -127,11 +157,10 @@ public:
         return Individual(parent1.GetFitnessFunction(), treeParent1);
     }
 
-    /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
-    /// \param population
-    /// \param size
-    /// \param eliteIndividuals
-    /// \return
+    /// The selection operator. Reduces the population to its fittest individuals.
+    /// Implemented as proportionate ranked selection.
+    /// \param population The target population.
+    /// \param size The number of individuals that will survive.
     static void Selection(Population& population, int size)
     {
         std::vector<double> fitnessScores = population.GetFitness();
@@ -145,7 +174,10 @@ public:
         population.ReducePopulation(sampledIndexes);
     }
 
-    static void Crossover(Population& population)
+    /// The crossover operator. Creates a new generation by reproduction of the individuals.
+    /// \param population The target population.
+    /// \param offspringSize The number of children individuals produced by each parent pair.
+    static void Crossover(Population& population, unsigned offspringSize = 1)
     {
         Population newGeneration(population.GetGeneratingGrammar(), population.GetFitnessFunction());
 
@@ -157,14 +189,30 @@ public:
             Individual& parent1 = population.GetIndividual(i);
             Individual& parent2 = population.GetIndividual(i+1);
 
-            // Generate two children.
-            newGeneration.AddIndividual(IndividualsCrossover(parent1, parent2));
-            newGeneration.AddIndividual(IndividualsCrossover(parent1, parent2));
+            // Generate offspring.
+            for (unsigned j = 0; j < offspringSize; j++)
+                newGeneration.AddIndividual(IndividualsCrossover(parent1, parent2));
         }
 
         population = newGeneration;
     }
 
+    /// Mutation operator that acts over an individual.
+    /// \param individual The target individual.
+    /// \param grammar The generating grammar used for NonTerminal mutation.
+    /// \param nonTermMutationProb The probability that the mutation is applied over a NonTerminal.
+    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
+    {
+        if (RandomBool(nonTermMutationProb))
+            MutateIndividualNonTerminal(individual, grammar);
+        else
+            MutateIndividualTerminal(individual);
+    }
+
+    /// Mutation operator that acts over a population.
+    /// \param population The target population.
+    /// \param mutationProbability The probability that a mutation is applied over an individual.
+    /// \param nonTermMutationProbability The probability that the mutation is applied over a NonTerminal.
     static void Mutation(Population& population, double mutationProbability, double nonTermMutationProbability = 0.5)
     {
         for (size_t i = 0; i < population.Size(); i++)

@@ -16,6 +16,9 @@ private:
     std::vector<Individual> _individuals;
 
 public:
+    /// Population constructor.
+    /// \param grammar The grammar used to initialize the individuals from the population.
+    /// \param fitnessFunction The fitness function for evaluating individuals.
     Population(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction)
     {
         _generatingGrammar = grammar;
@@ -36,19 +39,24 @@ public:
         }
     }
 
+    /// Add an individual to the population.
+    /// \param individual The individual to add.
     void AddIndividual(const Individual& individual)
     {
         _individuals.push_back(individual);
     }
 
-    Individual& GetIndividual(size_t index)
+    /// Get the individual at the n-th index.
+    /// \param n The index.
+    /// \return A reference to the individual.
+    Individual& GetIndividual(size_t n)
     {
-        return _individuals[index];
+        return _individuals[n];
     }
 
     Individual& GetFittestByRank(int rank)
     {
-        std::sort(_individuals.begin(), _individuals.end(), [](Individual a, Individual b) -> bool
+        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
         {
             return a.GetFitness() > b.GetFitness();
         });
@@ -62,12 +70,15 @@ public:
         _individuals = extract_elements_at_indexes(_individuals, keepIndexes);
     }
 
+    /// Evaluate all the individuals of the population.
     void Evaluate()
     {
         for (auto& ind : _individuals)
             ind.Evaluate();
     }
 
+    /// Get the fitness values of all the individuals in the population.
+    /// \return A vector with the fitness values.
     std::vector<double> GetFitness()
     {
         std::vector<double> fitnessValues;
@@ -79,24 +90,28 @@ public:
         return fitnessValues;
     }
 
+    /// Get a reference to the individuals of the population.
     [[nodiscard]]
-    std::vector<Individual> GetIndividuals() const
+    std::vector<Individual>& GetIndividuals()
     {
         return _individuals;
     }
 
+    /// Get the size of the population.
     [[nodiscard]]
     size_t Size() const
     {
         return _individuals.size();
     }
 
+    /// Grammar getter.
     [[nodiscard]]
     Grammar GetGeneratingGrammar() const
     {
         return _generatingGrammar;
     }
 
+    /// Fitness function getter.
     [[nodiscard]]
     std::function<double(SyntaxTree&)> GetFitnessFunction() const
     {

@@ -154,6 +154,8 @@ public:
         return *this;
     }
 
+    /// Set the production rule of the root node.
+    /// \param startRule The production rule.
     void SetRootRule(const ProductionRule& startRule)
     {
         _root = new TreeNode(startRule.from);

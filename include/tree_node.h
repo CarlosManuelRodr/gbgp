@@ -2,10 +2,6 @@
 #include <string>
 #include "production_rule.h"
 
-//*****************************
-//*    Node implementation    *
-//****************************/
-
 /// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty _tree nodes.
 enum class TreeNodeType
 {
@@ -109,7 +105,8 @@ struct TreeNode
             AddChildNode(new TreeNode(c), this);
     }
 
-    /// Constructor of a Terminal node.
+    /// Terminal node constructor.
+    /// \param t The terminal.
     explicit TreeNode(const Terminal& t)
     {
         type = TreeNodeType::Terminal;
@@ -120,6 +117,9 @@ struct TreeNode
         parent = nullptr;
     }
 
+    /// Terminal node with value constructor.
+    /// \param t The terminal.
+    /// \param value The value.
     TreeNode(const Terminal& t, const std::string& value)
     {
         type = TreeNodeType::Terminal;
@@ -131,7 +131,8 @@ struct TreeNode
         parent = nullptr;
     }
 
-    /// Copy constructor.
+    /// Copy constructor that copies all linked nodes.
+    /// \param other The other node.
     TreeNode(const TreeNode& other)
     {
         type = other.type;
@@ -146,6 +147,8 @@ struct TreeNode
     }
 
     /// Performs a copy of the node term without children.
+    /// \param other The other node.
+    /// \return A copy of the node without its children.
     static TreeNode* ShallowCopy(TreeNode* other)
     {
         auto* copyNode = new TreeNode();

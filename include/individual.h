@@ -11,6 +11,7 @@ private:
     /// The fitness function for evaluating the individual.
     std::function<double(SyntaxTree&)> _fitnessFunction;
 
+    /// The evaluated fitness value.
     std::optional<double> _fitnessValue = std::nullopt;
 
 public:
@@ -31,11 +32,13 @@ public:
         _fitnessValue = other._fitnessValue;
     }
 
+    /// Fitness function setter.
     void SetFitnessFunction(const std::function<double(SyntaxTree&)>& fitnessFunction)
     {
         _fitnessFunction = fitnessFunction;
     }
 
+    /// Fitness function getter.
     [[nodiscard]]
     std::function<double(SyntaxTree&)> GetFitnessFunction() const
     {
@@ -56,6 +59,7 @@ public:
         return _tree.SynthesizeExpression();
     }
 
+    /// Return the fitness value.
     [[nodiscard]]
     double GetFitness() const
     {
@@ -65,6 +69,7 @@ public:
             return _fitnessValue.value();
     }
 
+    /// Evaluates the fitness function and assign the fitness value.
     void Evaluate()
     {
         _fitnessValue = _fitnessFunction(_tree);
