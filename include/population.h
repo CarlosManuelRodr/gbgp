@@ -10,22 +10,16 @@ private:
     Grammar _generatingGrammar;
 
     /// The fitness function for individuals of this population.
-    FitnessFunction _fitnessFunction;
+    std::function<double(SyntaxTree&)> _fitnessFunction;
 
     /// The collection of individuals.
     std::vector<Individual> _individuals;
 
 public:
-    Population(const Grammar& grammar, const FitnessFunction& fitnessFunction)
+    Population(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction)
     {
         _generatingGrammar = grammar;
         _fitnessFunction = fitnessFunction;
-    }
-    Population(const Grammar& grammar, const FitnessFunction& fitnessFunction, const std::vector<Individual>& individuals)
-    {
-        _generatingGrammar = grammar;
-        _fitnessFunction = fitnessFunction;
-        _individuals = individuals;
     }
 
     /// Initializes a population of randomly generated individuals.
@@ -36,27 +30,50 @@ public:
 
         for (int i = 0; i < populationSize; i++)
         {
-            Individual newIndividual;
+            Individual newIndividual(_fitnessFunction);
             newIndividual.CreateRandom(_generatingGrammar);
-            newIndividual.SetFitnessFunction(_fitnessFunction);
             _individuals.push_back(newIndividual);
         }
     }
 
-    /// Reduce the population to the selected indexes.
-    /// \param indexes The indexes of the individuals selected to survive on the next generation.
-    void SelectIndividuals(const std::vector<size_t>& selectIndexes)
+    void AddIndividual(const Individual& individual)
     {
-        _individuals = extract_elements_at_indexes(_individuals, selectIndexes);
+        _individuals.push_back(individual);
     }
 
-    [[nodiscard]]
-    std::vector<double> GetFitness() const
+    Individual& GetIndividual(size_t index)
+    {
+        return _individuals[index];
+    }
+
+    Individual& GetFittestByRank(int rank)
+    {
+        std::sort(_individuals.begin(), _individuals.end(), [](Individual a, Individual b) -> bool
+        {
+            return a.GetFitness() > b.GetFitness();
+        });
+        return _individuals[rank];
+    }
+
+    /// Reduce the population to the selected indexes.
+    /// \param keepIndexes The indexes of the individuals selected to survive on the next generation.
+    void ReducePopulation(const std::vector<size_t>& keepIndexes)
+    {
+        _individuals = extract_elements_at_indexes(_individuals, keepIndexes);
+    }
+
+    void Evaluate()
+    {
+        for (auto& ind : _individuals)
+            ind.Evaluate();
+    }
+
+    std::vector<double> GetFitness()
     {
         std::vector<double> fitnessValues;
         fitnessValues.reserve(_individuals.size());
 
-        for (auto ind : _individuals)
+        for (auto& ind : _individuals)
             fitnessValues.push_back(ind.GetFitness());
 
         return fitnessValues;
@@ -68,4 +85,21 @@ public:
         return _individuals;
     }
 
+    [[nodiscard]]
+    size_t Size() const
+    {
+        return _individuals.size();
+    }
+
+    [[nodiscard]]
+    Grammar GetGeneratingGrammar() const
+    {
+        return _generatingGrammar;
+    }
+
+    [[nodiscard]]
+    std::function<double(SyntaxTree&)> GetFitnessFunction() const
+    {
+        return _fitnessFunction;
+    }
 };

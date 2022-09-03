@@ -12,7 +12,7 @@ private:
     Population _population;
 
 public:
-    Environment(const Grammar& grammar, const FitnessFunction& fitnessFunction,
+    Environment(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction,
                 int populationSize, int survivorsPerGeneration, int eliteIndividuals,
                 double mutationProbability)
                 : _population(grammar, fitnessFunction)
@@ -21,17 +21,26 @@ public:
         _survivorsPerGeneration = survivorsPerGeneration;
         _eliteIndividuals = eliteIndividuals;
         _mutationProbability = mutationProbability;
+
+        _population.Initialize(_populationSize);
+        _population.Evaluate();
+    }
+
+    [[nodiscard]]
+    Population& GetPopulation()
+    {
+        return _population;
     }
 
     void Optimize(int generations = 1)
     {
-        _population.Initialize(_populationSize);
-
         for (int i = 0; i < generations; i++)
         {
-            GeneticOperators::Selection(_population, _survivorsPerGeneration, _eliteIndividuals);
+            std::cout << "Generation " << i << std::endl;
+            GeneticOperators::Selection(_population, _survivorsPerGeneration);
             GeneticOperators::Crossover(_population);
             GeneticOperators::Mutation(_population, _mutationProbability);
+            _population.Evaluate();
         }
     }
 };

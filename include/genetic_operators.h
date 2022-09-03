@@ -124,7 +124,7 @@ public:
         treeParent1.RemoveSubtree(randomNonTermParent1);
         treeParent1.InsertSubtree(randomNonTermParent1, randomNonTermParent2);
 
-        return Individual(treeParent1, parent1.GetFitnessFunction());
+        return Individual(parent1.GetFitnessFunction(), treeParent1);
     }
 
     /// Implemented as proportionate ranked selection. TODO: Implement more selection operators.
@@ -132,7 +132,7 @@ public:
     /// \param size
     /// \param eliteIndividuals
     /// \return
-    static void Selection(Population& population, int size, int eliteIndividuals = 0)
+    static void Selection(Population& population, int size)
     {
         std::vector<double> fitnessScores = population.GetFitness();
         const int populationSize = static_cast<int>(fitnessScores.size());
@@ -142,16 +142,35 @@ public:
         std::vector<int> weights = range(populationSize, 0, -1);
         std::vector<size_t> sampledIndexes = random_weighted_sample_indexes(weights, size);
 
-        population.SelectIndividuals(sampledIndexes);
+        population.ReducePopulation(sampledIndexes);
     }
 
     static void Crossover(Population& population)
     {
+        Population newGeneration(population.GetGeneratingGrammar(), population.GetFitnessFunction());
 
+        std::vector<size_t> randomPairings = range(population.Size());
+        shuffle(randomPairings);
+
+        for (size_t i = 0; i < randomPairings.size(); i += 2)
+        {
+            Individual& parent1 = population.GetIndividual(i);
+            Individual& parent2 = population.GetIndividual(i+1);
+
+            // Generate two children.
+            newGeneration.AddIndividual(IndividualsCrossover(parent1, parent2));
+            newGeneration.AddIndividual(IndividualsCrossover(parent1, parent2));
+        }
+
+        population = newGeneration;
     }
 
     static void Mutation(Population& population, double mutationProbability, double nonTermMutationProbability = 0.5)
     {
-
+        for (size_t i = 0; i < population.Size(); i++)
+        {
+            if (RandomBool(mutationProbability))
+                MutateIndividual(population.GetIndividual(i), population.GetGeneratingGrammar(), nonTermMutationProbability);
+        }
     }
 };

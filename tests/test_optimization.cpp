@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/genetic_operators.h"
+#include "../include/environment.h"
 #include <numeric>
 using namespace std;
 
@@ -134,12 +134,12 @@ const ProductionRule rule6(
 //*****************************
 //*       Test routines       *
 //****************************/
-int target_func_pop(int x, int y)
+int target_func(int x, int y)
 {
     return 1 + 2*x + y*y*y;
 }
 
-double fitness_function_pop(SyntaxTree& solution)
+double fitness_function(SyntaxTree& solution)
 {
     vector<int> diff;
     for (int x = 0; x <= 10; x++)
@@ -153,7 +153,7 @@ double fitness_function_pop(SyntaxTree& solution)
             solution.Evaluate(arithmeticContext);
 
             int solutionValue = arithmeticContext.GetResult();
-            int expectedValue = target_func_pop(x, y);
+            int expectedValue = target_func(x, y);
 
             diff.push_back(abs(solutionValue - expectedValue));
         }
@@ -165,18 +165,30 @@ double fitness_function_pop(SyntaxTree& solution)
     return 1.0 / (1.0 + error);
 }
 
-TEST_CASE("Test population initialization")
+TEST_CASE("Test population optimization")
 {
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    Population population(grammar, fitness_function_pop);
-    population.Initialize(100);
+    Environment env(grammar, fitness_function, 200, 100, 0, 0.4);
 
     cout << "Initial population scores" << endl;
-    for (auto fitness : population.GetFitness())
+    for (auto fitness : env.GetPopulation().GetFitness())
         cout << fitness << endl;
 
-    cout << "Population scores after selection" << endl;
-    GeneticOperators::Selection(population, 10);
-    for (auto fitness : population.GetFitness())
-        cout << fitness << endl;
+    env.Optimize(5);
+
+    cout << "Fittest after optimization" << endl;
+    cout << "Rank\t|\tExpression\t|\tScore" << endl;
+    Population& lastGeneration = env.GetPopulation();
+    for (int i = 0; i < 5; i++)
+    {
+        try
+        {
+            Individual ind = lastGeneration.GetFittestByRank(i);
+            cout << i << "\t|\t" << ind.GetExpression() << "\t|\t" << ind.GetFitness() << endl;
+        }
+        catch (std::runtime_error& e)
+        {
+            cout << e.what() << endl;
+        }
+    }
 }

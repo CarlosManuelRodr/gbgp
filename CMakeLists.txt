@@ -30,6 +30,7 @@ add_executable(gbgp
         tests/test_semantic_evaluation.cpp
         tests/test_population.cpp
         tests/test_genetic_operators.cpp
+        tests/test_optimization.cpp
 
         util/peglib.h
         util/arithmetic_parser.h

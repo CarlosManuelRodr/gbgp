@@ -102,11 +102,6 @@ TEST_CASE("Test memory allocation/deallocation")
     auto* newTree = new SyntaxTree();
     grammar.CreateRandomTree(*newTree);
     delete newTree;
-
-    cout << "Testing Individual Creation/destruction" << endl;
-    auto* ind = new Individual();
-    ind->CreateRandom(grammar);
-    delete ind;
 }
 
 TEST_CASE("Test traversal copy/delete")

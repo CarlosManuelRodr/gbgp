@@ -61,6 +61,14 @@ Iter random_choice(Iter start, Iter end)
     return random_choice(start, end, gen);
 }
 
+template<typename T>
+void shuffle(std::vector<T>& data)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::shuffle(std::begin(data), std::end(data), gen);
+}
+
 // Source: https://stackoverflow.com/a/57616877
 inline int pow2(int n)
 {
