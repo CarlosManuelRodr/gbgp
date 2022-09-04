@@ -32,7 +32,7 @@ enum Terms
 //****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", { "x", "y" });
+const Terminal varTerm(Var, "var", { "x", "y", "1" });
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -126,7 +126,15 @@ const ProductionRule rule6(
         [](EvaluationContext* ctx) {
             auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
             string var = ctx->SemanticValue(0);
-            int varValue = var == "x" ? arithmeticContext->x : arithmeticContext->y;
+
+            int varValue;
+            if (var == "x")
+                varValue = arithmeticContext->x;
+            else if (var == "y")
+                varValue = arithmeticContext->y;
+            else
+                varValue = 1;
+
             ctx->result() = to_string(varValue);
         }
 );
