@@ -75,11 +75,18 @@ public:
         _fitnessValue = _fitnessFunction(_tree);
     }
 
+    /// Prunes the tree.
+    /// \param grammar The grammar that contains the prune rules.
+    void Prune(const Grammar& grammar)
+    {
+        grammar.PruneTree(_tree);
+    }
+
     /// Generates a random individual using the production rules and prune rules of the grammar.
     /// \param grammar The generating grammar.
     void CreateRandom(const Grammar& grammar)
     {
         grammar.CreateRandomTree(_tree);
-        grammar.PruneTree(_tree);
+        Prune(grammar);
     }
 };

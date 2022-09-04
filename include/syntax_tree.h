@@ -10,10 +10,6 @@
 #include <optional>
 #include "tree_node.h"
 
-//**********************************************
-//*    Concrete syntax tree implementation     *
-//*********************************************/
-
 /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
 class SyntaxTree
 {

@@ -49,11 +49,21 @@ public:
     {
         for (int i = 0; i < generations; i++)
         {
-            std::cout << "Generation " << i << std::endl;
+            // Store the fittest individuals.
+            std::vector<Individual> elite = _population.GetNthFittestByRank(_eliteIndividuals);
+
+            // Apply the genetic operators and evaluate generation-
             GeneticOperators::Selection(_population, _survivorsPerGeneration);
             GeneticOperators::Crossover(_population, _childrenByPair);
             GeneticOperators::Mutation(_population, _mutationProbability);
             _population.Evaluate();
+
+            // Replace worst of generation by elite individuals.
+            _population.RemoveWorst(_eliteIndividuals);
+            _population.AddIndividuals(elite);
+
+            // Prune generation.
+            _population.Prune();
         }
     }
 };

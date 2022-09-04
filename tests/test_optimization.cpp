@@ -168,27 +168,14 @@ double fitness_function(SyntaxTree& solution)
 TEST_CASE("Test population optimization")
 {
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    Environment env(grammar, fitness_function, 200, 100, 0, 0.4);
+    Environment env(grammar, fitness_function, 200, 100, 5, 0.4);
 
-    cout << "Initial population scores" << endl;
-    for (auto fitness : env.GetPopulation().GetFitness())
-        cout << fitness << endl;
-
-    env.Optimize(5);
-
-    cout << "Fittest after optimization" << endl;
-    cout << "Rank\t|\tExpression\t|\tScore" << endl;
+    cout << "Generation\t|\tScore\t|\tExpression" << endl;
     Population& lastGeneration = env.GetPopulation();
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 30; i++)
     {
-        try
-        {
-            Individual ind = lastGeneration.GetFittestByRank(i);
-            cout << i << "\t|\t" << ind.GetExpression() << "\t|\t" << ind.GetFitness() << endl;
-        }
-        catch (std::runtime_error& e)
-        {
-            cout << e.what() << endl;
-        }
+        env.Optimize();
+        Individual ind = lastGeneration.GetFittestByRank(0);
+        cout << i << "\t|\t" << ind.GetFitness() << "\t|\t" << ind.GetExpression() << endl;
     }
 }

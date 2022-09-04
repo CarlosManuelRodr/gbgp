@@ -49,7 +49,8 @@ struct TreeNode
         parent = nullptr;
     }
 
-    /// Constructor of a NonTerminal node.
+    /// NonTerminal node constructor.
+    /// \param nt The NonTerminal type.
     explicit TreeNode(const NonTerminal& nt)
     {
         type = TreeNodeType::NonTerminal;
@@ -60,6 +61,9 @@ struct TreeNode
         parent = nullptr;
     }
 
+    /// NonTerminal node constructor.
+    /// \param nt The NonTerminal type.
+    /// \param children Children instances that tells this node how to build its own children nodes.
     TreeNode(const NonTerminal& nt, const std::vector<TreeNode>& children)
     {
         type = TreeNodeType::NonTerminal;
@@ -73,6 +77,9 @@ struct TreeNode
             AddChildNode(new TreeNode(c), this);
     }
 
+    /// NonTerminal node constructor.
+    /// \param productionRule The production rule that builds this node.
+    /// \param nt The NonTerminal type.
     TreeNode(const ProductionRule& productionRule, const NonTerminal& nt)
     {
         type = TreeNodeType::NonTerminal;
@@ -85,11 +92,11 @@ struct TreeNode
         generatorPR = productionRule;
     }
 
-    /// Constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own
-    /// children nodes.
+    /// NonTerminal node constructor that takes TreeNode instances as children and uses them as a blueprint to
+    /// construct its own children nodes.
     /// \param productionRule The production rule that builds this node.
     /// \param nt The NonTerminal type.
-    /// \param children Children instances that tells this node how to build its children.
+    /// \param children Children instances that tells this node how to build its own children nodes.
     TreeNode(const ProductionRule& productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
     {
         type = TreeNodeType::NonTerminal;

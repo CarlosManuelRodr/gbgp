@@ -46,6 +46,13 @@ public:
         _individuals.push_back(individual);
     }
 
+    /// Add a collection of individuals to the population.
+    /// \param newIndividuals The collection of individuals to add.
+    void AddIndividuals(const std::vector<Individual>& newIndividuals)
+    {
+        _individuals.insert(_individuals.end(), newIndividuals.begin(), newIndividuals.end());
+    }
+
     /// Get the individual at the n-th index.
     /// \param n The index.
     /// \return A reference to the individual.
@@ -54,6 +61,7 @@ public:
         return _individuals[n];
     }
 
+    /// Get the fittest individual by rank.
     Individual& GetFittestByRank(int rank)
     {
         std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
@@ -63,11 +71,47 @@ public:
         return _individuals[rank];
     }
 
+    /// Get the fittest individuals up to rank maxRank.
+    std::vector<Individual> GetNthFittestByRank(int maxRank)
+    {
+        // Sort individuals by descending fitness.
+        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
+        {
+            return a.GetFitness() > b.GetFitness();
+        });
+
+        auto from = _individuals.begin();
+        auto to = _individuals.begin() + maxRank;
+        return {from, to};
+    }
+
     /// Reduce the population to the selected indexes.
     /// \param keepIndexes The indexes of the individuals selected to survive on the next generation.
     void ReducePopulation(const std::vector<size_t>& keepIndexes)
     {
         _individuals = extract_elements_at_indexes(_individuals, keepIndexes);
+    }
+
+    /// Removes the n-th worst individuals by fitness of the population.
+    /// \param maxRank The maximum rank of the worst individuals to remove.
+    void RemoveWorst(int maxRank)
+    {
+        // Sort individuals by ascending fitness.
+        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
+        {
+            return a.GetFitness() < b.GetFitness();
+        });
+
+        auto from = _individuals.begin();
+        auto to= _individuals.begin() + maxRank;
+        _individuals.erase(from, to);
+    }
+
+    /// Prune all the individuals of the population.
+    void Prune()
+    {
+        for (auto& ind : _individuals)
+            ind.Prune(_generatingGrammar);
     }
 
     /// Evaluate all the individuals of the population.
