@@ -10,6 +10,7 @@ private:
     int _childrenByPair;
     int _eliteIndividuals;
     double _mutationProbability;
+    RuntimeMode _runtimeMode;
     Population _population;
 
 public:
@@ -22,18 +23,19 @@ public:
     /// \param mutationProbability The probability that an individual mutates over a generation.
     Environment(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction,
                 int populationSize, int survivorsPerGeneration, int eliteIndividuals,
-                double mutationProbability)
+                double mutationProbability, RuntimeMode runtimeMode = RuntimeMode::SingleThread)
                 : _population(grammar, fitnessFunction)
     {
         _populationSize = populationSize;
         _survivorsPerGeneration = survivorsPerGeneration;
         _eliteIndividuals = eliteIndividuals;
         _mutationProbability = mutationProbability;
+        _runtimeMode = runtimeMode;
 
         _childrenByPair = _populationSize / _survivorsPerGeneration;
 
         _population.Initialize(_populationSize);
-        _population.Evaluate();
+        _population.Evaluate(_runtimeMode);
     }
 
     /// Population getter.
@@ -56,7 +58,7 @@ public:
             GeneticOperators::Selection(_population, _survivorsPerGeneration);
             GeneticOperators::Crossover(_population, _childrenByPair);
             GeneticOperators::Mutation(_population, _mutationProbability);
-            _population.Evaluate();
+            _population.Evaluate(_runtimeMode);
 
             // Replace worst of generation by elite individuals.
             _population.RemoveWorst(_eliteIndividuals);

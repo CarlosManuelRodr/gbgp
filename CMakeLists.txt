@@ -4,8 +4,8 @@ project(gbgp)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(gbgp
+        include/thread_pool.h
         include/syntax_tree.h
-        include/fitness_function.h
         include/grammar.h
         include/individual.h
         include/vector_ops.h

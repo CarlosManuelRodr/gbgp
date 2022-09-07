@@ -1,5 +1,11 @@
 #pragma once
 #include "individual.h"
+#include "thread_pool.h"
+
+enum class RuntimeMode
+{
+    SingleThread, MultiThread
+};
 
 /// A container for a collection of individuals. Handles their initialization and provides an interface for
 /// manipulating them.
@@ -114,11 +120,33 @@ public:
             ind.Prune(_generatingGrammar);
     }
 
-    /// Evaluate all the individuals of the population.
-    void Evaluate()
+    void SingleThreadEvaluate()
     {
         for (auto& ind : _individuals)
             ind.Evaluate();
+    }
+
+    void MultiThreadEvaluate()
+    {
+        BS::thread_pool pool;
+
+        for (auto& ind : _individuals)
+            pool.push_task(&Individual::Evaluate, &ind);
+
+        pool.wait_for_tasks();
+    }
+
+    /// Evaluate all the individuals of the population.
+    void Evaluate(RuntimeMode runtimeMode = RuntimeMode::SingleThread)
+    {
+        switch (runtimeMode) {
+            case RuntimeMode::SingleThread:
+                SingleThreadEvaluate();
+                break;
+            case RuntimeMode::MultiThread:
+                MultiThreadEvaluate();
+                break;
+        }
     }
 
     /// Get the fitness values of all the individuals in the population.

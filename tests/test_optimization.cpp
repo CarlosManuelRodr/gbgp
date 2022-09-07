@@ -176,7 +176,7 @@ double fitness_function(SyntaxTree& solution)
 TEST_CASE("Test population optimization")
 {
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
-    Environment env(grammar, fitness_function, 200, 100, 5, 0.4);
+    Environment env(grammar, fitness_function, 200, 100, 5, 0.4, RuntimeMode::MultiThread);
 
     cout << "Generation\t|\tScore\t|\tExpression" << endl;
     Population& lastGeneration = env.GetPopulation();
