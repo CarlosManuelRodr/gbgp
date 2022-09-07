@@ -24,7 +24,8 @@ public:
 
 enum Terms
 {
-    Var, Expr, Term, Factor
+    Var, Plus, Times, LeftParenthesis, RightParenthesis, // Terminals
+    Expr, Term, Factor // NonTerminals
 };
 
 //*****************************
@@ -33,6 +34,11 @@ enum Terms
 
 // Term/Nonterm declaration.
 const Terminal varTerm(Var, "var", { "x", "y", "1" });
+const Terminal plusTerm(Plus, "Plus", { "+" });
+const Terminal timesTerm(Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(RightParenthesis, "RightParenthesis", { ")" });
+
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -42,16 +48,17 @@ const ProductionRule rule1(
         exprNonTerm,
         {
                 ProductionElement(exprNonTerm),
+                ProductionElement(plusTerm),
                 ProductionElement(termNonTerm)
         },
         {
                 SemanticElement(exprNonTerm),
-                SemanticElement("+"),
+                SemanticElement(plusTerm),
                 SemanticElement(termNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
+            int n2 = stoi(ctx->SemanticValue(2));
             ctx->result() = std::to_string(n1 + n2);
         }
 );
@@ -73,16 +80,17 @@ const ProductionRule rule3(
         termNonTerm,
         {
                 ProductionElement(termNonTerm),
+                ProductionElement(timesTerm),
                 ProductionElement(factorNonTerm)
         },
         {
                 SemanticElement(termNonTerm),
-                SemanticElement("*"),
+                SemanticElement(timesTerm),
                 SemanticElement(factorNonTerm)
         },
         [](EvaluationContext* ctx) {
             int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
+            int n2 = stoi(ctx->SemanticValue(2));
             ctx->result() = std::to_string(n1 * n2);
         }
 );
@@ -103,15 +111,17 @@ const ProductionRule rule4(
 const ProductionRule rule5(
         factorNonTerm,
         {
+                ProductionElement(leftParenthesisTerm),
                 ProductionElement(exprNonTerm),
+                ProductionElement(rightParenthesisTerm)
         },
         {
-                SemanticElement("("),
+                SemanticElement(leftParenthesisTerm),
                 SemanticElement(exprNonTerm),
-                SemanticElement(")")
+                SemanticElement(rightParenthesisTerm)
         },
         [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+            ctx->result() = ctx->SemanticValue(1);
         }
 );
 
@@ -175,15 +185,53 @@ double fitness_function(SyntaxTree& solution)
 
 TEST_CASE("Test population optimization")
 {
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    SyntaxTree removeParenthesisFrom(
+            TreeNode(
+                    rule5,
+                    factorNonTerm,
+                    {
+                            TreeNode(leftParenthesisTerm, "("),
+                            TreeNode(
+                                    rule2,
+                                    exprNonTerm,
+                                    {
+                                            TreeNode(
+                                                    rule4,
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    rule6,
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(varTerm)
+                                                                    })
+                                                    })
+                                    }),
+                            TreeNode(rightParenthesisTerm, ")")
+                    })
+    );
+
+    SyntaxTree removeParenthesisTo(
+            TreeNode(
+                    rule6,
+                    factorNonTerm,
+                    {
+                            TreeNode(varTerm)
+                    })
+    );
+
+    PruneRule removeParenthesis(removeParenthesisFrom, removeParenthesisTo);
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 }, { removeParenthesis });
     Environment env(grammar, fitness_function, 200, 100, 5, 0.4, RuntimeMode::MultiThread);
 
     cout << "Generation\t|\tScore\t|\tExpression" << endl;
     Population& lastGeneration = env.GetPopulation();
-    for (int i = 0; i < 30; i++)
+    Individual fittest = lastGeneration.GetFittestByRank(0);
+
+    for (int i = 0; i < 30 && fittest.GetFitness() < 1; i++)
     {
         env.Optimize();
-        Individual ind = lastGeneration.GetFittestByRank(0);
-        cout << i << "\t|\t" << ind.GetFitness() << "\t|\t" << ind.GetExpression() << endl;
+        fittest = lastGeneration.GetFittestByRank(0);
+        cout << i << "\t|\t" << fittest.GetFitness() << "\t|\t" << fittest.GetExpression() << endl;
     }
 }
