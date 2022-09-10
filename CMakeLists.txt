@@ -31,6 +31,7 @@ add_executable(gbgp
         tests/test_population.cpp
         tests/test_genetic_operators.cpp
         tests/test_optimization.cpp
+        tests/test_logic_gates.cpp
 
         util/peglib.h
         util/arithmetic_parser.h
