@@ -1,2 +1,0 @@
-# gbgp
-GBGP++

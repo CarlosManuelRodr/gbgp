@@ -183,6 +183,56 @@ double fitness_function(SyntaxTree& solution)
     return 1.0 / (1.0 + error);
 }
 
+TEST_CASE("Test individual evaluation")
+{
+    SyntaxTree removeParenthesisFrom(
+            TreeNode(
+                    rule5,
+                    factorNonTerm,
+                    {
+                            TreeNode(leftParenthesisTerm, "("),
+                            TreeNode(
+                                    rule2,
+                                    exprNonTerm,
+                                    {
+                                            TreeNode(
+                                                    rule4,
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    rule6,
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(varTerm)
+                                                                    })
+                                                    })
+                                    }),
+                            TreeNode(rightParenthesisTerm, ")")
+                    })
+    );
+
+    SyntaxTree removeParenthesisTo(
+            TreeNode(
+                    rule6,
+                    factorNonTerm,
+                    {
+                            TreeNode(varTerm)
+                    })
+    );
+
+    PruneRule removeParenthesis(removeParenthesisFrom, removeParenthesisTo);
+
+    // GP Generator grammar
+    SyntaxTree cst;
+    EvaluationContext evaluationContext;
+    Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 }, { removeParenthesis });
+
+    grammar.CreateRandomTree(cst, 100);
+    cst.PrintTree();
+
+    cout << cst.SynthesizeExpression() << endl;
+}
+
 TEST_CASE("Test population optimization")
 {
     SyntaxTree removeParenthesisFrom(

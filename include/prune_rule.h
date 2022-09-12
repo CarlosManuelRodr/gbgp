@@ -10,12 +10,12 @@ private:
 
 public:
     /// Constructor by SyntaxTree.
-    /// \param pruneRuleFromTraversal Prune rule from as SyntaxTree.
-    /// \param pruneRuleToTraversal Prune rule to as SyntaxTree.
-    PruneRule(const SyntaxTree& pruneRuleFromTraversal, const SyntaxTree& pruneRuleToTraversal)
+    /// \param pruneRuleFrom Prune rule from as SyntaxTree.
+    /// \param pruneRuleTo Prune rule to as SyntaxTree.
+    PruneRule(const SyntaxTree& pruneRuleFrom, const SyntaxTree& pruneRuleTo)
     {
-        _pruneRuleFromTraversal = pruneRuleFromTraversal.GetTreeTraversal();
-        _pruneRuleToTraversal = pruneRuleToTraversal.GetTreeTraversal();
+        _pruneRuleFromTraversal = pruneRuleFrom.GetTreeTraversal();
+        _pruneRuleToTraversal = pruneRuleTo.GetTreeTraversal();
     }
 
     bool CanBeApplied(const SyntaxTree& target)

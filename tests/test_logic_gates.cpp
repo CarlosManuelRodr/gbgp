@@ -18,7 +18,7 @@ public:
 
 enum Terms
 {
-    Var, LogOp, // Terminals
+    Var, LogOp, NotOp, // Terminals
     Array, LogExpr // NonTerminals
 };
 
@@ -29,6 +29,7 @@ enum Terms
 // Term/Nonterm declaration.
 const Terminal varTerm(Var, "var", { "x0", "x1" });
 const Terminal logOpTerm(LogOp, "logOp", { "And", "Or", "Xor" });
+const Terminal notOpTerm(NotOp, "notOp", { "Not" });
 const NonTerminal arrayNonTerm(Array, "ARRAY");
 const NonTerminal logExprNonTerm(LogExpr, "LOG_EXPR");
 
@@ -88,15 +89,17 @@ const ProductionRule rule2(
 const ProductionRule rule3(
         logExprNonTerm,
         {
+                ProductionElement(notOpTerm),
                 ProductionElement(logExprNonTerm),
         },
         {
-                SemanticElement("Not("),
+                SemanticElement(notOpTerm),
+                SemanticElement("("),
                 SemanticElement(logExprNonTerm),
                 SemanticElement(")")
         },
         [](EvaluationContext* ctx) {
-            bool a = stoi(ctx->SemanticValue(0));
+            bool a = stoi(ctx->SemanticValue(1));
             ctx->result() = to_string(!a);
         }
 );
@@ -154,7 +157,60 @@ double logic_fitness_function(SyntaxTree& solution)
 
 TEST_CASE("Test half adder optimization")
 {
-    Grammar grammar { rule1, rule2, rule3, rule4 };
+    SyntaxTree doubleNotExprFrom(
+            TreeNode(
+            rule3,
+            logExprNonTerm,
+            {
+                TreeNode(notOpTerm),
+                TreeNode(
+                        rule3,
+                        logExprNonTerm,
+                        {
+                            TreeNode(notOpTerm),
+                            TreeNode(logExprNonTerm)
+                        })
+            })
+    );
+
+    SyntaxTree doubleNotExprTo(
+            (TreeNode(logExprNonTerm))
+            );
+
+    SyntaxTree sameArgAndFrom(
+            TreeNode(
+                    rule2,
+                    logExprNonTerm,
+                    {
+                            TreeNode(logOpTerm, "And"),
+                            TreeNode(varTerm),
+                            TreeNode(varTerm)
+                    })
+    );
+
+    SyntaxTree sameArgAndTo(
+            (TreeNode(varTerm))
+    );
+
+    SyntaxTree sameArgOrFrom(
+            TreeNode(
+                    rule2,
+                    logExprNonTerm,
+                    {
+                            TreeNode(logOpTerm, "Or"),
+                            TreeNode(varTerm),
+                            TreeNode(varTerm)
+                    })
+    );
+
+    SyntaxTree sameArgOrTo(
+            (TreeNode(varTerm))
+    );
+
+    PruneRule doubleNegationExpr(doubleNotExprFrom, doubleNotExprTo);
+    PruneRule sameArgAnd(sameArgAndFrom, sameArgAndTo);
+    PruneRule sameArgOr(sameArgOrFrom, sameArgOrTo);
+    Grammar grammar ({ rule1, rule2, rule3, rule4 }, { doubleNegationExpr, sameArgAnd, sameArgOr });
     Environment env(grammar, logic_fitness_function, 200, 100, 5, 0.4);
 
     cout << "Generation\t|\tScore\t|\tExpression" << endl;

@@ -91,6 +91,12 @@ public:
         return {from, to};
     }
 
+/*    [[nodiscard]]
+    Population GetSubpopulation() const
+    {
+
+    }*/
+
     /// Reduce the population to the selected indexes.
     /// \param keepIndexes The indexes of the individuals selected to survive on the next generation.
     void ReducePopulation(const std::vector<size_t>& keepIndexes)
@@ -139,6 +145,7 @@ public:
     /// Evaluate all the individuals of the population.
     void Evaluate(RuntimeMode runtimeMode = RuntimeMode::SingleThread)
     {
+        // Evaluate individuals.
         switch (runtimeMode) {
             case RuntimeMode::SingleThread:
                 SingleThreadEvaluate();
@@ -147,6 +154,12 @@ public:
                 MultiThreadEvaluate();
                 break;
         }
+
+        // Sort individuals by descending fitness.
+        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
+        {
+            return a.GetFitness() > b.GetFitness();
+        });
     }
 
     /// Get the fitness values of all the individuals in the population.
