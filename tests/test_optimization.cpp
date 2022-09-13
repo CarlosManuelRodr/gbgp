@@ -12,10 +12,7 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
-    int GetResult()
-    {
-        return stoi(result());
-    }
+    int GetResult() { return stoi(result()); }
 };
 
 //*****************************
