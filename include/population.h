@@ -21,110 +21,8 @@ private:
     /// The collection of individuals.
     std::vector<Individual> _individuals;
 
-public:
-    /// Population constructor.
-    /// \param grammar The grammar used to initialize the individuals from the population.
-    /// \param fitnessFunction The fitness function for evaluating individuals.
-    Population(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction)
-    {
-        _generatingGrammar = grammar;
-        _fitnessFunction = fitnessFunction;
-    }
-
-    /// Initializes a population of randomly generated individuals.
-    /// \param populationSize The size of the population.
-    void Initialize(int populationSize)
-    {
-        _individuals.reserve(populationSize);
-
-        for (int i = 0; i < populationSize; i++)
-        {
-            Individual newIndividual(_fitnessFunction);
-            newIndividual.CreateRandom(_generatingGrammar);
-            _individuals.push_back(newIndividual);
-        }
-    }
-
-    /// Add an individual to the population.
-    /// \param individual The individual to add.
-    void AddIndividual(const Individual& individual)
-    {
-        _individuals.push_back(individual);
-    }
-
-    /// Add a collection of individuals to the population.
-    /// \param newIndividuals The collection of individuals to add.
-    void AddIndividuals(const std::vector<Individual>& newIndividuals)
-    {
-        _individuals.insert(_individuals.end(), newIndividuals.begin(), newIndividuals.end());
-    }
-
-    /// Get the individual at the n-th index.
-    /// \param n The index.
-    /// \return A reference to the individual.
-    Individual& GetIndividual(size_t n)
-    {
-        return _individuals[n];
-    }
-
-    /// Get the fittest individual by rank.
-    Individual& GetFittestByRank(int rank)
-    {
-        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
-        {
-            return a.GetFitness() > b.GetFitness();
-        });
-        return _individuals[rank];
-    }
-
-    /// Get the fittest individuals up to rank maxRank.
-    std::vector<Individual> GetNthFittestByRank(int maxRank)
-    {
-        // Sort individuals by descending fitness.
-        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
-        {
-            return a.GetFitness() > b.GetFitness();
-        });
-
-        auto from = _individuals.begin();
-        auto to = _individuals.begin() + maxRank;
-        return {from, to};
-    }
-
-/*    [[nodiscard]]
-    Population GetSubpopulation() const
-    {
-
-    }*/
-
-    /// Reduce the population to the selected indexes.
-    /// \param keepIndexes The indexes of the individuals selected to survive on the next generation.
-    void ReducePopulation(const std::vector<size_t>& keepIndexes)
-    {
-        _individuals = extract_elements_at_indexes(_individuals, keepIndexes);
-    }
-
-    /// Removes the n-th worst individuals by fitness of the population.
-    /// \param maxRank The maximum rank of the worst individuals to remove.
-    void RemoveWorst(int maxRank)
-    {
-        // Sort individuals by ascending fitness.
-        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
-        {
-            return a.GetFitness() < b.GetFitness();
-        });
-
-        auto from = _individuals.begin();
-        auto to= _individuals.begin() + maxRank;
-        _individuals.erase(from, to);
-    }
-
-    /// Prune all the individuals of the population.
-    void Prune()
-    {
-        for (auto& ind : _individuals)
-            ind.Prune(_generatingGrammar);
-    }
+    /// Is the population evaluated?
+    bool _isEvaluated;
 
     void SingleThreadEvaluate()
     {
@@ -142,6 +40,117 @@ public:
         pool.wait_for_tasks();
     }
 
+    void SortPopulation()
+    {
+        // Sort individuals by descending fitness.
+        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
+        {
+            return a.GetFitness() > b.GetFitness();
+        });
+    }
+
+public:
+    /// Population constructor.
+    /// \param grammar The grammar used to initialize the individuals from the population.
+    /// \param fitnessFunction The fitness function for evaluating individuals.
+    Population(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction)
+    {
+        _generatingGrammar = grammar;
+        _fitnessFunction = fitnessFunction;
+        _isEvaluated = false;
+    }
+
+    /// Initializes a population of randomly generated individuals.
+    /// \param populationSize The size of the population.
+    void Initialize(unsigned populationSize)
+    {
+        _individuals.reserve(populationSize);
+
+        for (int i = 0; i < populationSize; i++)
+        {
+            Individual newIndividual(_fitnessFunction);
+            newIndividual.CreateRandom(_generatingGrammar);
+            _individuals.push_back(newIndividual);
+        }
+        _isEvaluated = false;
+    }
+
+    /// Add an individual to the population.
+    /// \param individual The individual to add.
+    void AddIndividual(const Individual& individual)
+    {
+        _individuals.push_back(individual);
+        _isEvaluated &= individual.IsEvaluated();
+
+        if (_isEvaluated)
+            SortPopulation();
+    }
+
+    /// Add a collection of individuals to the population.
+    /// \param newIndividuals The collection of individuals to add.
+    void AddIndividuals(const std::vector<Individual>& newIndividuals)
+    {
+        _individuals.insert(_individuals.end(), newIndividuals.begin(), newIndividuals.end());
+        std::for_each(_individuals.begin(), _individuals.end(), [this](const Individual& ind) { _isEvaluated &= ind.IsEvaluated(); } );
+
+        if (_isEvaluated)
+            SortPopulation();
+    }
+
+    /// Get the individual at the n-th index.
+    /// \param n The index.
+    /// \return A reference to the individual.
+    Individual& GetIndividual(size_t n)
+    {
+        return _individuals[n];
+    }
+
+    /// Get the fittest individual by rank.
+    Individual& GetFittestByRank(int rank)
+    {
+        if (!_isEvaluated)
+            throw std::runtime_error("Tried to access ranked individuals of an unevaluated population.");
+
+        return _individuals[rank];
+    }
+
+    /// Get the fittest individuals up to rank maxRank.
+    std::vector<Individual> GetNthFittestByRank(int maxRank)
+    {
+        if (!_isEvaluated)
+            throw std::runtime_error("Tried to access ranked individuals of an unevaluated population.");
+
+        auto from = _individuals.begin();
+        auto to = _individuals.begin() + maxRank;
+        return {from, to};
+    }
+
+    /// Reduce the population to the selected indexes.
+    /// \param keepIndexes The indexes of the individuals selected to survive on the next generation.
+    void ReducePopulation(const std::vector<size_t>& keepIndexes)
+    {
+        _individuals = extract_elements_at_indexes(_individuals, keepIndexes);
+    }
+
+    /// Removes the n-th worst individuals by fitness of the population.
+    /// \param maxRank The maximum rank of the worst individuals to remove.
+    void RemoveWorst(int maxRank)
+    {
+        if (!_isEvaluated)
+            throw std::runtime_error("Tried to access ranked individuals of an unevaluated population.");
+
+        auto from = _individuals.end() - maxRank;
+        auto to= _individuals.end();
+        _individuals.erase(from, to);
+    }
+
+    /// Prune all the individuals of the population.
+    void Prune()
+    {
+        for (auto& ind : _individuals)
+            ind.Prune(_generatingGrammar);
+    }
+
     /// Evaluate all the individuals of the population.
     void Evaluate(RuntimeMode runtimeMode = RuntimeMode::SingleThread)
     {
@@ -155,17 +164,19 @@ public:
                 break;
         }
 
-        // Sort individuals by descending fitness.
-        std::sort(_individuals.begin(), _individuals.end(), [](const Individual& a, const Individual& b) -> bool
-        {
-            return a.GetFitness() > b.GetFitness();
-        });
+        SortPopulation();
+
+        _isEvaluated = true;
     }
 
     /// Get the fitness values of all the individuals in the population.
     /// \return A vector with the fitness values.
-    std::vector<double> GetFitness()
+    [[nodiscard]]
+    std::vector<double> GetFitness() const
     {
+        if (!_isEvaluated)
+            throw std::runtime_error("Tried to access fitness of individuals on an unevaluated population.");
+
         std::vector<double> fitnessValues;
         fitnessValues.reserve(_individuals.size());
 

@@ -59,6 +59,13 @@ public:
         return _tree.SynthesizeExpression();
     }
 
+    /// Is this individual evaluated?
+    [[nodiscard]]
+    bool IsEvaluated() const
+    {
+        return _fitnessValue != std::nullopt;
+    }
+
     /// Return the fitness value.
     [[nodiscard]]
     double GetFitness() const

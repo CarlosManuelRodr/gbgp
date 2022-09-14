@@ -211,7 +211,7 @@ TEST_CASE("Test half adder optimization")
     PruneRule sameArgAnd(sameArgAndFrom, sameArgAndTo);
     PruneRule sameArgOr(sameArgOrFrom, sameArgOrTo);
     Grammar grammar ({ rule1, rule2, rule3, rule4 }, { doubleNegationExpr, sameArgAnd, sameArgOr });
-    Environment env(grammar, logic_fitness_function, 200, 100, 5, 0.4);
+    Environment env(grammar, logic_fitness_function, 200, 100, 5, 5, 0.4);
 
     cout << "Generation\t|\tScore\t|\tExpression" << endl;
     Population& lastGeneration = env.GetPopulation();

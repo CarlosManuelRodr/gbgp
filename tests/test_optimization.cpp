@@ -269,7 +269,7 @@ TEST_CASE("Test population optimization")
 
     PruneRule removeParenthesis(removeParenthesisFrom, removeParenthesisTo);
     Grammar grammar({ rule1, rule2, rule3, rule4, rule5, rule6 }, { removeParenthesis });
-    Environment env(grammar, fitness_function, 200, 100, 5, 0.4, RuntimeMode::MultiThread);
+    Environment env(grammar, fitness_function, 200, 100, 5, 5, 0.4, RuntimeMode::MultiThread);
 
     cout << "Generation\t|\tScore\t|\tExpression" << endl;
     Population& lastGeneration = env.GetPopulation();
