@@ -14,6 +14,16 @@ private:
     RuntimeMode _runtimeMode;
     Population _population;
 
+    /// Generates new immigrant individuals.
+    /// \param n The number of individuals.
+    std::vector<Individual> GenerateImmigrationIndividuals(unsigned n)
+    {
+        Population immigrants(_population.GetGeneratingGrammar(), _population.GetFitnessFunction());
+        immigrants.Initialize(n);
+        immigrants.Evaluate(_runtimeMode);
+        return immigrants.GetIndividuals();
+    }
+
 public:
     /// Environment constructor.
     /// \param grammar The grammar used for creating and mutating individuals.
@@ -48,16 +58,6 @@ public:
     Population& GetPopulation()
     {
         return _population;
-    }
-
-    /// Generates new immigrant individuals.
-    /// \param n The number of individuals.
-    std::vector<Individual> GenerateImmigrationIndividuals(unsigned n)
-    {
-        Population immigrants(_population.GetGeneratingGrammar(), _population.GetFitnessFunction());
-        immigrants.Initialize(n);
-        immigrants.Evaluate(_runtimeMode);
-        return immigrants.GetIndividuals();
     }
 
     /// Optimizes a population via genetic optimization.

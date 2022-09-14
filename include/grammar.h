@@ -9,6 +9,49 @@ private:
     std::vector<ProductionRule> _grammarRules;
     std::vector<PruneRule> _pruneRules;
 
+    /// Applies sequentially all the prune rules of the grammar.
+    /// \param syntaxTree The target syntax tree that will be pruned.
+    /// \return True if a prune rule could be applied, false otherwise.
+    bool ApplyPruneRules(SyntaxTree& syntaxTree) const
+    {
+        bool wasPruned = false;
+        for (auto pruneRule : _pruneRules)
+        {
+            if (pruneRule.CanBeApplied(syntaxTree))
+            {
+                pruneRule.Apply(syntaxTree);
+                wasPruned = true;
+            }
+        }
+        return wasPruned;
+    }
+
+    /// Finds all the rules compatible with the specified Non-Terminal type.
+    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
+    /// \return A vector containing the compatible rules.
+    [[nodiscard]]
+    std::vector<ProductionRule> GetCompatibleRules(int fromNonTermType) const
+    {
+        std::vector<ProductionRule> compatibleRules;
+        for (const ProductionRule& rule : _grammarRules)
+        {
+            if (rule.from.id == fromNonTermType)
+                compatibleRules.push_back(rule);
+        }
+
+        return compatibleRules;
+    }
+
+    /// Gets a random rule that is compatible with the specified Non-Terminal type.
+    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
+    /// \return The selected random rule.
+    [[nodiscard]]
+    ProductionRule GetRandomCompatibleRule(int fromNonTermType) const
+    {
+        std::vector<ProductionRule> compatibleRules = this->GetCompatibleRules(fromNonTermType);
+        return *random_choice(compatibleRules.begin(), compatibleRules.end());
+    }
+
 public:
     Grammar() = default;
     Grammar(const Grammar& other) = default;
@@ -37,22 +80,6 @@ public:
         return _grammarRules.front();
     }
 
-    /// Finds all the rules compatible with the specified Non-Terminal type.
-    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
-    /// \return A vector containing the compatible rules.
-    [[nodiscard]]
-    std::vector<ProductionRule> GetCompatibleRules(int fromNonTermType) const
-    {
-        std::vector<ProductionRule> compatibleRules;
-        for (const ProductionRule& rule : _grammarRules)
-        {
-            if (rule.from.id == fromNonTermType)
-                compatibleRules.push_back(rule);
-        }
-
-        return compatibleRules;
-    }
-
     /// Returns the number of production rules of this grammar.
     [[nodiscard]]
     unsigned Size() const
@@ -63,16 +90,6 @@ public:
     //*******************************
     //*   Random tree generation    *
     //******************************/
-
-    /// Gets a random rule that is compatible with the specified Non-Terminal type.
-    /// \param fromNonTermType The type of the Non-Terminal to find an appropriate rule.
-    /// \return The selected random rule.
-    [[nodiscard]]
-    ProductionRule GetRandomCompatibleRule(int fromNonTermType) const
-    {
-        std::vector<ProductionRule> compatibleRules = this->GetCompatibleRules(fromNonTermType);
-        return *random_choice(compatibleRules.begin(), compatibleRules.end());
-    }
 
     /// Recursive implementation. Create random tree based on the production rules described in _grammarRules.
     /// \param maxDepth Maximum allowed tree depth.
@@ -153,23 +170,6 @@ public:
             syntaxTree.Destroy();
             success = this->TryCreateRandomTree(syntaxTree, maxDepth, rootRule);
         }
-    }
-
-    /// Applies sequentially all the prune rules of the grammar.
-    /// \param syntaxTree The target syntax tree that will be pruned.
-    /// \return True if a prune rule could be applied, false otherwise.
-    bool ApplyPruneRules(SyntaxTree& syntaxTree) const
-    {
-        bool wasPruned = false;
-        for (auto pruneRule : _pruneRules)
-        {
-            if (pruneRule.CanBeApplied(syntaxTree))
-            {
-                pruneRule.Apply(syntaxTree);
-                wasPruned = true;
-            }
-        }
-        return wasPruned;
     }
 
     /// Applies the grammar prune rules repeatedly until no further simplification can be performed.
