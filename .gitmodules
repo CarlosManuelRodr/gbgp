@@ -1,0 +1,9 @@
+[submodule "third-party/doctest"]
+	path = third-party/doctest
+	url = https://github.com/doctest/doctest
+[submodule "third-party/pybind11"]
+	path = third-party/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "third-party/cpp-peglib"]
+	path = third-party/cpp-peglib
+	url = https://github.com/yhirose/cpp-peglib

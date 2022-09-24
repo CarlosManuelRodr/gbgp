@@ -3,6 +3,9 @@ project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(third-party/doctest/doctest)
+include_directories(third-party/cpp-peglib)
+
 add_executable(gbgp
         include/thread_pool.h
         include/syntax_tree.h
@@ -19,7 +22,6 @@ add_executable(gbgp
         include/environment.h
         include/gbgp.h
 
-        tests/doctest.h
         tests/testing.cpp
         tests/test_tree_manipulation.cpp
         tests/test_trading_grammar.cpp
@@ -33,6 +35,5 @@ add_executable(gbgp
         tests/test_optimization.cpp
         tests/test_logic_gates.cpp
 
-        util/peglib.h
         util/arithmetic_parser.h
         util/arithmetic_parser.cpp)

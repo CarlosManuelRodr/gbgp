@@ -1,5 +1,5 @@
 #include "arithmetic_parser.h"
-#include "peglib.h"
+#include <peglib.h>
 using namespace std;
 
 peg::parser parser(R"(
