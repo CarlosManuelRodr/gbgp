@@ -18,11 +18,13 @@ private:
     std::vector<std::string> _semanticValues;
 
 public:
-    /// Result getter.
-    auto result()                     -> std::string&       { return _result; }
 
-    /// Result setter.
+    // Shorthand getter/setter
+    auto result()                     -> std::string&       { return _result; }
     [[nodiscard]] auto result() const -> const std::string& { return _result; }
+
+    std::string GetResult() { return result(); }
+    void SetResult(const std::string& s) { result() = s; }
 
     /// Get semantic value of the associated ProductionRule at the specified index.
     /// \param index Index of the ProductionRule.
@@ -31,6 +33,12 @@ public:
     std::string SemanticValue(unsigned index) const
     {
         return _semanticValues.at(index);
+    }
+
+    [[nodiscard]]
+    std::vector<std::string> GetSemanticValues() const
+    {
+        return _semanticValues;
     }
 
     /// Push the evaluation result of a ProductionRule for later use inside a semantic action.

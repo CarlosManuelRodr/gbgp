@@ -66,5 +66,11 @@ elseif(CMAKE_BUILD_TYPE MATCHES Python)
 
             python/bindings.cpp
             )
+
+    add_custom_command(TARGET gbgp POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy
+            "$<TARGET_FILE:gbgp>"
+            "${CMAKE_CURRENT_SOURCE_DIR}/python/$<TARGET_FILE_NAME:gbgp>"
+            COMMENT "Copying to output directory")
 endif()
 

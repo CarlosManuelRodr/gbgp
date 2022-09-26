@@ -49,6 +49,36 @@ struct ProductionElement
         term = Terminal();
         nonterm = pnonterm;
     }
+
+    [[nodiscard]]
+    std::string GetTypeStr() const
+    {
+        switch (type)
+        {
+            case ProductionElementType::NonTerminal:
+                return "NonTerminal";
+            case ProductionElementType::Terminal:
+                return "Terminal";
+            case ProductionElementType::Unassigned:
+            default:
+                return "Unassigned";
+        }
+    }
+
+    [[nodiscard]]
+    std::string GetValue() const
+    {
+        switch (type)
+        {
+            case ProductionElementType::NonTerminal:
+                return nonterm.label;
+            case ProductionElementType::Terminal:
+                return term.label;
+            case ProductionElementType::Unassigned:
+            default:
+                return {};
+        }
+    }
 };
 
 //*********************************
@@ -91,7 +121,22 @@ struct SemanticElement
     }
 
     [[nodiscard]]
-    std::string ToString() const
+    std::string GetTypeStr() const
+    {
+        switch (type)
+        {
+            case SemanticElementType::NonTerminal:
+                return "NonTerminal";
+            case SemanticElementType::Terminal:
+                return "Terminal";
+            case SemanticElementType::String:
+            default:
+                return "String";
+        }
+    }
+
+    [[nodiscard]]
+    std::string GetValue() const
     {
         switch (type)
         {
@@ -144,6 +189,30 @@ struct ProductionRule
     }
 
     [[nodiscard]]
+    NonTerminal GetFrom() const
+    {
+        return from;
+    }
+
+    [[nodiscard]]
+    std::vector<ProductionElement> GetTo() const
+    {
+        return to;
+    }
+
+    [[nodiscard]]
+    std::vector<SemanticElement> GetSemanticRules() const
+    {
+        return semanticRules;
+    }
+
+    [[nodiscard]]
+    std::function<void(EvaluationContext*)> GetSemanticAction() const
+    {
+        return semanticAction;
+    }
+
+    [[nodiscard]]
     std::string ToString() const
     {
         std::string output = from.label;
@@ -152,7 +221,7 @@ struct ProductionRule
         int index = 0;
         for (const auto& prodElement: semanticRules)
         {
-            output += prodElement.ToString() + ((index == semanticRules.size() - 1) ? "" : " ");
+            output += prodElement.GetValue() + ((index == semanticRules.size() - 1) ? "" : " ");
             index++;
         }
         return output;
