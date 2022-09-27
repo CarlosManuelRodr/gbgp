@@ -12,7 +12,7 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
-    int GetResult() { return stoi(result()); }
+    int GetIntResult() { return stoi(result()); }
 };
 
 //*****************************
@@ -167,7 +167,7 @@ double fitness_function(SyntaxTree& solution)
 
             solution.Evaluate(arithmeticContext);
 
-            int solutionValue = arithmeticContext.GetResult();
+            int solutionValue = arithmeticContext.GetIntResult();
             int expectedValue = target_func(x, y);
 
             diff.push_back(abs(solutionValue - expectedValue));
