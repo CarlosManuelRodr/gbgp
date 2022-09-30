@@ -163,7 +163,7 @@ struct ProductionRule
     NonTerminal from;
     std::vector<ProductionElement> to;
     std::vector<SemanticElement> semanticRules;
-    std::function<void(EvaluationContext*)> semanticAction {};
+    std::function<void(EvaluationContext&)> semanticAction {};
 
     ProductionRule()
     {
@@ -174,7 +174,7 @@ struct ProductionRule
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto,
             const std::vector<SemanticElement>& psemrules,
-            std::function<void(EvaluationContext*)> pSemanticAction = nullptr)
+            std::function<void(EvaluationContext&)> pSemanticAction = nullptr)
     {
         from = pfrom;
         to = pto;
@@ -207,7 +207,7 @@ struct ProductionRule
     }
 
     [[nodiscard]]
-    std::function<void(EvaluationContext*)> GetSemanticAction() const
+    std::function<void(EvaluationContext&)> GetSemanticAction() const
     {
         return semanticAction;
     }

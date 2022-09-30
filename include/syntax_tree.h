@@ -674,7 +674,7 @@ public:
         // Execute semantic action and delete.
         if (rule.semanticAction != nullptr)
         {
-            rule.semanticAction(&evaluationContext);
+            rule.semanticAction(evaluationContext);
             treeTraversal[nextIndex]->expressionEvaluation = evaluationContext.result();
         }
         else

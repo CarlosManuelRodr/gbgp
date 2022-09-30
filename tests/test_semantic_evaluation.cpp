@@ -12,10 +12,9 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
-    int GetResult()
-    {
-        return stoi(result());
-    }
+    int GetIntResult() { return stoi(result()); }
+    void SetIntResult(int r) { result() = to_string(r); }
+    int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
 };
 
 //*****************************
@@ -49,10 +48,11 @@ const ProductionRule rule1(
                 SemanticElement("+"),
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 + n2);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            arithmeticContext.SetIntResult(n1 + n2);
         }
 );
 
@@ -64,8 +64,8 @@ const ProductionRule rule2(
         {
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -80,10 +80,11 @@ const ProductionRule rule3(
                 SemanticElement("*"),
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 * n2);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            arithmeticContext.SetIntResult(n1 * n2);
         }
 );
 
@@ -95,8 +96,8 @@ const ProductionRule rule4(
         {
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -110,8 +111,8 @@ const ProductionRule rule5(
                 SemanticElement(exprNonTerm),
                 SemanticElement(")")
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -123,11 +124,10 @@ const ProductionRule rule6(
         {
                 SemanticElement(varTerm)
         },
-        [](EvaluationContext* ctx) {
-            auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
-            string var = ctx->SemanticValue(0);
-            int varValue = var == "x" ? arithmeticContext->x : arithmeticContext->y;
-            ctx->result() = to_string(varValue);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int varValue = ctx.SemanticValue(0) == "x" ? arithmeticContext.x : arithmeticContext.y;
+            arithmeticContext.SetIntResult(varValue);
         }
 );
 
@@ -152,7 +152,7 @@ double s_fitness_function(SyntaxTree& solution)
 
             solution.Evaluate(arithmeticContext);
 
-            int solutionValue = arithmeticContext.GetResult();
+            int solutionValue = arithmeticContext.GetIntResult();
             int expectedValue = s_target_func(x, y);
 
             diff.push_back(abs(solutionValue - expectedValue));

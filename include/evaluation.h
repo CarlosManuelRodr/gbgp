@@ -54,6 +54,11 @@ public:
         return _semanticValues.size();
     }
 
+    void TransferSemanticValueToResult(unsigned index = 0)
+    {
+        result() = SemanticValue(index);
+    }
+
     /// Virtual function that is executed before each evaluation of a semantic action.
     virtual void Prepare()
     {

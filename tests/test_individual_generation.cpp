@@ -34,10 +34,10 @@ const ProductionRule rule1(
                 SemanticElement("+"),
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 + n2);
+        [](EvaluationContext& ctx) {
+            int n1 = stoi(ctx.SemanticValue(0));
+            int n2 = stoi(ctx.SemanticValue(1));
+            ctx.result() = std::to_string(n1 + n2);
         }
 );
 
@@ -49,8 +49,8 @@ const ProductionRule rule2(
         {
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.result() = ctx.SemanticValue(0);
         }
 );
 
@@ -65,10 +65,10 @@ const ProductionRule rule3(
                 SemanticElement("*"),
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(1));
-            ctx->result() = std::to_string(n1 * n2);
+        [](EvaluationContext& ctx) {
+            int n1 = stoi(ctx.SemanticValue(0));
+            int n2 = stoi(ctx.SemanticValue(1));
+            ctx.result() = std::to_string(n1 * n2);
         }
 );
 
@@ -80,8 +80,8 @@ const ProductionRule rule4(
         {
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.result() = ctx.SemanticValue(0);
         }
 );
 
@@ -95,8 +95,8 @@ const ProductionRule rule5(
                 SemanticElement(exprNonTerm),
                 SemanticElement(")")
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.result() = ctx.SemanticValue(0);
         }
 );
 
@@ -108,8 +108,8 @@ const ProductionRule rule6(
         {
                 SemanticElement(varTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.result() = ctx.SemanticValue(0);
         }
 );
 

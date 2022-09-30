@@ -47,11 +47,11 @@ const ProductionRule rule1(
                 SemanticElement(logExprNonTerm),
                 SemanticElement("}")
         },
-        [](EvaluationContext* ctx) {
-            auto* booleanContext = dynamic_cast<BooleanContext*>(ctx);
-            booleanContext->y0 = stoi(ctx->SemanticValue(0));
-            booleanContext->y1 = stoi(ctx->SemanticValue(1));
-            ctx->result() = "{" + to_string(booleanContext->y0) + "," + to_string(booleanContext->y1) + "}";
+        [](EvaluationContext& ctx) {
+            auto& booleanContext = dynamic_cast<BooleanContext&>(ctx);
+            booleanContext.y0 = stoi(ctx.SemanticValue(0));
+            booleanContext.y1 = stoi(ctx.SemanticValue(1));
+            ctx.result() = "{" + to_string(booleanContext.y0) + "," + to_string(booleanContext.y1) + "}";
         }
 );
 
@@ -70,10 +70,10 @@ const ProductionRule rule2(
             SemanticElement(logExprNonTerm),
             SemanticElement(")"),
         },
-        [](EvaluationContext* ctx) {
-            string op = ctx->SemanticValue(0);
-            bool a = stoi(ctx->SemanticValue(1));
-            bool b = stoi(ctx->SemanticValue(2));
+        [](EvaluationContext& ctx) {
+            string op = ctx.SemanticValue(0);
+            bool a = stoi(ctx.SemanticValue(1));
+            bool b = stoi(ctx.SemanticValue(2));
             bool r;
             if (op == "And")
                 r = a && b;
@@ -82,7 +82,7 @@ const ProductionRule rule2(
             else if (op == "Xor")
                 r = a ^ b;
 
-            ctx->result() = to_string(r);
+            ctx.result() = to_string(r);
         }
 );
 
@@ -98,9 +98,9 @@ const ProductionRule rule3(
                 SemanticElement(logExprNonTerm),
                 SemanticElement(")")
         },
-        [](EvaluationContext* ctx) {
-            bool a = stoi(ctx->SemanticValue(1));
-            ctx->result() = to_string(!a);
+        [](EvaluationContext& ctx) {
+            bool a = stoi(ctx.SemanticValue(1));
+            ctx.result() = to_string(!a);
         }
 );
 
@@ -112,16 +112,16 @@ const ProductionRule rule4(
         {
                 SemanticElement(varTerm),
         },
-        [](EvaluationContext* ctx) {
-            auto* booleanContext = dynamic_cast<BooleanContext*>(ctx);
-            string var = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            auto& booleanContext = dynamic_cast<BooleanContext&>(ctx);
+            string var = ctx.SemanticValue(0);
             bool r;
             if (var == "x0")
-                r = booleanContext->x0;
+                r = booleanContext.x0;
             else if (var == "x1")
-                r = booleanContext->x1;
+                r = booleanContext.x1;
 
-            ctx->result() = to_string(r);
+            ctx.result() = to_string(r);
         }
 );
 

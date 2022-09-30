@@ -13,6 +13,8 @@ public:
     int x{}, y{};
 
     int GetIntResult() { return stoi(result()); }
+    void SetIntResult(int r) { result() = to_string(r); }
+    int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
 };
 
 //*****************************
@@ -53,10 +55,11 @@ const ProductionRule rule1(
                 SemanticElement(plusTerm),
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(2));
-            ctx->result() = std::to_string(n1 + n2);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(2);
+            arithmeticContext.SetIntResult(n1 + n2);
         }
 );
 
@@ -68,8 +71,8 @@ const ProductionRule rule2(
         {
                 SemanticElement(termNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -85,10 +88,11 @@ const ProductionRule rule3(
                 SemanticElement(timesTerm),
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            int n1 = stoi(ctx->SemanticValue(0));
-            int n2 = stoi(ctx->SemanticValue(2));
-            ctx->result() = std::to_string(n1 * n2);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(2);
+            arithmeticContext.SetIntResult(n1 * n2);
         }
 );
 
@@ -100,8 +104,8 @@ const ProductionRule rule4(
         {
                 SemanticElement(factorNonTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -117,8 +121,8 @@ const ProductionRule rule5(
                 SemanticElement(exprNonTerm),
                 SemanticElement(rightParenthesisTerm)
         },
-        [](EvaluationContext* ctx) {
-            ctx->result() = ctx->SemanticValue(1);
+        [](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult(1);
         }
 );
 
@@ -130,19 +134,19 @@ const ProductionRule rule6(
         {
                 SemanticElement(varTerm)
         },
-        [](EvaluationContext* ctx) {
-            auto* arithmeticContext = dynamic_cast<ArithmeticContext*>(ctx);
-            string var = ctx->SemanticValue(0);
+        [](EvaluationContext& ctx) {
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            string var = ctx.SemanticValue(0);
 
             int varValue;
             if (var == "x")
-                varValue = arithmeticContext->x;
+                varValue = arithmeticContext.x;
             else if (var == "y")
-                varValue = arithmeticContext->y;
+                varValue = arithmeticContext.y;
             else
                 varValue = 1;
 
-            ctx->result() = to_string(varValue);
+            arithmeticContext.SetIntResult(varValue);
         }
 );
 
