@@ -1,5 +1,5 @@
 #pragma once
-#include "terms.h"
+#include "term.h"
 #include "evaluation.h"
 
 //*********************************

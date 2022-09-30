@@ -22,7 +22,7 @@ if (CMAKE_BUILD_TYPE MATCHES Test)
             include/tree_node.h
             include/prune_rule.h
             include/production_rule.h
-            include/terms.h
+            include/term.h
             include/population.h
             include/genetic_operators.h
             include/environment.h
@@ -58,7 +58,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES Python)
             include/tree_node.h
             include/prune_rule.h
             include/production_rule.h
-            include/terms.h
+            include/term.h
             include/population.h
             include/genetic_operators.h
             include/environment.h

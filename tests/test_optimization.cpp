@@ -12,6 +12,8 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
+    ArithmeticContext(int px, int py) : x(px), y(py) {}
+
     int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
     int GetIntResult() { return stoi(result()); }
     void SetIntResult(int r) { result() = to_string(r); }
@@ -165,10 +167,7 @@ double fitness_function(SyntaxTree& solution)
     {
         for (int y = 0; y <= 10; y++)
         {
-            ArithmeticContext arithmeticContext;
-            arithmeticContext.x = x;
-            arithmeticContext.y = y;
-
+            ArithmeticContext arithmeticContext(x, y);;
             solution.Evaluate(arithmeticContext);
 
             int solutionValue = arithmeticContext.GetIntResult();

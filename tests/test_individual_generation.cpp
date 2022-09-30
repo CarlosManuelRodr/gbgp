@@ -12,6 +12,8 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
+    ArithmeticContext(int px, int py) : x(px), y(py) {}
+
     int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
     int GetIntResult() { return stoi(result()); }
     void SetIntResult(int r) { result() = to_string(r); }

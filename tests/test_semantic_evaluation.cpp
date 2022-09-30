@@ -12,6 +12,8 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
+    ArithmeticContext(int px, int py) : x(px), y(py) {}
+
     int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
     int GetIntResult() { return stoi(result()); }
     void SetIntResult(int r) { result() = to_string(r); }
@@ -146,10 +148,7 @@ double s_fitness_function(SyntaxTree& solution)
     {
         for (int y = 0; y <= 10; y++)
         {
-            ArithmeticContext arithmeticContext;
-            arithmeticContext.x = x;
-            arithmeticContext.y = y;
-
+            ArithmeticContext arithmeticContext(x, y);
             solution.Evaluate(arithmeticContext);
 
             int solutionValue = arithmeticContext.GetIntResult();
@@ -182,10 +181,7 @@ TEST_CASE("Test arithmetic evaluation")
     // GP Generator grammar
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
     SyntaxTree cst;
-
-    ArithmeticContext arithmeticContext;
-    arithmeticContext.x = 4;
-    arithmeticContext.y = 5;
+    ArithmeticContext arithmeticContext(4, 5);
 
     grammar.CreateRandomTree(cst, 100);
 
