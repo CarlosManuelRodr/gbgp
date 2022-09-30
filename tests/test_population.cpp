@@ -12,10 +12,9 @@ class ArithmeticContext : public EvaluationContext
 public:
     int x{}, y{};
 
-    int GetResult()
-    {
-        return stoi(result());
-    }
+    int GetIntSemanticValue(int index) { return stoi(SemanticValue(index)); }
+    int GetIntResult() { return stoi(result()); }
+    void SetIntResult(int r) { result() = to_string(r); }
 };
 
 //*****************************
@@ -50,9 +49,10 @@ const ProductionRule rule1(
                 SemanticElement(termNonTerm)
         },
         [](EvaluationContext& ctx) {
-            int n1 = stoi(ctx.SemanticValue(0));
-            int n2 = stoi(ctx.SemanticValue(1));
-            ctx.result() = std::to_string(n1 + n2);
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            arithmeticContext.SetIntResult(n1 + n2);
         }
 );
 
@@ -65,7 +65,7 @@ const ProductionRule rule2(
                 SemanticElement(termNonTerm)
         },
         [](EvaluationContext& ctx) {
-            ctx.result() = ctx.SemanticValue(0);
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -81,9 +81,10 @@ const ProductionRule rule3(
                 SemanticElement(factorNonTerm)
         },
         [](EvaluationContext& ctx) {
-            int n1 = stoi(ctx.SemanticValue(0));
-            int n2 = stoi(ctx.SemanticValue(1));
-            ctx.result() = std::to_string(n1 * n2);
+            auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
+            int n1 = arithmeticContext.GetIntSemanticValue(0);
+            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            arithmeticContext.SetIntResult(n1 * n2);
         }
 );
 
@@ -96,7 +97,7 @@ const ProductionRule rule4(
                 SemanticElement(factorNonTerm)
         },
         [](EvaluationContext& ctx) {
-            ctx.result() = ctx.SemanticValue(0);
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -111,7 +112,7 @@ const ProductionRule rule5(
                 SemanticElement(")")
         },
         [](EvaluationContext& ctx) {
-            ctx.result() = ctx.SemanticValue(0);
+            ctx.TransferSemanticValueToResult();
         }
 );
 
@@ -152,7 +153,7 @@ double fitness_function_pop(SyntaxTree& solution)
 
             solution.Evaluate(arithmeticContext);
 
-            int solutionValue = arithmeticContext.GetResult();
+            int solutionValue = arithmeticContext.GetIntResult();
             int expectedValue = target_func_pop(x, y);
 
             diff.push_back(abs(solutionValue - expectedValue));
