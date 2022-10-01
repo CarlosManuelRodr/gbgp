@@ -19,30 +19,35 @@ struct ProductionElement
     NonTerminal nonterm;
     Terminal term;
 
-    ProductionElement()
-    {
-        type = ProductionElementType::Unassigned;
-        nonterm = NonTerminal();
-        term = Terminal();
-    }
+    /// Terminal element constructor.
+    /// \param pterm The Terminal element.
     explicit ProductionElement(const Terminal& pterm)
     {
         type = ProductionElementType::Terminal;
         term = pterm;
         nonterm = NonTerminal();
     }
-    ProductionElement(int pid, const std::string& psymbol)
+
+    explicit ProductionElement(const std::string& value)
     {
         type = ProductionElementType::Terminal;
-        term = Terminal(pid, psymbol);
+        term = Terminal(value);
         nonterm = NonTerminal();
     }
-    ProductionElement(int pid, const std::string& psymbol, const std::vector<std::string>& pvalue)
+
+    /// Terminal constructor with possible values.
+    /// \param id The Terminal id.
+    /// \param label The label of the Terminal.
+    /// \param values List of possible values for this Terminal.
+    ProductionElement(int id, const std::string& label, const std::vector<std::string>& values)
     {
         type = ProductionElementType::Terminal;
-        term = Terminal(pid, psymbol, pvalue);
+        term = Terminal(id, label, values);
         nonterm = NonTerminal();
     }
+
+    /// NonTerminal element constructor.
+    /// \param pnonterm The NonTerminal element.
     explicit ProductionElement(const NonTerminal& pnonterm)
     {
         type = ProductionElementType::NonTerminal;
@@ -82,76 +87,6 @@ struct ProductionElement
 };
 
 //*********************************
-//*  Semantic element definition  *
-//********************************/
-
-enum class SemanticElementType
-{
-    NonTerminal, Terminal, String
-};
-
-/// Single target element of a semantic rule. It is used for describing how an expression will be synthesized.
-struct SemanticElement
-{
-    SemanticElementType type;
-    NonTerminal nonterm;
-    Terminal term;
-    std::string string;
-
-    explicit SemanticElement(const Terminal& pterm)
-    {
-        type = SemanticElementType::Terminal;
-        term = pterm;
-        nonterm = NonTerminal();
-        string = "";
-    }
-    explicit SemanticElement(const NonTerminal& pnonterm)
-    {
-        type = SemanticElementType::NonTerminal;
-        term = Terminal();
-        nonterm = pnonterm;
-        string = "";
-    }
-    explicit SemanticElement(const std::string& pstring)
-    {
-        type = SemanticElementType::String;
-        term = Terminal();
-        nonterm = NonTerminal();
-        string = pstring;
-    }
-
-    [[nodiscard]]
-    std::string GetTypeStr() const
-    {
-        switch (type)
-        {
-            case SemanticElementType::NonTerminal:
-                return "NonTerminal";
-            case SemanticElementType::Terminal:
-                return "Terminal";
-            case SemanticElementType::String:
-            default:
-                return "String";
-        }
-    }
-
-    [[nodiscard]]
-    std::string GetValue() const
-    {
-        switch (type)
-        {
-            case SemanticElementType::NonTerminal:
-                return nonterm.label;
-            case SemanticElementType::Terminal:
-                return term.label;
-            case SemanticElementType::String:
-            default:
-                return string;
-        }
-    }
-};
-
-//*********************************
 //*   Production rule definition  *
 //********************************/
 
@@ -162,7 +97,6 @@ struct ProductionRule
 {
     NonTerminal from;
     std::vector<ProductionElement> to;
-    std::vector<SemanticElement> semanticRules;
     std::function<void(EvaluationContext&)> semanticAction {};
 
     ProductionRule()
@@ -173,13 +107,22 @@ struct ProductionRule
     ProductionRule(
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto,
-            const std::vector<SemanticElement>& psemrules,
-            std::function<void(EvaluationContext&)> pSemanticAction = nullptr)
+            std::function<void(EvaluationContext&)> pSemanticAction)
     {
         from = pfrom;
         to = pto;
-        semanticRules = psemrules;
         semanticAction = std::move(pSemanticAction);
+    }
+    ProductionRule(
+            const NonTerminal& pfrom,
+            const std::vector<ProductionElement>& pto,
+            int semanticTransferIndex = 0)
+    {
+        from = pfrom;
+        to = pto;
+        semanticAction = [semanticTransferIndex](EvaluationContext& ctx) {
+            ctx.TransferSemanticValueToResult(semanticTransferIndex);
+        };
     }
 
     [[nodiscard]]
@@ -201,12 +144,6 @@ struct ProductionRule
     }
 
     [[nodiscard]]
-    std::vector<SemanticElement> GetSemanticRules() const
-    {
-        return semanticRules;
-    }
-
-    [[nodiscard]]
     std::function<void(EvaluationContext&)> GetSemanticAction() const
     {
         return semanticAction;
@@ -219,9 +156,9 @@ struct ProductionRule
         output += " -> ";
 
         int index = 0;
-        for (const auto& prodElement: semanticRules)
+        for (const auto& prodElement: to)
         {
-            output += prodElement.GetValue() + ((index == semanticRules.size() - 1) ? "" : " ");
+            output += prodElement.GetValue() + ((index == to.size() - 1) ? "" : " ");
             index++;
         }
         return output;

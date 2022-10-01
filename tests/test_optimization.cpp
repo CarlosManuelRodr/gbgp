@@ -47,16 +47,7 @@ const NonTerminal factorNonTerm(Factor, "FACTOR");
 // Grammar definition.
 const ProductionRule rule1(
         exprNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-                ProductionElement(plusTerm),
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(exprNonTerm),
-                SemanticElement(plusTerm),
-                SemanticElement(termNonTerm)
-        },
+        { ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             int n1 = arithmeticContext.GetIntSemanticValue(0);
@@ -67,29 +58,12 @@ const ProductionRule rule1(
 
 const ProductionRule rule2(
         exprNonTerm,
-        {
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm)
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult();
-        }
+        { ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule3(
         termNonTerm,
-        {
-                ProductionElement(termNonTerm),
-                ProductionElement(timesTerm),
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm),
-                SemanticElement(timesTerm),
-                SemanticElement(factorNonTerm)
-        },
+        { ProductionElement(termNonTerm), ProductionElement(timesTerm), ProductionElement(factorNonTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             int n1 = arithmeticContext.GetIntSemanticValue(0);
@@ -100,42 +74,18 @@ const ProductionRule rule3(
 
 const ProductionRule rule4(
         termNonTerm,
-        {
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(factorNonTerm)
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult();
-        }
+        { ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule5(
         factorNonTerm,
-        {
-                ProductionElement(leftParenthesisTerm),
-                ProductionElement(exprNonTerm),
-                ProductionElement(rightParenthesisTerm)
-        },
-        {
-                SemanticElement(leftParenthesisTerm),
-                SemanticElement(exprNonTerm),
-                SemanticElement(rightParenthesisTerm)
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult(1);
-        }
+        { ProductionElement(leftParenthesisTerm), ProductionElement(exprNonTerm), ProductionElement(rightParenthesisTerm) },
+        1
 );
 
 const ProductionRule rule6(
         factorNonTerm,
-        {
-                ProductionElement(varTerm),
-        },
-        {
-                SemanticElement(varTerm)
-        },
+        { ProductionElement(varTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             string var = ctx.SemanticValue(0);

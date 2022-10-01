@@ -34,18 +34,13 @@ const NonTerminal unsignedPercentageExpressionNonTerm(UnsignedPercentageExpressi
 const ProductionRule rule1(
         conditionalNonTerm,
         {
+                ProductionElement("("),
                 ProductionElement(conditionalNonTerm),
+                ProductionElement(") "),
                 ProductionElement(logicOpTerm),
-                ProductionElement(conditionalNonTerm)
-        },
-        {
-                SemanticElement("("),
-                SemanticElement(conditionalNonTerm),
-                SemanticElement(") "),
-                SemanticElement(logicOpTerm),
-                SemanticElement(" ("),
-                SemanticElement(conditionalNonTerm),
-                SemanticElement(")")
+                ProductionElement(" ("),
+                ProductionElement(conditionalNonTerm),
+                ProductionElement(")")
         }
 );
 
@@ -54,10 +49,6 @@ const ProductionRule rule2(
         {
                 ProductionElement(notTerm),
                 ProductionElement(conditionalNonTerm)
-        },
-        {
-                SemanticElement(notTerm),
-                SemanticElement(conditionalNonTerm)
         }
 );
 
@@ -65,15 +56,10 @@ const ProductionRule rule3(
         conditionalNonTerm,
         {
                 ProductionElement(priceExpressionNonTerm),
+                ProductionElement(" "),
                 ProductionElement(numOpTerm),
+                ProductionElement(" "),
                 ProductionElement(priceExpressionNonTerm)
-        },
-        {
-                SemanticElement(priceExpressionNonTerm),
-                SemanticElement(" "),
-                SemanticElement(numOpTerm),
-                SemanticElement(" "),
-                SemanticElement(priceExpressionNonTerm)
         }
 );
 
@@ -81,15 +67,10 @@ const ProductionRule rule4(
         conditionalNonTerm,
         {
                 ProductionElement(volumeExpressionNonTerm),
+                ProductionElement(" "),
                 ProductionElement(numOpTerm),
+                ProductionElement(" "),
                 ProductionElement(volumeExpressionNonTerm)
-        },
-        {
-                SemanticElement(volumeExpressionNonTerm),
-                SemanticElement(" "),
-                SemanticElement(numOpTerm),
-                SemanticElement(" "),
-                SemanticElement(volumeExpressionNonTerm)
         }
 );
 
@@ -97,15 +78,10 @@ const ProductionRule rule5(
         conditionalNonTerm,
         {
                 ProductionElement(signedPercentageExpressionNonTerm),
+                ProductionElement(" "),
                 ProductionElement(numOpTerm),
+                ProductionElement(" "),
                 ProductionElement(signedPercentageExpressionNonTerm)
-        },
-        {
-                SemanticElement(signedPercentageExpressionNonTerm),
-                SemanticElement(" "),
-                SemanticElement(numOpTerm),
-                SemanticElement(" "),
-                SemanticElement(signedPercentageExpressionNonTerm)
         }
 );
 
@@ -113,123 +89,90 @@ const ProductionRule rule6(
         conditionalNonTerm,
         {
                 ProductionElement(unsignedPercentageExpressionNonTerm),
+                ProductionElement(" "),
                 ProductionElement(numOpTerm),
+                ProductionElement(" "),
                 ProductionElement(unsignedPercentageExpressionNonTerm)
-        },
-        {
-                SemanticElement(unsignedPercentageExpressionNonTerm),
-                SemanticElement(" "),
-                SemanticElement(numOpTerm),
-                SemanticElement(" "),
-                SemanticElement(unsignedPercentageExpressionNonTerm)
         }
 );
 
 const ProductionRule rule7(
         priceExpressionNonTerm,
         {
-                ProductionElement(priceIndTerm)
-        },
-        {
-                SemanticElement("Indicator(\""),
-                SemanticElement(priceIndTerm),
-                SemanticElement("\", stock, time)")
+                ProductionElement("Indicator(\""),
+                ProductionElement(priceIndTerm),
+                ProductionElement("\", stock, time)")
         }
 );
 
 const ProductionRule rule8(
         priceExpressionNonTerm,
         {
+                ProductionElement("IndQuantile(\""),
                 ProductionElement(priceIndTerm),
+                ProductionElement("\", "),
                 ProductionElement(percentileTerm),
-        },
-        {
-                SemanticElement("IndQuantile(\""),
-                SemanticElement(priceIndTerm),
-                SemanticElement("\", "),
-                SemanticElement(percentileTerm),
-                SemanticElement(", stock, time)")
+                ProductionElement(", stock, time)")
         }
 );
 
 const ProductionRule rule9(
         volumeExpressionNonTerm,
         {
-                ProductionElement(volumeIndTerm)
-        },
-        {
-                SemanticElement("Indicator(\""),
-                SemanticElement(volumeIndTerm),
-                SemanticElement("\", stock, time)")
+                ProductionElement("Indicator(\""),
+                ProductionElement(volumeIndTerm),
+                ProductionElement("\", stock, time)")
         }
 );
 
 const ProductionRule rule10(
         volumeExpressionNonTerm,
         {
+                ProductionElement("IndQuantile(\""),
                 ProductionElement(volumeIndTerm),
+                ProductionElement("\", "),
                 ProductionElement(percentileTerm),
-        },
-        {
-                SemanticElement("IndQuantile(\""),
-                SemanticElement(volumeIndTerm),
-                SemanticElement("\", "),
-                SemanticElement(percentileTerm),
-                SemanticElement(", stock, time)")
+                ProductionElement(", stock, time)")
         }
 );
 
 const ProductionRule rule11(
         signedPercentageExpressionNonTerm,
         {
-                ProductionElement(signedIndTerm)
-        },
-        {
-                SemanticElement("Indicator(\""),
-                SemanticElement(signedIndTerm),
-                SemanticElement("\", stock, time)")
+                ProductionElement("Indicator(\""),
+                ProductionElement(signedIndTerm),
+                ProductionElement("\", stock, time)")
         }
 );
 
 const ProductionRule rule12(
         signedPercentageExpressionNonTerm,
         {
+                ProductionElement("IndQuantile(\""),
                 ProductionElement(signedIndTerm),
+                ProductionElement("\", "),
                 ProductionElement(percentileTerm),
-        },
-        {
-                SemanticElement("IndQuantile(\""),
-                SemanticElement(signedIndTerm),
-                SemanticElement("\", "),
-                SemanticElement(percentileTerm),
-                SemanticElement(", stock, time)")
+                ProductionElement(", stock, time)")
         }
 );
 
 const ProductionRule rule13(
         unsignedPercentageExpressionNonTerm,
         {
-                ProductionElement(unsignedIndTerm)
-        },
-        {
-                SemanticElement("Indicator(\""),
-                SemanticElement(unsignedIndTerm),
-                SemanticElement("\", stock, time)")
+                ProductionElement("Indicator(\""),
+                ProductionElement(unsignedIndTerm),
+                ProductionElement("\", stock, time)")
         }
 );
 
 const ProductionRule rule14(
         unsignedPercentageExpressionNonTerm,
         {
+                ProductionElement("IndQuantile(\""),
                 ProductionElement(unsignedIndTerm),
+                ProductionElement("\", "),
                 ProductionElement(percentileTerm),
-        },
-        {
-                SemanticElement("IndQuantile(\""),
-                SemanticElement(unsignedIndTerm),
-                SemanticElement("\", "),
-                SemanticElement(percentileTerm),
-                SemanticElement(", stock, time)")
+                ProductionElement(", stock, time)")
         }
 );
 
@@ -238,7 +181,7 @@ const ProductionRule rule14(
 ****************************/
 TEST_CASE("Testing random individual generation")
 {
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
+    Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8,
                     rule9, rule10, rule11, rule12, rule13, rule14 };
 
     SyntaxTree cst;

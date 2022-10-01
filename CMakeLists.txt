@@ -3,10 +3,10 @@ project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CONFIGURATION_TYPES "Test;Python" CACHE STRING "" FORCE)
-message("Available build types are: ${CMAKE_CONFIGURATION_TYPES}")
+#set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Python" CACHE STRING "" FORCE)
+#message("Available build types are: ${CMAKE_CONFIGURATION_TYPES}")
 
-if (CMAKE_BUILD_TYPE MATCHES Test)
+if (CMAKE_BUILD_TYPE MATCHES Debug)
     message("Compiling unit tests" )
 
     include_directories(third-party/doctest/doctest)

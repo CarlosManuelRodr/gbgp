@@ -30,74 +30,32 @@ const NonTerminal factorNonTerm(Factor, "FACTOR");
 // Grammar definition.
 const ProductionRule rule1(
         exprNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-                ProductionElement(plusTerm),
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(exprNonTerm),
-                SemanticElement(plusTerm),
-                SemanticElement(termNonTerm)
-        }
+        { ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule2(
         exprNonTerm,
-        {
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm)
-        }
+        { ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule3(
         termNonTerm,
-        {
-                ProductionElement(termNonTerm),
-                ProductionElement(timesTerm),
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm),
-                SemanticElement(timesTerm),
-                SemanticElement(factorNonTerm)
-        }
+        { ProductionElement(termNonTerm), ProductionElement(timesTerm), ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule4(
         termNonTerm,
-        {
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(factorNonTerm)
-        }
+        { ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule5(
         factorNonTerm,
-        {
-                ProductionElement(leftParenthesisTerm),
-                ProductionElement(exprNonTerm),
-                ProductionElement(rightParenthesisTerm),
-        },
-        {
-                SemanticElement(leftParenthesisTerm),
-                SemanticElement(exprNonTerm),
-                SemanticElement(rightParenthesisTerm)
-        }
+        { ProductionElement(leftParenthesisTerm), ProductionElement(exprNonTerm), ProductionElement(rightParenthesisTerm) }
 );
 
 const ProductionRule rule6(
         factorNonTerm,
-        {
-                ProductionElement(varTerm),
-        },
-        {
-                SemanticElement(varTerm)
-        }
+        { ProductionElement(varTerm) }
 );
 
 /****************************

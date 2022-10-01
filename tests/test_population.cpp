@@ -25,7 +25,8 @@ public:
 
 enum Terms
 {
-    Var, Expr, Term, Factor
+    Var, Plus, Times, LeftParenthesis, RightParenthesis, // Terminals
+    Expr, Term, Factor // NonTerminals
 };
 
 //*****************************
@@ -33,7 +34,12 @@ enum Terms
 //****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", { "x", "y" });
+const Terminal varTerm(Var, "var", { "x", "y", "1" });
+const Terminal plusTerm(Plus, "Plus", { "+" });
+const Terminal timesTerm(Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(RightParenthesis, "RightParenthesis", { ")" });
+
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -41,96 +47,50 @@ const NonTerminal factorNonTerm(Factor, "FACTOR");
 // Grammar definition.
 const ProductionRule rule1(
         exprNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(exprNonTerm),
-                SemanticElement("+"),
-                SemanticElement(termNonTerm)
-        },
+        { ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             int n1 = arithmeticContext.GetIntSemanticValue(0);
-            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            int n2 = arithmeticContext.GetIntSemanticValue(2);
             arithmeticContext.SetIntResult(n1 + n2);
         }
 );
 
 const ProductionRule rule2(
         exprNonTerm,
-        {
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm)
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult();
-        }
+        { ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule3(
         termNonTerm,
-        {
-                ProductionElement(termNonTerm),
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm),
-                SemanticElement("*"),
-                SemanticElement(factorNonTerm)
-        },
+        { ProductionElement(termNonTerm), ProductionElement(timesTerm), ProductionElement(factorNonTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             int n1 = arithmeticContext.GetIntSemanticValue(0);
-            int n2 = arithmeticContext.GetIntSemanticValue(1);
+            int n2 = arithmeticContext.GetIntSemanticValue(2);
             arithmeticContext.SetIntResult(n1 * n2);
         }
 );
 
 const ProductionRule rule4(
         termNonTerm,
-        {
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(factorNonTerm)
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult();
-        }
+        { ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule5(
         factorNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-        },
-        {
-                SemanticElement("("),
-                SemanticElement(exprNonTerm),
-                SemanticElement(")")
-        },
-        [](EvaluationContext& ctx) {
-            ctx.TransferSemanticValueToResult();
-        }
+        { ProductionElement(leftParenthesisTerm), ProductionElement(exprNonTerm), ProductionElement(rightParenthesisTerm) },
+        1
 );
 
 const ProductionRule rule6(
         factorNonTerm,
-        {
-                ProductionElement(varTerm),
-        },
-        {
-                SemanticElement(varTerm)
-        },
+        { ProductionElement(varTerm) },
         [](EvaluationContext& ctx) {
             auto& arithmeticContext = dynamic_cast<ArithmeticContext&>(ctx);
             string var = ctx.SemanticValue(0);
             int varValue = var == "x" ? arithmeticContext.x : arithmeticContext.y;
-            ctx.result() = to_string(varValue);
+            arithmeticContext.SetIntResult(varValue);
         }
 );
 
@@ -167,9 +127,10 @@ double fitness_function_pop(SyntaxTree& solution)
 
 TEST_CASE("Test population initialization")
 {
-    Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6 };
+    Grammar grammar{ rule1, rule2, rule3, rule4, rule5, rule6 };
     Population population(grammar, fitness_function_pop);
     population.Initialize(100);
+    population.Evaluate();
 
     cout << "Initial population scores" << endl;
     for (auto fitness : population.GetFitness())

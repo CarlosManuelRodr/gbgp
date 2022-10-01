@@ -9,7 +9,8 @@ using namespace std;
 
 enum Terms
 {
-    Var, Expr, Term, Factor
+    Var, Plus, Times, LeftParenthesis, RightParenthesis, // Terminals
+    Expr, Term, Factor // NonTerminals
 };
 
 /****************************
@@ -17,7 +18,12 @@ enum Terms
 ****************************/
 
 // Term/Nonterm declaration.
-const Terminal varTerm(Var, "var", {"1", "2", "3" });
+const Terminal varTerm(Var, "var", { "a", "b", "c" });
+const Terminal plusTerm(Plus, "Plus", { "+" });
+const Terminal timesTerm(Times, "Times", { "*" });
+const Terminal leftParenthesisTerm(LeftParenthesis, "LeftParenthesis", { "(" });
+const Terminal rightParenthesisTerm(RightParenthesis, "RightParenthesis", { ")" });
+
 const NonTerminal exprNonTerm(Expr, "EXPR");
 const NonTerminal termNonTerm(Term, "TERM");
 const NonTerminal factorNonTerm(Factor, "FACTOR");
@@ -25,70 +31,32 @@ const NonTerminal factorNonTerm(Factor, "FACTOR");
 // Grammar definition.
 const ProductionRule rule1(
         exprNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(exprNonTerm),
-                SemanticElement("+"),
-                SemanticElement(termNonTerm)
-        }
+        { ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule2(
         exprNonTerm,
-        {
-                ProductionElement(termNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm)
-        }
+        { ProductionElement(termNonTerm) }
 );
 
 const ProductionRule rule3(
         termNonTerm,
-        {
-                ProductionElement(termNonTerm),
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(termNonTerm),
-                SemanticElement("*"),
-                SemanticElement(factorNonTerm)
-        }
+        { ProductionElement(termNonTerm), ProductionElement(timesTerm), ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule4(
         termNonTerm,
-        {
-                ProductionElement(factorNonTerm)
-        },
-        {
-                SemanticElement(factorNonTerm)
-        }
+        { ProductionElement(factorNonTerm) }
 );
 
 const ProductionRule rule5(
         factorNonTerm,
-        {
-                ProductionElement(exprNonTerm),
-        },
-        {
-                SemanticElement("("),
-                SemanticElement(exprNonTerm),
-                SemanticElement(")")
-        }
+        { ProductionElement(leftParenthesisTerm), ProductionElement(exprNonTerm), ProductionElement(rightParenthesisTerm) }
 );
 
 const ProductionRule rule6(
         factorNonTerm,
-        {
-                ProductionElement(varTerm),
-        },
-        {
-                SemanticElement(varTerm)
-        }
+        { ProductionElement(varTerm) }
 );
 
 /****************************

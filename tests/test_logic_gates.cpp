@@ -37,20 +37,16 @@ const NonTerminal logExprNonTerm(LogExpr, "LOG_EXPR");
 const ProductionRule rule1(
         arrayNonTerm,
         {
+                ProductionElement("{"),
                 ProductionElement(logExprNonTerm),
-                ProductionElement(logExprNonTerm)
-        },
-        {
-                SemanticElement("{"),
-                SemanticElement(logExprNonTerm),
-                SemanticElement(", "),
-                SemanticElement(logExprNonTerm),
-                SemanticElement("}")
+                ProductionElement(", "),
+                ProductionElement(logExprNonTerm),
+                ProductionElement("}")
         },
         [](EvaluationContext& ctx) {
             auto& booleanContext = dynamic_cast<BooleanContext&>(ctx);
-            booleanContext.y0 = stoi(ctx.SemanticValue(0));
-            booleanContext.y1 = stoi(ctx.SemanticValue(1));
+            booleanContext.y0 = stoi(ctx.SemanticValue(1));
+            booleanContext.y1 = stoi(ctx.SemanticValue(3));
             ctx.result() = "{" + to_string(booleanContext.y0) + "," + to_string(booleanContext.y1) + "}";
         }
 );
@@ -58,22 +54,17 @@ const ProductionRule rule1(
 const ProductionRule rule2(
         logExprNonTerm,
         {
-            ProductionElement(logOpTerm),
-            ProductionElement(logExprNonTerm),
-            ProductionElement(logExprNonTerm)
-        },
-        {
-            SemanticElement(logOpTerm),
-            SemanticElement("("),
-            SemanticElement(logExprNonTerm),
-            SemanticElement(","),
-            SemanticElement(logExprNonTerm),
-            SemanticElement(")"),
+                ProductionElement(logOpTerm),
+                ProductionElement("("),
+                ProductionElement(logExprNonTerm),
+                ProductionElement(","),
+                ProductionElement(logExprNonTerm),
+                ProductionElement(")")
         },
         [](EvaluationContext& ctx) {
             string op = ctx.SemanticValue(0);
-            bool a = stoi(ctx.SemanticValue(1));
-            bool b = stoi(ctx.SemanticValue(2));
+            bool a = stoi(ctx.SemanticValue(2));
+            bool b = stoi(ctx.SemanticValue(4));
             bool r;
             if (op == "And")
                 r = a && b;
@@ -90,16 +81,12 @@ const ProductionRule rule3(
         logExprNonTerm,
         {
                 ProductionElement(notOpTerm),
+                ProductionElement("("),
                 ProductionElement(logExprNonTerm),
-        },
-        {
-                SemanticElement(notOpTerm),
-                SemanticElement("("),
-                SemanticElement(logExprNonTerm),
-                SemanticElement(")")
+                ProductionElement(")")
         },
         [](EvaluationContext& ctx) {
-            bool a = stoi(ctx.SemanticValue(1));
+            bool a = stoi(ctx.SemanticValue(2));
             ctx.result() = to_string(!a);
         }
 );
@@ -108,9 +95,6 @@ const ProductionRule rule4(
         logExprNonTerm,
         {
                 ProductionElement(varTerm),
-        },
-        {
-                SemanticElement(varTerm),
         },
         [](EvaluationContext& ctx) {
             auto& booleanContext = dynamic_cast<BooleanContext&>(ctx);

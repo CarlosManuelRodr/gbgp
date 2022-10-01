@@ -24,6 +24,12 @@ struct Terminal
         id = -1;
         label = '\0';
     }
+    explicit Terminal(const std::string& value)
+    {
+        id = -1;
+        label = value;
+        values.push_back(value);
+    }
     Terminal(int pid, const std::string& plabel)
     {
         id = pid;
@@ -39,11 +45,11 @@ struct Terminal
 
     bool operator==(const Terminal& other) const
     {
-        return id == other.id;
+        return id != -1 ? id == other.id : label == other.label;
     }
     bool operator!=(const Terminal& other) const
     {
-        return id != other.id;
+        return id != -1 ? id != other.id : label != other.label;
     }
 
     [[nodiscard]]
@@ -88,10 +94,10 @@ struct NonTerminal
 
     bool operator==(const NonTerminal& other) const
     {
-        return id == other.id;
+        return id != -1 ? id == other.id : label == other.label;
     }
     bool operator!=(const NonTerminal& other) const
     {
-        return id != other.id;
+        return id != -1 ? id != other.id : label != other.label;
     }
 };

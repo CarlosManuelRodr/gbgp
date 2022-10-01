@@ -562,11 +562,9 @@ public:
         std::vector<size_t> toErase;
 
         // Process the elements of treeTraversal that match the semantic rules.
-        for (const SemanticElement& se : rule.semanticRules)
+        for (const ProductionElement& se : rule.to)
         {
-            if (se.type == SemanticElementType::String)
-                synthesis += se.string;
-            else if (se.type == SemanticElementType::NonTerminal)
+            if (se.type == ProductionElementType::NonTerminal)
             {
                 const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != std::nullopt)
@@ -581,7 +579,7 @@ public:
                     throw std::runtime_error(errorReport);
                 }
             }
-            else if (se.type == SemanticElementType::Terminal)
+            else if (se.type == ProductionElementType::Terminal)
             {
                 const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
                 if (pos != std::nullopt)
