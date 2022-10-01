@@ -497,8 +497,9 @@ public:
         for (const ProductionElement& se : rule.to)
         {
             const std::optional<size_t> pos = (se.type == ProductionElementType::NonTerminal) ?
-                    FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules()) :
-                    FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                    FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
+                                       rule.NumberOfProductionElements()) :
+                    FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfProductionElements());
 
             if (pos != std::nullopt)
             {
@@ -566,7 +567,8 @@ public:
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
+                                                                     rule.NumberOfProductionElements());
                 if (pos != std::nullopt)
                 {
                     synthesis += treeTraversal[pos.value()]->expressionSynthesis;
@@ -581,7 +583,8 @@ public:
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex,
+                                                                  rule.NumberOfProductionElements());
                 if (pos != std::nullopt)
                 {
                     synthesis += treeTraversal[pos.value()]->termValue;
@@ -643,7 +646,8 @@ public:
         {
             if (se.type == ProductionElementType::NonTerminal)
             {
-                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex, rule.NumberOfRules());
+                const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
+                                                                     rule.NumberOfProductionElements());
                 if (pos != std::nullopt)
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->expressionEvaluation);
@@ -658,7 +662,8 @@ public:
             }
             else if (se.type == ProductionElementType::Terminal)
             {
-                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfRules());
+                const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex,
+                                                                  rule.NumberOfProductionElements());
                 if (pos != -1)
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->termValue);

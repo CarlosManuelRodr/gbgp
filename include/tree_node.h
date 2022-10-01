@@ -8,7 +8,7 @@ enum class TreeNodeType
     None, NonTerminal, Terminal
 };
 
-/// Represents a node of an n-ary _tree
+/// Represents a node of an n-ary tree
 struct TreeNode
 {
     /// Type of the node.
@@ -23,7 +23,7 @@ struct TreeNode
     /// Production rule from which this node is part of.
     ProductionRule generatorPR;
 
-    /// Parent of the node. If the node is a _root, its value will be null.
+    /// Parent of the node. If the node is a root, its value will be null.
     TreeNode* parent;
 
     /// List of references to the children of this node.

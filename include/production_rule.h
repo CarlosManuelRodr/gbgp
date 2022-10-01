@@ -28,6 +28,8 @@ struct ProductionElement
         nonterm = NonTerminal();
     }
 
+    /// Terminal constructor with unique values.
+    /// \param value The value.
     explicit ProductionElement(const std::string& value)
     {
         type = ProductionElementType::Terminal;
@@ -35,7 +37,7 @@ struct ProductionElement
         nonterm = NonTerminal();
     }
 
-    /// Terminal constructor with possible values.
+    /// Terminal constructor with various possible values.
     /// \param id The Terminal id.
     /// \param label The label of the Terminal.
     /// \param values List of possible values for this Terminal.
@@ -99,11 +101,17 @@ struct ProductionRule
     std::vector<ProductionElement> to;
     std::function<void(EvaluationContext&)> semanticAction {};
 
+    /// Empty ProductionRule constructor.
     ProductionRule()
     {
         from = NonTerminal();
         semanticAction = nullptr;
     }
+
+    /// Production rule with custom semantic action.
+    /// \param pfrom The From non-terminal
+    /// \param pto The To Terms
+    /// \param pSemanticAction A function to evaluate this production rule.
     ProductionRule(
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto,
@@ -113,6 +121,11 @@ struct ProductionRule
         to = pto;
         semanticAction = std::move(pSemanticAction);
     }
+
+    /// Production rule with default semantic action.
+    /// \param pfrom The From non-terminal
+    /// \param pto The To Terms
+    /// \param semanticTransferIndex The index of the ProductionElement whose value will be used on evaluation.
     ProductionRule(
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto,
@@ -126,7 +139,7 @@ struct ProductionRule
     }
 
     [[nodiscard]]
-    int NumberOfRules() const
+    int NumberOfProductionElements() const
     {
         return static_cast<int>(to.size());
     }
