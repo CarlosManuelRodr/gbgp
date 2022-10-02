@@ -188,3 +188,21 @@ std::vector<size_t> find_indexes_if(const std::vector<T>& v, UnaryPredicate pred
 
     return indexes;
 }
+
+/****************************
+*     Vector conversions    *
+****************************/
+
+std::string to_string(const std::vector<std::string>& v)
+{
+    std::string s = "[";
+    for (auto& elem : v)
+    {
+        size_t i = &elem - &v[0];
+        s += "'" + elem + "'";
+        if (i != v.size() - 1)
+            s += ",";
+    }
+    s += "]";
+    return s;
+}

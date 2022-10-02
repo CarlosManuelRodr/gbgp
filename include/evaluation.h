@@ -65,4 +65,10 @@ public:
         _semanticValues.clear();
         _result.clear();
     }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "result='" + result() + "', semanticValues='" + to_string(GetSemanticValues());
+    }
 };

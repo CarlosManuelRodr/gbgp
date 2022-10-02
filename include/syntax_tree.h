@@ -413,7 +413,7 @@ public:
         {
             for (unsigned j = replaceIndex; j < replaceIndex + replaceFromLength; j++)
             {
-                if (copyNodes[i]->SameID(traversal[j]))
+                if (copyNodes[i]->SameID(*traversal[j]))
                 {
                     copyNodes[i]->termValue = traversal[j]->termValue;
                     break;
@@ -497,8 +497,7 @@ public:
         for (const ProductionElement& se : rule.to)
         {
             const std::optional<size_t> pos = (se.type == ProductionElementType::NonTerminal) ?
-                    FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
-                                       rule.NumberOfProductionElements()) :
+                    FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,rule.NumberOfProductionElements()) :
                     FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfProductionElements());
 
             if (pos != std::nullopt)

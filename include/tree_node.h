@@ -2,7 +2,7 @@
 #include <string>
 #include "production_rule.h"
 
-/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty _tree nodes.
+/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty tree nodes.
 enum class TreeNodeType
 {
     None, NonTerminal, Terminal
@@ -184,15 +184,6 @@ struct TreeNode
     bool operator!=(const TreeNode& other) const
     {
         return !(*this == other);
-    }
-
-    /// Check if both nodes have the same term ID.
-    /// \param other The other node.
-    /// \return Whether nodes have the same ID.
-    [[nodiscard]]
-    bool SameID(TreeNode* other) const
-    {
-        return SameID(*other);
     }
 
     /// Check if both nodes have the same term ID.

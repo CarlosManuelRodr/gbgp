@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
-
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Python" CACHE STRING "Available build-types: Debug, Release and Python")
-#message("Available build types are: ${CMAKE_CONFIGURATION_TYPES}")
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if ((CMAKE_BUILD_TYPE MATCHES Debug) OR (CMAKE_BUILD_TYPE MATCHES Release))
     message("Compiling unit tests" )
 
     include_directories(third-party/doctest/doctest)
@@ -67,10 +65,10 @@ elseif(CMAKE_BUILD_TYPE MATCHES Python)
             python/bindings.cpp
             )
 
-#    add_custom_command(TARGET gbgp POST_BUILD
-#            COMMAND "${CMAKE_COMMAND}" -E copy
-#            "$<TARGET_FILE:gbgp>"
-#            "${CMAKE_CURRENT_SOURCE_DIR}/python/$<TARGET_FILE_NAME:gbgp>"
-#            COMMENT "Copying to output directory")
+    add_custom_command(TARGET gbgp POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy
+            "$<TARGET_FILE:gbgp>"
+            "${CMAKE_CURRENT_SOURCE_DIR}/python/$<TARGET_FILE_NAME:gbgp>"
+            COMMENT "Copying to output directory")
 endif()
 

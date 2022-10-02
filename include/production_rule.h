@@ -92,6 +92,12 @@ struct ProductionElement
                 return {};
         }
     }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "type='" + GetTypeStr() + "', value='" + GetValue();
+    }
 };
 
 //*********************************

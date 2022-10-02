@@ -7,7 +7,7 @@
 //*         Terminal          *
 //****************************/
 
-/// Terminal term. A terminal is a leaf node in the expression _tree that contains a value.
+/// Terminal term. A terminal is a leaf node in the expression tree that contains a value.
 struct Terminal
 {
     /// The term type.
@@ -66,13 +66,19 @@ struct Terminal
         else
             return *random_choice(values.begin(), values.end());
     }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "id='" + std::to_string(id) + "', label='" + label + "', values='" + to_string(values);
+    }
 };
 
 //*****************************
 //*        NonTerminal        *
 //****************************/
 
-/// Non-Terminal term. A non-terminal is a part of the expression _tree that contains other children nodes.
+/// Non-Terminal term. A non-terminal is a part of the expression tree that contains other children nodes.
 struct NonTerminal
 {
     /// The term type.
@@ -99,5 +105,11 @@ struct NonTerminal
     bool operator!=(const NonTerminal& other) const
     {
         return id != -1 ? id != other.id : label != other.label;
+    }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "id='" + std::to_string(id) + "', label='" + label + "'";
     }
 };

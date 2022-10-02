@@ -1,26 +1,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/operators.h>
 #include "../include/gbgp.h"
 namespace py = pybind11;
 using namespace std;
-
-//*****************************
-//*        Utilities          *
-//****************************/
-
-string to_string(const vector<string>& v)
-{
-    string s = "[";
-    for (auto& elem : v)
-    {
-        size_t i = &elem - &v[0];
-        s += "'" + elem + "'";
-        if (i != v.size() - 1)
-            s += ",";
-    }
-    s += "]";
-    return s;
-}
 
 //*****************************
 //*         Bindings          *
@@ -40,8 +23,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def_readwrite("values", &Terminal::values)
             .def("__repr__",
                  [](const Terminal &t) {
-                     return "<gbgp.Terminal id='" + to_string(t.id) +
-                     "', label='" + t.label + "', values='" + to_string(t.values) + "'>";
+                     return "<gbgp.Terminal " + t.ToString() + ">";
                  }
             );
 
@@ -52,8 +34,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def_readwrite("label", &NonTerminal::label)
             .def("__repr__",
                  [](const NonTerminal &nt) {
-                     return "<gbgp.NonTerminal id='" + to_string(nt.id) +
-                            "', label='" + nt.label + "'>";
+                     return "<gbgp.NonTerminal " + nt.ToString() + ">";
                  }
             );
 
@@ -67,8 +48,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def("NumberOfSemanticValues", &EvaluationContext::NumberOfSemanticValues)
             .def("__repr__",
                  [](const EvaluationContext &ctx) {
-                     return "<gbgp.EvaluationContext result='" + ctx.result() +
-                            "', semanticValues='" + to_string(ctx.GetSemanticValues()) + "'>";
+                     return "<gbgp.EvaluationContext " + ctx.ToString() + ">";
                  }
             );
 
@@ -87,8 +67,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetValue", &ProductionElement::GetValue)
             .def("__repr__",
                  [](const ProductionElement &pe) {
-                     return "<gbgp.ProductionElement type='" + pe.GetTypeStr() +
-                            "', value='" + pe.GetValue() + "'>";
+                     return "<gbgp.ProductionElement " + pe.ToString() + ">";
                  }
             );
 
@@ -104,7 +83,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetSemanticAction", &ProductionRule::GetSemanticAction)
             .def("__repr__",
                  [](const ProductionRule &pr) {
-                     return "<gbgp.ProductionRule value='" + pr.ToString() + "'>";
+                     return "<gbgp.ProductionRule '" + pr.ToString() + "'>";
                  }
             );
 
@@ -122,7 +101,17 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>())
             .def(py::init<const ProductionRule&, const NonTerminal&>())
             .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>())
-            //.def("GetSemanticAction", &ProductionRule::GetSemanticAction)
+            .def(py::self == py::self)
+            .def(py::self != py::self)
+            .def("SameID", &TreeNode::SameID)
+            .def("ClearSynthesis", &TreeNode::ClearSynthesis)
+            .def("IsSynthesized", &TreeNode::IsSynthesized)
+            .def("ClearEvaluation", &TreeNode::ClearEvaluation)
+            .def("IsEvaluated", &TreeNode::IsEvaluated)
+            .def("HasChildren", &TreeNode::HasChildren)
+            .def("GetValue", &TreeNode::GetValue)
+            .def("GetLabel", &TreeNode::GetLabel)
+            .def("ToString", &TreeNode::ToString)
             .def("__repr__",
                  [](const TreeNode &node) {
                      return "<gbgp.TreeNode value='" + node.ToString() + "'>";
