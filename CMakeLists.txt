@@ -3,7 +3,7 @@ project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Python" CACHE STRING "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Python" CACHE STRING "Available build-types: Debug, Release and Python")
 #message("Available build types are: ${CMAKE_CONFIGURATION_TYPES}")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)

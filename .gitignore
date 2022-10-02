@@ -35,7 +35,7 @@
 .idea
 cmake-build-debug
 cmake-build-release
-cmake-build-pythonbindings
+cmake-build-python
 cmake-build-unittestsdebug
 .vs
 out

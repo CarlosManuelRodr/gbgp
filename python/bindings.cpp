@@ -72,12 +72,17 @@ PYBIND11_MODULE(gbgp, m) {
                  }
             );
 
+    py::enum_<ProductionElementType>(m, "ProductionElementType")
+            .value("Unassigned", ProductionElementType::Unassigned)
+            .value("NonTerminal", ProductionElementType::NonTerminal)
+            .value("Terminal", ProductionElementType::Terminal);
+
     py::class_<ProductionElement>(m, "ProductionElement")
-            .def(py::init<>())
+            .def(py::init<const std::string&>())
             .def(py::init<const Terminal&>())
             .def(py::init<const NonTerminal&>())
-            .def(py::init<int, const std::string&>())
             .def(py::init<int, const std::string&, const std::vector<std::string>&>())
+            .def("GetType", &ProductionElement::GetType)
             .def("GetTypeStr", &ProductionElement::GetTypeStr)
             .def("GetValue", &ProductionElement::GetValue)
             .def("__repr__",
@@ -87,32 +92,40 @@ PYBIND11_MODULE(gbgp, m) {
                  }
             );
 
-    py::class_<SemanticElement>(m, "SemanticElement")
-            .def(py::init<const Terminal&>())
-            .def(py::init<const NonTerminal&>())
-            .def(py::init<const std::string&>())
-            .def("GetTypeStr", &SemanticElement::GetTypeStr)
-            .def("GetValue", &SemanticElement::GetValue)
-            .def("__repr__",
-                 [](const SemanticElement &se) {
-                     return "<gbgp.SemanticElement type='" + se.GetTypeStr() +
-                            "', value='" + se.GetValue() + "'>";
-                 }
-            );
-
     py::class_<ProductionRule>(m, "ProductionRule")
             .def(py::init<>())
-            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, const std::vector<SemanticElement>&>())
-            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, const std::vector<SemanticElement>&, std::function<void(EvaluationContext*)>>())
-            .def("NumberOfRules", &ProductionRule::NumberOfRules)
+            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&>())
+            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, int>())
+            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>())
+            .def("NumberOfProductionElements", &ProductionRule::NumberOfProductionElements)
             .def("ToString", &ProductionRule::ToString)
             .def("GetFrom", &ProductionRule::GetFrom)
             .def("GetTo", &ProductionRule::GetTo)
-            .def("GetSemanticRules", &ProductionRule::GetSemanticRules)
             .def("GetSemanticAction", &ProductionRule::GetSemanticAction)
             .def("__repr__",
                  [](const ProductionRule &pr) {
                      return "<gbgp.ProductionRule value='" + pr.ToString() + "'>";
+                 }
+            );
+
+    py::enum_<TreeNodeType>(m, "TreeNodeType")
+            .value("None", TreeNodeType::None)
+            .value("NonTerminal", TreeNodeType::NonTerminal)
+            .value("Terminal", TreeNodeType::Terminal);
+
+    py::class_<TreeNode>(m, "TreeNode")
+            .def(py::init<>())
+            .def(py::init<const TreeNode&>())
+            .def(py::init<const Terminal&>())
+            .def(py::init<const Terminal&, const std::string&>())
+            .def(py::init<const NonTerminal&>())
+            .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>())
+            .def(py::init<const ProductionRule&, const NonTerminal&>())
+            .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>())
+            //.def("GetSemanticAction", &ProductionRule::GetSemanticAction)
+            .def("__repr__",
+                 [](const TreeNode &node) {
+                     return "<gbgp.TreeNode value='" + node.ToString() + "'>";
                  }
             );
 }

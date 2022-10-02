@@ -58,6 +58,12 @@ struct ProductionElement
     }
 
     [[nodiscard]]
+    ProductionElementType GetType() const
+    {
+        return type;
+    }
+
+    [[nodiscard]]
     std::string GetTypeStr() const
     {
         switch (type)
@@ -122,6 +128,11 @@ struct ProductionRule
         semanticAction = std::move(pSemanticAction);
     }
 
+    ProductionRule(
+            const NonTerminal& pfrom,
+            const std::vector<ProductionElement>& pto)
+            : ProductionRule(pfrom, pto, 0) {}
+
     /// Production rule with default semantic action.
     /// \param pfrom The From non-terminal
     /// \param pto The To Terms
@@ -129,7 +140,7 @@ struct ProductionRule
     ProductionRule(
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto,
-            int semanticTransferIndex = 0)
+            int semanticTransferIndex)
     {
         from = pfrom;
         to = pto;
