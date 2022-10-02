@@ -150,15 +150,6 @@ public:
         return *this;
     }
 
-    /// Set the production rule of the root node.
-    /// \param startRule The production rule.
-    void SetRootRule(const ProductionRule& startRule)
-    {
-        _root = new TreeNode(startRule.from);
-        _root->parent = nullptr;
-        _root->generatorPR = startRule;
-    }
-
     /// Destroy the tree by deleting all its nodes.
     void Destroy()
     {
@@ -194,6 +185,15 @@ public:
     //**************************
     //*    Tree manipulation   *
     //*************************/
+
+    /// Set the production rule of the root node.
+    /// \param startRule The production rule.
+    void SetRootRule(const ProductionRule& startRule)
+    {
+        _root = new TreeNode(startRule.from);
+        _root->parent = nullptr;
+        _root->generatorPR = startRule;
+    }
 
     /// Check if the tree is empty.
     [[nodiscard]]
@@ -349,6 +349,14 @@ public:
             SyntaxTree::PrintNodeAsTree(stream, n, 1);
             PrintTree(stream, n, 2);
         }
+    }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        PrintTree(ss);
+        return ss.str();
     }
 
     /// Performs a shallow copy of each node.

@@ -28,7 +28,7 @@ struct ProductionElement
         nonterm = NonTerminal();
     }
 
-    /// Terminal constructor with unique values.
+    /// Terminal constructor with unique value.
     /// \param value The value.
     explicit ProductionElement(const std::string& value)
     {
@@ -57,12 +57,14 @@ struct ProductionElement
         nonterm = pnonterm;
     }
 
+    /// Get the production element type.
     [[nodiscard]]
     ProductionElementType GetType() const
     {
         return type;
     }
 
+    /// Get production element type as a string.
     [[nodiscard]]
     std::string GetTypeStr() const
     {
@@ -78,6 +80,7 @@ struct ProductionElement
         }
     }
 
+    /// Get the label value of the production element.
     [[nodiscard]]
     std::string GetValue() const
     {
@@ -93,6 +96,7 @@ struct ProductionElement
         }
     }
 
+    /// Get a string representation.
     [[nodiscard]]
     std::string ToString() const
     {
@@ -104,8 +108,8 @@ struct ProductionElement
 //*   Production rule definition  *
 //********************************/
 
-/// A rule that describes how to build the next sub-nodes from a given Non-Term. It can also contain
-/// a set of semantic rules for synthesizing an expression from the rule and a semantic action, which is
+/// A rule that describes how to build the next sub-nodes from a given Non-Terminal. It can also contain
+/// a set of semantic rules for synthesizing an expression and evaluating it using a semantic action, which is
 /// a function that evaluates a node using its children values.
 struct ProductionRule
 {
@@ -120,28 +124,17 @@ struct ProductionRule
         semanticAction = nullptr;
     }
 
-    /// Production rule with custom semantic action.
-    /// \param pfrom The From non-terminal
-    /// \param pto The To Terms
-    /// \param pSemanticAction A function to evaluate this production rule.
-    ProductionRule(
-            const NonTerminal& pfrom,
-            const std::vector<ProductionElement>& pto,
-            std::function<void(EvaluationContext&)> pSemanticAction)
-    {
-        from = pfrom;
-        to = pto;
-        semanticAction = std::move(pSemanticAction);
-    }
-
+    /// Production rule with default semantic action.
+    /// \param pfrom The From non-terminal.
+    /// \param pto The To Terms.
     ProductionRule(
             const NonTerminal& pfrom,
             const std::vector<ProductionElement>& pto)
             : ProductionRule(pfrom, pto, 0) {}
 
     /// Production rule with default semantic action.
-    /// \param pfrom The From non-terminal
-    /// \param pto The To Terms
+    /// \param pfrom The From non-terminal.
+    /// \param pto The To Terms.
     /// \param semanticTransferIndex The index of the ProductionElement whose value will be used on evaluation.
     ProductionRule(
             const NonTerminal& pfrom,
@@ -155,30 +148,49 @@ struct ProductionRule
         };
     }
 
+    /// Production rule with custom semantic action.
+    /// \param pfrom The From non-terminal.
+    /// \param pto The To Terms.
+    /// \param pSemanticAction A function to evaluate this production rule.
+    ProductionRule(
+            const NonTerminal& pfrom,
+            const std::vector<ProductionElement>& pto,
+            std::function<void(EvaluationContext&)> pSemanticAction)
+    {
+        from = pfrom;
+        to = pto;
+        semanticAction = std::move(pSemanticAction);
+    }
+
+    /// Returns the number of production elements.
     [[nodiscard]]
     int NumberOfProductionElements() const
     {
         return static_cast<int>(to.size());
     }
 
+    /// Getter for the from list.
     [[nodiscard]]
     NonTerminal GetFrom() const
     {
         return from;
     }
 
+    /// Getter for the to list.
     [[nodiscard]]
     std::vector<ProductionElement> GetTo() const
     {
         return to;
     }
 
+    /// Getter for the semantic action.
     [[nodiscard]]
     std::function<void(EvaluationContext&)> GetSemanticAction() const
     {
         return semanticAction;
     }
 
+    /// Get a string representation.
     [[nodiscard]]
     std::string ToString() const
     {

@@ -35,6 +35,7 @@ public:
         return _semanticValues.at(index);
     }
 
+    /// Get the list of semantic values.
     [[nodiscard]]
     std::vector<std::string> GetSemanticValues() const
     {
@@ -48,12 +49,15 @@ public:
         _semanticValues.push_back(value);
     }
 
+    /// Get the total number of semantic values.
     [[nodiscard]]
     unsigned NumberOfSemanticValues() const
     {
         return _semanticValues.size();
     }
 
+    /// Transfer the semantic value at the specified index to the result.
+    /// \param index The semantic value index.
     void TransferSemanticValueToResult(unsigned index = 0)
     {
         result() = SemanticValue(index);
@@ -66,6 +70,7 @@ public:
         _result.clear();
     }
 
+    /// Get the string representation.
     [[nodiscard]]
     std::string ToString() const
     {

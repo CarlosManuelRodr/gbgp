@@ -77,7 +77,7 @@ struct TreeNode
             AddChildNode(new TreeNode(c), this);
     }
 
-    /// NonTerminal node constructor.
+    /// NonTerminal node constructor with generator production rule.
     /// \param productionRule The production rule that builds this node.
     /// \param nt The NonTerminal type.
     TreeNode(const ProductionRule& productionRule, const NonTerminal& nt)

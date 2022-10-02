@@ -13,7 +13,7 @@ struct Terminal
     /// The term type.
     int id;
 
-    /// Used for debugging and visual representation of rules and trees.
+    /// The label used visual representation and debugging of rules and trees.
     std::string label;
 
     /// List of possible terminal values that a node of this type can contain.
@@ -52,12 +52,14 @@ struct Terminal
         return id != -1 ? id != other.id : label != other.label;
     }
 
+    /// Does this terminal have multiple possible values?
     [[nodiscard]]
     bool IsMutable() const
     {
         return values.size() > 1;
     }
 
+    /// Get a random value of the set of possible values.
     [[nodiscard]]
     std::string GetRandomValue() const
     {
