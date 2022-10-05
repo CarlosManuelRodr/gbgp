@@ -69,10 +69,11 @@ struct Terminal
             return *random_choice(values.begin(), values.end());
     }
 
+    /// Get string representation.
     [[nodiscard]]
     std::string ToString() const
     {
-        return "id='" + std::to_string(id) + "', label='" + label + "', values='" + to_string(values);
+        return "id='" + std::to_string(id) + "', label='" + label + "', values='" + vector_to_string(values);
     }
 };
 
@@ -89,11 +90,16 @@ struct NonTerminal
     /// Used for debugging and visual representation of rules and trees.
     std::string label;
 
+    /// Empty constructor.
     NonTerminal()
     {
         id = -1;
         label = '\0';
     }
+
+    /// Constructor by id and label.
+    /// \param pid The id.
+    /// \param plabel The label.
     NonTerminal(int pid, const std::string& plabel)
     {
         id = pid;
@@ -109,6 +115,7 @@ struct NonTerminal
         return id != -1 ? id != other.id : label != other.label;
     }
 
+    /// Get string representation.
     [[nodiscard]]
     std::string ToString() const
     {

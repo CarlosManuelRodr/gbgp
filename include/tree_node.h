@@ -204,7 +204,7 @@ struct TreeNode
             return false;
     }
 
-    /// Reset the synthesis of this node
+    /// Reset the synthesis of this node.
     void ClearSynthesis()
     {
         expressionSynthesis.clear();
@@ -217,7 +217,7 @@ struct TreeNode
         return !expressionSynthesis.empty();
     }
 
-    /// Reset the evaluation of this node
+    /// Reset the evaluation of this node.
     void ClearEvaluation()
     {
         expressionEvaluation.clear();
@@ -244,6 +244,47 @@ struct TreeNode
         if (nodeParent != nullptr)
             node->parent = nodeParent;
         children.push_back(node);
+    }
+
+    /// Add child NonTerminal node to the target.
+    /// \param nonTerm NonTerminal instance.
+    /// \param generatorPR Production rule from which this node is part of.
+    /// \return Pointer to the newly created node.
+    TreeNode* AddChildNode(const NonTerminal& nonTerm, const ProductionRule& pgeneratorPR)
+    {
+        auto* newNode = new TreeNode(nonTerm);
+        newNode->generatorPR = pgeneratorPR;
+        newNode->parent = this;
+        AddChildNode(newNode);
+        return newNode;
+    }
+
+    /// Add child Terminal node to the target. If the Terminal has only one possible value, sets it as the termValue.
+    /// If not, leaves the value empty.
+    /// \param target Node where the child will be placed.
+    /// \param term Terminal instance.
+    /// \return Pointer to the newly created node.
+    TreeNode* AddChildNode(const Terminal& term)
+    {
+        auto* newNode = new TreeNode(term);
+        newNode->termValue = term.GetRandomValue();
+        newNode->parent = this;
+        AddChildNode(newNode);
+        return newNode;
+    }
+
+    /// Add child Terminal node to the target.
+    /// \param target Node where the child will be placed.
+    /// \param term Terminal instance.
+    /// \param termValue Terminal value.
+    /// \return Pointer to the newly created node.
+    TreeNode* AddChildNode(const Terminal& term, const std::string& ptermValue)
+    {
+        auto* newNode = new TreeNode(term);
+        newNode->termValue = ptermValue;
+        newNode->parent = this;
+        this->AddChildNode(newNode);
+        return newNode;
     }
 
     /// Returns the value of the node.

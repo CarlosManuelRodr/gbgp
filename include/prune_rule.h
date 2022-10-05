@@ -8,6 +8,20 @@ private:
     std::vector<TreeNode*> _pruneRuleFromTraversal;
     std::vector<TreeNode*> _pruneRuleToTraversal;
 
+    static std::string TraversalToString(std::vector<TreeNode*> traversal)
+    {
+        std::string out = "[";
+        for (auto& node : traversal)
+        {
+            size_t i = &node - &traversal[0];
+            out += node->ToString();
+            if (i != traversal.size() - 1)
+                out += ", ";
+        }
+        out += "]";
+        return out;
+    }
+
 public:
     /// Constructor by SyntaxTree.
     /// \param pruneRuleFrom Prune rule from as SyntaxTree.
@@ -18,6 +32,7 @@ public:
         _pruneRuleToTraversal = pruneRuleTo.GetTreeTraversal();
     }
 
+    /// Does the target tree can be simplified further with this rule?
     bool CanBeApplied(const SyntaxTree& target)
     {
         std::vector<TreeNode*> treeTraversal = target.GetTreeTraversal();
@@ -35,5 +50,12 @@ public:
                                                                                            _pruneRuleFromTraversal,
                                                                                            _pruneRuleToTraversal);
         SyntaxTree::BuildFromTraversal(target, replacedTraversal);
+    }
+
+    /// Get string representation.
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "from=" + TraversalToString(_pruneRuleFromTraversal) + ", to=" + TraversalToString(_pruneRuleToTraversal);
     }
 };

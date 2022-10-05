@@ -74,6 +74,6 @@ public:
     [[nodiscard]]
     std::string ToString() const
     {
-        return "result='" + result() + "', semanticValues='" + to_string(GetSemanticValues());
+        return "result='" + result() + "', semanticValues='" + vector_to_string(GetSemanticValues());
     }
 };

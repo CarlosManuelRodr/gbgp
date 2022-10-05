@@ -80,7 +80,7 @@ private:
         TreeNode* randomNonTerm = *random_choice(mutableNonTerminals.begin(), mutableNonTerminals.end());
 
         // Remove branch and create subtree.
-        tree.RemoveSubtree(randomNonTerm);
+        tree.DeleteSubtree(randomNonTerm);
         SyntaxTree replacement;
         grammar.CreateRandomTree(replacement, 50, randomNonTerm->generatorPR);
         tree.InsertSubtree(randomNonTerm, replacement);
@@ -151,7 +151,7 @@ public:
         TreeNode* randomNonTermParent1 = GetRandomNodeOfType(mutableNonTerminalsParent1, sharedNonTerminals);
         TreeNode* randomNonTermParent2 = GetRandomNodeOfType(mutableNonTerminalsParent2, randomNonTermParent1->nonTermInstance);
 
-        treeParent1.RemoveSubtree(randomNonTermParent1);
+        treeParent1.DeleteSubtree(randomNonTermParent1);
         treeParent1.InsertSubtree(randomNonTermParent1, randomNonTermParent2);
 
         return Individual(parent1.GetFitnessFunction(), treeParent1);

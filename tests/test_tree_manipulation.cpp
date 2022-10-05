@@ -86,42 +86,42 @@ TEST_CASE("Testing subtree insertion")
     // First tree. Procedural construction.
     SyntaxTree ast1;
     ast1.SetRootRule(rule1);
-    auto leftExpr1 = SyntaxTree::AddNode(ast1.Root(), exprNonTerm, rule2);
-    auto middleSum1 = SyntaxTree::AddNode(ast1.Root(), plusTerm);
-    auto rightTerm1 = SyntaxTree::AddNode(ast1.Root(), termNonTerm, rule3);
+    auto leftExpr1 = ast1.Root()->AddChildNode(exprNonTerm, rule2);
+    auto middleSum1 = ast1.Root()->AddChildNode(plusTerm);
+    auto rightTerm1 = ast1.Root()->AddChildNode(termNonTerm, rule3);
 
-    auto leftTerm1 = SyntaxTree::AddNode(leftExpr1, termNonTerm, rule4);
-    auto leftFactor1 = SyntaxTree::AddNode(leftTerm1, factorNonTerm, rule6);
-    auto leftVar1 = SyntaxTree::AddNode(leftFactor1, varTerm, "a");
+    auto leftTerm1 = leftExpr1->AddChildNode(termNonTerm, rule4);
+    auto leftFactor1 = leftTerm1->AddChildNode(factorNonTerm, rule6);
+    auto leftVar1 = leftFactor1->AddChildNode(varTerm, "a");
 
-    auto rightLeftTerm1 = SyntaxTree::AddNode(rightTerm1, termNonTerm, rule4);
-    auto rightMultiplication1 = SyntaxTree::AddNode(rightTerm1, timesTerm);
-    auto rightRightFactor1 = SyntaxTree::AddNode(rightTerm1, factorNonTerm, rule6);
+    auto rightLeftTerm1 = rightTerm1->AddChildNode(termNonTerm, rule4);
+    auto rightMultiplication1 = rightTerm1->AddChildNode(timesTerm);
+    auto rightRightFactor1 = rightTerm1->AddChildNode(factorNonTerm, rule6);
 
-    auto rightLeftFactor1 = SyntaxTree::AddNode(rightLeftTerm1, factorNonTerm, rule6);
-    auto rightLeftVar1 = SyntaxTree::AddNode(rightLeftFactor1, varTerm, "a");
+    auto rightLeftFactor1 = rightLeftTerm1->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftVar1 = rightLeftFactor1->AddChildNode(varTerm, "a");
 
-    auto rightRightVar1 = SyntaxTree::AddNode(rightRightFactor1, varTerm, "a");
+    auto rightRightVar1 = rightRightFactor1->AddChildNode(varTerm, "a");
 
     // Second tree. Procedural construction.
     SyntaxTree ast2;
     ast2.SetRootRule(rule1);
-    auto leftExpr2 = SyntaxTree::AddNode(ast2.Root(), exprNonTerm, rule2);
-    auto middleSum2 = SyntaxTree::AddNode(ast2.Root(), plusTerm);
-    auto rightTerm2 = SyntaxTree::AddNode(ast2.Root(), termNonTerm, rule3);
+    auto leftExpr2 = ast2.Root()->AddChildNode(exprNonTerm, rule2);
+    auto middleSum2 = ast2.Root()->AddChildNode(plusTerm);
+    auto rightTerm2 = ast2.Root()->AddChildNode(termNonTerm, rule3);
 
-    auto leftTerm2 = SyntaxTree::AddNode(leftExpr2, termNonTerm, rule4);
-    auto leftFactor2 = SyntaxTree::AddNode(leftTerm2, factorNonTerm, rule6);
-    auto leftVar2 = SyntaxTree::AddNode(leftFactor2, varTerm, "c");
+    auto leftTerm2 = leftExpr2->AddChildNode(termNonTerm, rule4);
+    auto leftFactor2 = leftTerm2->AddChildNode(factorNonTerm, rule6);
+    auto leftVar2 = leftFactor2->AddChildNode(varTerm, "c");
 
-    auto rightLeftTerm2 = SyntaxTree::AddNode(rightTerm2, termNonTerm, rule4);
-    auto rightMultiplication2 = SyntaxTree::AddNode(rightTerm2, timesTerm);
-    auto rightRightFactor2 = SyntaxTree::AddNode(rightTerm2, factorNonTerm, rule6);
+    auto rightLeftTerm2 = rightTerm2->AddChildNode(termNonTerm, rule4);
+    auto rightMultiplication2 = rightTerm2->AddChildNode(timesTerm);
+    auto rightRightFactor2 = rightTerm2->AddChildNode(factorNonTerm, rule6);
 
-    auto rightLeftFactor2 = SyntaxTree::AddNode(rightLeftTerm2, factorNonTerm, rule6);
-    auto rightLeftVar2 = SyntaxTree::AddNode(rightLeftFactor2, varTerm, "b");
+    auto rightLeftFactor2 = rightLeftTerm2->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftVar2 = rightLeftFactor2->AddChildNode(varTerm, "b");
 
-    auto rightRightVar2 = SyntaxTree::AddNode(rightRightFactor2, varTerm, "b");
+    auto rightRightVar2 = rightRightFactor2->AddChildNode(varTerm, "b");
 
     // Third tree. Declarative construction.
     SyntaxTree ast3(
@@ -177,8 +177,8 @@ TEST_CASE("Testing subtree insertion")
     CHECK(ast2.SynthesizeExpression() == "c+b*b");
     CHECK(ast3.SynthesizeExpression() == "c+b*b");
 
-    ast1.RemoveSubtree(rightTerm1);
-    SyntaxTree subtree = SyntaxTree::GetSubtree(rightTerm2);
+    ast1.DeleteSubtree(rightTerm1);
+    SyntaxTree subtree = SyntaxTree::CopySubtree(rightTerm2);
     ast1.InsertSubtree(rightTerm1, subtree);
 
     CHECK(ast1.SynthesizeExpression() == "a+b*b");
@@ -191,22 +191,22 @@ TEST_CASE("Test random subtree replacement")
     // Original tree.
     SyntaxTree tree;
     tree.SetRootRule(rule1);
-    auto leftExpr = SyntaxTree::AddNode(tree.Root(), exprNonTerm, rule2);
-    auto middleSum = SyntaxTree::AddNode(tree.Root(), plusTerm);
-    auto rightTerm = SyntaxTree::AddNode(tree.Root(), termNonTerm, rule3);
+    auto leftExpr = tree.Root()->AddChildNode(exprNonTerm, rule2);
+    auto middleSum = tree.Root()->AddChildNode(plusTerm);
+    auto rightTerm = tree.Root()->AddChildNode(termNonTerm, rule3);
 
-    auto leftTerm = SyntaxTree::AddNode(leftExpr, termNonTerm, rule4);
-    auto leftFactor = SyntaxTree::AddNode(leftTerm, factorNonTerm, rule6);
-    auto leftVar = SyntaxTree::AddNode(leftFactor, varTerm, "a");
+    auto leftTerm = leftExpr->AddChildNode(termNonTerm, rule4);
+    auto leftFactor = leftTerm->AddChildNode(factorNonTerm, rule6);
+    auto leftVar = leftFactor->AddChildNode(varTerm, "a");
 
-    auto rightLeftTerm = SyntaxTree::AddNode(rightTerm, termNonTerm, rule4);
-    auto rightMultiplication = SyntaxTree::AddNode(rightTerm, timesTerm);
-    auto rightRightFactor = SyntaxTree::AddNode(rightTerm, factorNonTerm, rule6);
+    auto rightLeftTerm = rightTerm->AddChildNode(termNonTerm, rule4);
+    auto rightMultiplication = rightTerm->AddChildNode(timesTerm);
+    auto rightRightFactor = rightTerm->AddChildNode(factorNonTerm, rule6);
 
-    auto rightLeftFactor = SyntaxTree::AddNode(rightLeftTerm, factorNonTerm, rule6);
-    auto rightLeftVar = SyntaxTree::AddNode(rightLeftFactor, varTerm, "a");
+    auto rightLeftFactor = rightLeftTerm->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftVar = rightLeftFactor->AddChildNode(varTerm, "a");
 
-    auto rightRightVar = SyntaxTree::AddNode(rightRightFactor, varTerm, "a");
+    auto rightRightVar = rightRightFactor->AddChildNode(varTerm, "a");
 
     string originalSynth = tree.SynthesizeExpression();
     cout << "Original: " << originalSynth << endl;
@@ -216,7 +216,7 @@ TEST_CASE("Test random subtree replacement")
     TreeNode* randomNonTerm = *random_choice(nonTerminals.begin(), nonTerminals.end());
 
     // Remove branch and create subtree.
-    tree.RemoveSubtree(randomNonTerm);
+    tree.DeleteSubtree(randomNonTerm);
     SyntaxTree replacement;
     grammar.CreateRandomTree(replacement, 50, randomNonTerm->generatorPR);
     tree.InsertSubtree(randomNonTerm, replacement);

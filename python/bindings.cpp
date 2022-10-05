@@ -9,8 +9,24 @@ using namespace std;
 //*         Bindings          *
 //****************************/
 
+struct Pet {
+    Pet(const std::string& name, int age) : name(name), age(age) { }
+    bool set(int& age_) { age = age_; return true; }
+    bool set(EvaluationContext& ctx) const { return true; }
+    bool set(const std::string& name_) { name = name_; return true;  }
+    bool Evaluate(EvaluationContext& ctx) const { return true; }
+    std::string name;
+    int age;
+};
+
 PYBIND11_MODULE(gbgp, m) {
     m.doc() = "gbgp python bindings"; // optional module docstring
+
+    py::class_<Pet>(m, "Pet")
+            .def(py::init<const std::string &, int>())
+            .def("set", py::overload_cast<int&>(&Pet::set), "Set the pet's age")
+            .def("set", py::overload_cast<EvaluationContext&>(&Pet::set, py::const_), "Set the pet's age")
+            .def("set", static_cast<bool (Pet::*)(const std::string &)>(&Pet::set), "Set the pets name");
 
     py::class_<Terminal>(m, "Terminal")
             .def(py::init<>())
@@ -102,43 +118,56 @@ PYBIND11_MODULE(gbgp, m) {
 
     py::class_<TreeNode>(m, "TreeNode")
             .def(py::init<>(), "Constructor of an empty node.")
-            .def(py::init<const TreeNode&>(), "Copy constructor that copies all linked nodes.")
-            .def(py::init<const Terminal&>(), "Terminal node constructor.")
-            .def(py::init<const Terminal&, const std::string&>(), "Terminal node with value constructor.")
-            .def(py::init<const NonTerminal&>(), "NonTerminal node constructor.")
-            .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor with explicit children instances.")
-            .def(py::init<const ProductionRule&, const NonTerminal&>(), "NonTerminal node constructor with generator production rule.")
-            .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own children nodes.")
+            .def(py::init<const TreeNode&>(), "Copy constructor that copies all linked nodes.", py::arg("other"))
+            .def(py::init<const Terminal&>(), "Terminal node constructor.", py::arg("t"))
+            .def(py::init<const Terminal&, const std::string&>(), "Terminal node with value constructor.", py::arg("t"), py::arg("value"))
+            .def(py::init<const NonTerminal&>(), "NonTerminal node constructor.", py::arg("nt"))
+            .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor with explicit children instances.", py::arg("nt"), py::arg("children"))
+            .def(py::init<const ProductionRule&, const NonTerminal&>(), "NonTerminal node constructor with generator production rule.", py::arg("productionRule"), py::arg("nt"))
+            .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own children nodes.",py::arg("productionRule"), py::arg("nt"), py::arg("children"))
             .def(py::self == py::self)
             .def(py::self != py::self)
-            .def("SameID", &TreeNode::SameID)
-            .def("ClearSynthesis", &TreeNode::ClearSynthesis)
-            .def("IsSynthesized", &TreeNode::IsSynthesized)
-            .def("ClearEvaluation", &TreeNode::ClearEvaluation)
-            .def("IsEvaluated", &TreeNode::IsEvaluated)
-            .def("HasChildren", &TreeNode::HasChildren)
-            .def("GetValue", &TreeNode::GetValue)
-            .def("GetLabel", &TreeNode::GetLabel)
-            .def("ToString", &TreeNode::ToString)
+            .def("ClearSynthesis", &TreeNode::ClearSynthesis, "Reset the synthesis of this node.")
+            .def("IsSynthesized", &TreeNode::IsSynthesized, "Check if this node has been synthesized.")
+            .def("ClearEvaluation", &TreeNode::ClearEvaluation, "Reset the evaluation of this node.")
+            .def("IsEvaluated", &TreeNode::IsEvaluated, "Check if this node has been evaluated.")
+            .def("HasChildren", &TreeNode::HasChildren, "Check if this node has children.")
+            .def("GetValue", &TreeNode::GetValue, "Returns the value of the node.")
+            .def("GetLabel", &TreeNode::GetLabel, "Returns a formatted label of the node.")
+            .def("ToString", &TreeNode::ToString, "Get node representation as string.")
             .def("__repr__",
                  [](const TreeNode &node) {
-                     return "<gbgp.TreeNode value='" + node.ToString() + "'>";
+                     return "<gbgp.TreeNode '" + node.ToString() + "'>";
                  }
             );
 
     py::class_<SyntaxTree>(m, "SyntaxTree")
-            .def(py::init<>())
-            .def(py::init<const TreeNode&>())
-            .def(py::init<const SyntaxTree&>())
-            .def("IsEmpty", &SyntaxTree::IsEmpty)
-            .def("SetRootRule", &SyntaxTree::SetRootRule)
-            .def("ToString", &SyntaxTree::ToString)
-            .def("GetTreeTraversal", &SyntaxTree::GetTreeTraversal)
-            .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression)
-            //.def("Evaluate", &SyntaxTree::Evaluate)
+            .def(py::init<>(), "Creates an empty SyntaxTree.")
+            .def(py::init<const TreeNode&>(), "Builds a tree from a root node.", py::arg("root"))
+            .def(py::init<const SyntaxTree&>(), "Copy constructor.", py::arg("other"))
+            .def("Root", &SyntaxTree::Root, "Returns a reference to the root.")
+            .def("SetRoot", &SyntaxTree::SetRoot, "Set the root node.", py::arg("rootNode"))
+            .def("IsEmpty", &SyntaxTree::IsEmpty, "Check if the tree is empty.")
+            .def("SetRootRule", &SyntaxTree::SetRootRule, "Set the production rule of the root node.", py::arg("startRule"))
+            .def("ToString", &SyntaxTree::ToString, "Get string representation.")
+            .def("GetTreeTraversal", &SyntaxTree::GetTreeTraversal, "Traverses the tree in a depth first post-order.")
+            .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression, "Synthesizes the tree into an expression using the production rules of the grammar.")
+            .def("Evaluate", py::overload_cast<EvaluationContext&>(&SyntaxTree::Evaluate, py::const_), "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
+            .def("ExternalEvaluate", py::overload_cast<function<string(string)>, string&>(&SyntaxTree::ExternalEvaluate<string>, py::const_), "Evaluates the tree using an external evaluator.", py::arg("evaluator"), py::arg("result"))
             .def("__repr__",
                  [](const SyntaxTree &tree) {
                      return "<gbgp.SyntaxTree '" + tree.ToString() + "'>";
+                 }
+            );
+
+    py::class_<PruneRule>(m, "PruneRule")
+            .def(py::init<const SyntaxTree&, const SyntaxTree&>(), "Constructor by SyntaxTree.")
+            .def("CanBeApplied", &PruneRule::CanBeApplied, "Does the target tree can be simplified further with this rule?", py::arg("target"))
+            .def("Apply", &PruneRule::Apply, "Create a new SyntaxTree where the prune rule has been applied.")
+            .def("ToString", &PruneRule::ToString, "Get string representation.")
+            .def("__repr__",
+                 [](const PruneRule &pruneRule) {
+                     return "<gbgp.PruneRule '" + pruneRule.ToString() + "'>";
                  }
             );
 }

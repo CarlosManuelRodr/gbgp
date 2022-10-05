@@ -89,27 +89,25 @@ public:
     //**************************************************/
 
     /// Creates an empty SyntaxTree.
-    /// \param grammar The formal grammar of the SyntaxTree.
     SyntaxTree()
     {
         _root = nullptr;
     }
 
     /// Builds a tree from a root node.
-    /// \param proot Pointer to the root of the tree.
-    /// \param deepCopy If set to true, it will copy the tree into a new instance.
-    explicit SyntaxTree(TreeNode* proot)
+    /// \param root Pointer to the root of the tree.
+    explicit SyntaxTree(TreeNode* root)
     {
-        _root = proot;
+        _root = root;
         _root->parent = nullptr;
         this->ClearEvaluation();
     }
 
     /// Builds a tree from a root node.
-    /// \param proot Root of the tree.
-    explicit SyntaxTree(const TreeNode& proot)
+    /// \param root Root of the tree.
+    explicit SyntaxTree(const TreeNode& root)
     {
-        _root = new TreeNode(proot);
+        _root = new TreeNode(root);
         _root->parent = nullptr;
         this->ClearEvaluation();
     }
@@ -123,15 +121,6 @@ public:
         this->ClearEvaluation();
     }
 
-    /// Copy constructor from reference.
-    /// \param other Pointer to the SyntaxTree to be copied.
-    explicit SyntaxTree(SyntaxTree* other)
-    {
-        _root = new TreeNode(*other->_root);
-        _root->parent = nullptr;
-        this->ClearEvaluation();
-    }
-
     ~SyntaxTree()
     {
         this->Destroy();
@@ -139,7 +128,7 @@ public:
 
     SyntaxTree& operator=(const SyntaxTree& other)
     {
-        // self-assignment check
+        // Self-assignment check
         if (this == &other)
             return *this;
 
@@ -210,6 +199,8 @@ public:
         return _root;
     }
 
+    /// Set the root node.
+    /// \param rootNode Pointer to the root node.
     void SetRoot(TreeNode* rootNode)
     {
         if (_root != nullptr)
@@ -218,51 +209,9 @@ public:
         _root = rootNode;
     }
 
-    /// Add child NonTerminal node to the target.
-    /// \param target Node where the child will be placed.
-    /// \param nonTerm NonTerminal instance.
-    /// \param generatorPR Production rule from which this node is part of.
-    /// \return Pointer to the newly created node.
-    static TreeNode* AddNode(TreeNode* target, const NonTerminal& nonTerm, const ProductionRule& generatorPR)
-    {
-        auto* newNode = new TreeNode(nonTerm);
-        newNode->generatorPR = generatorPR;
-        newNode->parent = target;
-        target->AddChildNode(newNode);
-        return newNode;
-    }
-
-    /// Add child Terminal node to the target. If the Terminal has only one possible value, sets it as the termValue.
-    /// If not, leaves the value empty.
-    /// \param target Node where the child will be placed.
-    /// \param term Terminal instance.
-    /// \return Pointer to the newly created node.
-    static TreeNode* AddNode(TreeNode* target, const Terminal& term)
-    {
-        auto* newNode = new TreeNode(term);
-        newNode->termValue = term.GetRandomValue();
-        newNode->parent = target;
-        target->AddChildNode(newNode);
-        return newNode;
-    }
-
-    /// Add child Terminal node to the target.
-    /// \param target Node where the child will be placed.
-    /// \param term Terminal instance.
-    /// \param termValue Terminal value.
-    /// \return Pointer to the newly created node.
-    static TreeNode* AddNode(TreeNode* target, const Terminal& term, const std::string& termValue)
-    {
-        auto* newNode = new TreeNode(term);
-        newNode->termValue = termValue;
-        newNode->parent = target;
-        target->AddChildNode(newNode);
-        return newNode;
-    }
-
     /// Removes the subtree starting from rootOfSubtree.
     /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
-    void RemoveSubtree(TreeNode* rootOfSubtree)
+    void DeleteSubtree(TreeNode* rootOfSubtree)
     {
         std::vector<TreeNode*> nodeList = this->GetTreeTraversal(rootOfSubtree);
         nodeList.pop_back();
@@ -282,7 +231,7 @@ public:
     /// \param subTreeStartNode Root node of subtree.
     /// \return A new SyntaxTree starting from the subTreeStartNode.
     [[nodiscard]]
-    static SyntaxTree GetSubtree(TreeNode* subTreeStartNode)
+    static SyntaxTree CopySubtree(TreeNode* subTreeStartNode)
     {
         auto* subtreeRoot = new TreeNode(*subTreeStartNode);
         subtreeRoot->parent = nullptr;
@@ -351,6 +300,7 @@ public:
         }
     }
 
+    /// Get string representation.
     [[nodiscard]]
     std::string ToString() const
     {
@@ -607,7 +557,7 @@ public:
         delete_elements_at_indexes(treeTraversal, toErase);
     }
 
-    /// Synthesizes the tree into an expression using the semantic rules of the grammar.
+    /// Synthesizes the tree into an expression using the production rules of the grammar.
     /// \return The synthesized expression as a std::string.
     [[nodiscard]]
     std::string SynthesizeExpression() const
@@ -633,7 +583,7 @@ public:
         return treeTraversal.size();
     }
 
-    /// Evaluate the first non-evaluate node and deletes the consumed nodes.
+    /// ExternalEvaluate the first non-evaluate node and deletes the consumed nodes.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
     /// \param evaluationContext reference to the evaluation context.
     static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext& evaluationContext)
@@ -693,16 +643,16 @@ public:
         delete_elements_at_indexes(treeTraversal, toErase);
     }
 
-    /// Evaluates the tree using the production rules of the grammar.
-    /// \param evaluationContext reference to the evaluation context.
+    /// Evaluates the tree using the semantic actions of the grammar.
+    /// \param ctx reference to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
-    bool Evaluate(EvaluationContext& evaluationContext) const
+    bool Evaluate(EvaluationContext& ctx) const
     {
         std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
         for (auto node : treeTraversal) node->ClearEvaluation();
 
         while (treeTraversal.size() > 1)
-            EvaluateFirst(treeTraversal, evaluationContext);
+            EvaluateFirst(treeTraversal, ctx);
 
         return true;
     }
@@ -712,7 +662,7 @@ public:
     /// \param evaluator The function pointer to the evaluator.
     /// \param result Reference to the variable where the result will be stored.
     /// \return true if expression was evaluated correctly, false if not.
-    template<typename ReturnType> bool Evaluate(std::function<ReturnType(std::string)> evaluator, ReturnType& result)
+    template<typename ReturnType = std::string> bool ExternalEvaluate(std::function<ReturnType(std::string)> evaluator, ReturnType& result) const
     {
         std::string synthesis = SynthesizeExpression();
         if (synthesis.empty())

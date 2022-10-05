@@ -105,9 +105,9 @@ public:
             for (const ProductionElement& pe : node->generatorPR.to)
             {
                 if (pe.type == ProductionElementType::NonTerminal)
-                    newNodes.push_back(SyntaxTree::AddNode(node, pe.nonterm, GetRandomCompatibleRule(pe.nonterm.id)));
+                    newNodes.push_back(node->AddChildNode(pe.nonterm, GetRandomCompatibleRule(pe.nonterm.id)));
                 if (pe.type == ProductionElementType::Terminal)
-                    newNodes.push_back(SyntaxTree::AddNode(node, pe.term));
+                    newNodes.push_back(node->AddChildNode(pe.term));
                 if (pe.type == ProductionElementType::Unassigned)
                     throw std::runtime_error("Unassigned production element type");
             }
@@ -143,9 +143,9 @@ public:
         for (const ProductionElement& pe : syntaxTree.Root()->generatorPR.to)
         {
             if (pe.type == ProductionElementType::NonTerminal)
-                newNodes.push_back(SyntaxTree::AddNode(syntaxTree.Root(), pe.nonterm, GetRandomCompatibleRule(pe.nonterm.id)));
+                newNodes.push_back(syntaxTree.Root()->AddChildNode(pe.nonterm, GetRandomCompatibleRule(pe.nonterm.id)));
             if (pe.type == ProductionElementType::Terminal)
-                newNodes.push_back(SyntaxTree::AddNode(syntaxTree.Root(), pe.term));
+                newNodes.push_back(syntaxTree.Root()->AddChildNode(pe.term));
             if (pe.type == ProductionElementType::Unassigned)
                 throw std::runtime_error("Unassigned production element type");
         }

@@ -193,7 +193,8 @@ std::vector<size_t> find_indexes_if(const std::vector<T>& v, UnaryPredicate pred
 *     Vector conversions    *
 ****************************/
 
-std::string to_string(const std::vector<std::string>& v)
+template<typename T>
+T vector_to_string(const std::vector<T>& v)
 {
     std::string s = "[";
     for (auto& elem : v)
