@@ -151,10 +151,17 @@ public:
             ind.Prune(_generatingGrammar);
     }
 
-    /// ExternalEvaluate all the individuals of the population.
-    void Evaluate(RuntimeMode runtimeMode = RuntimeMode::SingleThread)
+    /// Evaluate all the individuals of the population.
+    void Evaluate()
     {
-        // ExternalEvaluate individuals.
+        Evaluate(RuntimeMode::SingleThread);
+    }
+
+    /// Evaluate all the individuals of the population.
+    /// \param runtimeMode
+    void Evaluate(RuntimeMode runtimeMode)
+    {
+        // Evaluate individuals.
         switch (runtimeMode) {
             case RuntimeMode::SingleThread:
                 SingleThreadEvaluate();

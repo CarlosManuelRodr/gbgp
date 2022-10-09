@@ -9,24 +9,8 @@ using namespace std;
 //*         Bindings          *
 //****************************/
 
-struct Pet {
-    Pet(const std::string& name, int age) : name(name), age(age) { }
-    bool set(int& age_) { age = age_; return true; }
-    bool set(EvaluationContext& ctx) const { return true; }
-    bool set(const std::string& name_) { name = name_; return true;  }
-    bool Evaluate(EvaluationContext& ctx) const { return true; }
-    std::string name;
-    int age;
-};
-
 PYBIND11_MODULE(gbgp, m) {
     m.doc() = "gbgp python bindings"; // optional module docstring
-
-    py::class_<Pet>(m, "Pet")
-            .def(py::init<const std::string &, int>())
-            .def("set", py::overload_cast<int&>(&Pet::set), "Set the pet's age")
-            .def("set", py::overload_cast<EvaluationContext&>(&Pet::set, py::const_), "Set the pet's age")
-            .def("set", static_cast<bool (Pet::*)(const std::string &)>(&Pet::set), "Set the pets name");
 
     py::class_<Terminal>(m, "Terminal")
             .def(py::init<>())
@@ -170,4 +154,77 @@ PYBIND11_MODULE(gbgp, m) {
                      return "<gbgp.PruneRule '" + pruneRule.ToString() + "'>";
                  }
             );
+
+    py::class_<Grammar>(m, "Grammar")
+            .def(py::init<>(), "Empty constructor.")
+            .def(py::init<std::initializer_list<ProductionRule>>(), "")
+            .def(py::init<std::initializer_list<ProductionRule>, std::initializer_list<PruneRule>>(), "")
+            .def(py::init<const Grammar&>(), "Copy constructor.")
+            .def(py::init<const std::vector<ProductionRule>&>(), "")
+
+            .def("GetRootRule", &Grammar::GetRootRule, "Get the root rule of the grammar.")
+            .def("Size", &Grammar::Size, "Get the number of production rules of this grammar.")
+            .def("CreateRandomTree", py::overload_cast<SyntaxTree&>(&Grammar::CreateRandomTree, py::const_), "Create random tree safely by creating random trees until there is a success.", py::arg("syntaxTree"))
+            .def("CreateRandomTree", py::overload_cast<SyntaxTree&, int>(&Grammar::CreateRandomTree, py::const_), "Create random tree safely by creating random trees until there is a success.", py::arg("syntaxTree"), py::arg("maxDepth"))
+            .def("PruneTree", &Grammar::PruneTree, " Applies the grammar prune rules repeatedly until no further simplification can be performed.", py::arg("syntaxTree"))
+            .def("ToString", &Grammar::ToString, "Get string representation.")
+            .def("__repr__",
+                 [](const Grammar &grammar) {
+                     return "<gbgp.Grammar '" + grammar.ToString() + "'>";
+                 }
+            );
+
+    py::class_<Individual>(m, "Individual")
+            .def(py::init<>(), "Empty constructor.")
+            .def(py::init<const std::function<double(SyntaxTree&)>&>(), "Blank individual constructor.", py::arg("fitnessFunction"))
+            .def(py::init<const std::function<double(SyntaxTree&)>&, const SyntaxTree&>(), "Constructor for already built syntax tree.", py::arg("fitnessFunction"), py::arg("syntaxTree"))
+            .def(py::init<const Individual&>(), "Copy constructor.", py::arg("other"))
+
+            .def("GetFitnessFunction", &Individual::GetFitnessFunction, "Fitness function getter.")
+            .def("GetTree", &Individual::GetTree, "Returns a reference to the syntax tree.")
+            .def("GetExpression", &Individual::GetExpression, "Synthesizes the tree expression.")
+            .def("IsEvaluated", &Individual::IsEvaluated, "Is this individual evaluated?")
+            .def("GetFitness", &Individual::GetFitness, "Return the fitness value.")
+            .def("Evaluate", &Individual::Evaluate, "Evaluates the fitness function and assign the fitness value.")
+            .def("Prune", &Individual::Prune, "Prunes the tree.", py::arg("grammar"))
+            .def("CreateRandom", &Individual::CreateRandom, "Generates a random individual using the production rules and prune rules of the grammar.", py::arg("grammar"))
+            ;
+
+    py::class_<Population>(m, "Population")
+            .def(py::init<const Grammar&, const std::function<double(SyntaxTree&)>&>(), "Population constructor.", py::arg("grammar"), py::arg("fitnessFunction"))
+
+            .def("Initialize", &Population::Initialize, "Initializes a population of randomly generated individuals.", py::arg("populationSize"))
+            .def("AddIndividual", &Population::AddIndividual, "Add an individual to the population.", py::arg("individual"))
+            .def("AddIndividuals", &Population::AddIndividuals, "Add a collection of individuals to the population.", py::arg("newIndividuals"))
+            .def("GetIndividual", &Population::GetIndividual, "Get the individual at the n-th index.", py::arg("n"))
+            .def("GetFittestByRank", &Population::GetFittestByRank, "Get the fittest individual by rank.", py::arg("rank"))
+            .def("GetNthFittestByRank", &Population::GetNthFittestByRank, "Get the fittest individuals up to rank maxRank.", py::arg("maxRank"))
+            .def("ReducePopulation", &Population::ReducePopulation, "Reduce the population to the selected indexes.", py::arg("keepIndexes"))
+            .def("RemoveWorst", &Population::RemoveWorst, "Removes the n-th worst individuals by fitness of the population.", py::arg("maxRank"))
+            .def("Prune", &Population::Prune, "Prune all the individuals of the population.")
+            .def("Evaluate", py::overload_cast<>(&Population::Evaluate), "Evaluate all the individuals of the population.")
+            .def("GetFitness", &Population::GetFitness, "Get the fitness values of all the individuals in the population.")
+            .def("GetIndividuals", &Population::GetIndividuals, "Get a reference to the individuals of the population.")
+            .def("Size", &Population::Size, "Get the size of the population.")
+            .def("GetGeneratingGrammar", &Population::GetGeneratingGrammar, "Grammar getter.")
+            .def("GetFitnessFunction", &Population::GetFitnessFunction, "Fitness function getter.")
+            ;
+
+    py::class_<GeneticOperators>(m, "GeneticOperators")
+            .def_static("IndividualsCrossover", &GeneticOperators::IndividualsCrossover, "Generates a new offspring individual that combines genome features from both parents.", py::arg("parent1"), py::arg("parent2"))
+            .def_static("Selection", &GeneticOperators::Selection, "The selection operator. Reduces the population to its fittest individuals.", py::arg("population"), py::arg("size"))
+            .def_static("Crossover", py::overload_cast<Population&>(&GeneticOperators::Crossover), "The crossover operator. Creates a new generation by reproduction of the individuals.", py::arg("population"))
+            .def_static("Crossover", py::overload_cast<Population&, unsigned>(&GeneticOperators::Crossover), "The crossover operator. Creates a new generation by reproduction of the individuals.", py::arg("population"), py::arg("offspringSize"))
+            .def_static("MutateIndividual", py::overload_cast<Individual&, const Grammar&>(&GeneticOperators::MutateIndividual), "Mutation operator that acts over an individual. Mutation probability is 50%.", py::arg("individual"), py::arg("grammar"))
+            .def_static("MutateIndividual", py::overload_cast<Individual&, const Grammar&, double>(&GeneticOperators::MutateIndividual), "Mutation operator that acts over an individual.", py::arg("individual"), py::arg("grammar"), py::arg("nonTermMutationProb"))
+            .def_static("Mutation", py::overload_cast<Population&, double>(&GeneticOperators::Mutation), "Mutation operator that acts over a population.", py::arg("population"), py::arg("mutationProbability"))
+            .def_static("Mutation", py::overload_cast<Population&, double, double>(&GeneticOperators::Mutation), "Mutation operator that acts over a population.", py::arg("population"), py::arg("mutationProbability"), py::arg("nonTermMutationProbability"))
+            ;
+
+    py::class_<Environment>(m, "Environment")
+            .def(py::init<const Grammar&, const std::function<double(SyntaxTree&)>&, int, int, int, int, double>(), "Environment constructor.", py::arg("grammar"), py::arg("fitnessFunction"), py::arg("populationSize"), py::arg("survivorsPerGeneration"), py::arg("eliteIndividuals"), py::arg("immigrationIndividuals"), py::arg("mutationProbability"))
+            .def("GetPopulation", &Environment::GetPopulation, "Population getter.")
+            .def("Optimize", py::overload_cast<>(&Environment::Optimize), "Optimizes a population via genetic optimization.")
+            .def("Optimize", py::overload_cast<unsigned>(&Environment::Optimize), "Optimizes a population via genetic optimization.", py::arg("generations"))
+            ;
 }

@@ -46,3 +46,12 @@ print(rule4)
 print(rule5)
 print(rule6)
 
+grammar = gbgp.Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
+
+print(grammar)
+
+tree = gbgp.SyntaxTree()
+grammar.CreateRandomTree(tree, 100)
+
+print(tree)
+

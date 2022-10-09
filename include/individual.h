@@ -15,16 +15,26 @@ private:
     std::optional<double> _fitnessValue = std::nullopt;
 
 public:
+    /// Default constructor.
     Individual() = default;
+
+    /// Blank individual constructor.
+    /// \param fitnessFunction The fitness function to evaluate this individual.
+    explicit Individual(const std::function<double(SyntaxTree&)>& fitnessFunction)
+    {
+        _fitnessFunction = fitnessFunction;
+    }
+
+    /// Constructor for already built syntax tree.
+    /// \param fitnessFunction The fitness function to evaluate this individual.
+    /// \param syntaxTree The syntax tree of the individual.
     explicit Individual(const std::function<double(SyntaxTree&)>& fitnessFunction, const SyntaxTree& syntaxTree)
     {
         _fitnessFunction = fitnessFunction;
         _tree = syntaxTree;
     }
-    explicit Individual(const std::function<double(SyntaxTree&)>& fitnessFunction)
-    {
-        _fitnessFunction = fitnessFunction;
-    }
+
+    /// Copy constructor.
     Individual(const Individual& other)
     {
         _tree = other._tree;

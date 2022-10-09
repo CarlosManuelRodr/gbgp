@@ -176,8 +176,15 @@ public:
 
     /// The crossover operator. Creates a new generation by reproduction of the individuals.
     /// \param population The target population.
+    static void Crossover(Population& population)
+    {
+        Crossover(population, 1);
+    }
+
+    /// The crossover operator. Creates a new generation by reproduction of the individuals.
+    /// \param population The target population.
     /// \param offspringSize The number of children individuals produced by each parent pair.
-    static void Crossover(Population& population, unsigned offspringSize = 1)
+    static void Crossover(Population& population, unsigned offspringSize)
     {
         Population newGeneration(population.GetGeneratingGrammar(), population.GetFitnessFunction());
 
@@ -197,11 +204,19 @@ public:
         population = newGeneration;
     }
 
+    /// Mutation operator that acts over an individual. Mutation probability is 50%.
+    /// \param individual The target individual.
+    /// \param grammar The generating grammar used for NonTerminal mutation.
+    static void MutateIndividual(Individual& individual, const Grammar& grammar)
+    {
+        MutateIndividual(individual, grammar, 0.5);
+    }
+
     /// Mutation operator that acts over an individual.
     /// \param individual The target individual.
     /// \param grammar The generating grammar used for NonTerminal mutation.
     /// \param nonTermMutationProb The probability that the mutation is applied over a NonTerminal.
-    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb = 0.5)
+    static void MutateIndividual(Individual& individual, const Grammar& grammar, double nonTermMutationProb)
     {
         if (RandomBool(nonTermMutationProb))
             MutateIndividualNonTerminal(individual, grammar);
@@ -212,8 +227,16 @@ public:
     /// Mutation operator that acts over a population.
     /// \param population The target population.
     /// \param mutationProbability The probability that a mutation is applied over an individual.
+    static void Mutation(Population& population, double mutationProbability)
+    {
+        Mutation(population, mutationProbability, 0.5);
+    }
+
+    /// Mutation operator that acts over a population.
+    /// \param population The target population.
+    /// \param mutationProbability The probability that a mutation is applied over an individual.
     /// \param nonTermMutationProbability The probability that the mutation is applied over a NonTerminal.
-    static void Mutation(Population& population, double mutationProbability, double nonTermMutationProbability = 0.5)
+    static void Mutation(Population& population, double mutationProbability, double nonTermMutationProbability)
     {
         for (size_t i = 0; i < population.Size(); i++)
         {

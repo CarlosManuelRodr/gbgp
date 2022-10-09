@@ -53,7 +53,10 @@ private:
     }
 
 public:
+    /// Empty constructor.
     Grammar() = default;
+
+    /// Copy constructor.
     Grammar(const Grammar& other) = default;
 
     Grammar(std::initializer_list<ProductionRule> productionRuleList) : _grammarRules(productionRuleList) {}
@@ -80,7 +83,7 @@ public:
         return _grammarRules.front();
     }
 
-    /// Returns the number of production rules of this grammar.
+    /// Get the number of production rules of this grammar.
     [[nodiscard]]
     unsigned Size() const
     {
@@ -160,9 +163,26 @@ public:
         return true;
     }
 
-    /// Ensure the creation of a random tree by creating random trees until there is a success.
+    /// Create random tree safely by creating random trees until there is a success.
+    /// \param syntaxTree The target tree.
+    void CreateRandomTree(SyntaxTree& syntaxTree) const
+    {
+        CreateRandomTree(syntaxTree, 50);
+    }
+
+    /// Create random tree safely by creating random trees until there is a success.
+    /// \param syntaxTree The target tree.
     /// \param maxDepth Maximum allowed tree depth.
-    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth = 50, const std::optional<ProductionRule>& rootRule = std::nullopt) const
+    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth) const
+    {
+        CreateRandomTree(syntaxTree, maxDepth, std::nullopt);
+    }
+
+    /// Create random tree safely by creating random trees until there is a success.
+    /// \param syntaxTree The target tree.
+    /// \param maxDepth Maximum allowed tree depth.
+    /// \param rootRule The root rule of the grammar.
+    void CreateRandomTree(SyntaxTree& syntaxTree, int maxDepth, const std::optional<ProductionRule>& rootRule) const
     {
         bool success = false;
         while (!success)
@@ -180,5 +200,11 @@ public:
         do
             canBePruned = ApplyPruneRules(syntaxTree);
         while (canBePruned);
+    }
+
+    [[nodiscard]]
+    std::string ToString() const
+    {
+        return "rules='" + std::to_string(_grammarRules.size()) + "'";
     }
 };

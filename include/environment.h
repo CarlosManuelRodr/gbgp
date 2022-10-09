@@ -33,11 +33,25 @@ public:
     /// \param eliteIndividuals The number of individuals that automatically survive to the next generation.
     /// \param immigrationIndividuals The number of new individuals to be inserted on the population on each generation.
     /// \param mutationProbability The probability that an individual mutates over a generation.
+    Environment(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction,
+                int populationSize, int survivorsPerGeneration, int eliteIndividuals,
+                int immigrationIndividuals, double mutationProbability) :
+            Environment(grammar, fitnessFunction, populationSize, survivorsPerGeneration, eliteIndividuals,
+                        immigrationIndividuals, mutationProbability, RuntimeMode::SingleThread) {}
+
+    /// Environment constructor.
+    /// \param grammar The grammar used for creating and mutating individuals.
+    /// \param fitnessFunction The fitness function for evaluating individuals.
+    /// \param populationSize The size of the population.
+    /// \param survivorsPerGeneration The number of individuals that survive the selection operator.
+    /// \param eliteIndividuals The number of individuals that automatically survive to the next generation.
+    /// \param immigrationIndividuals The number of new individuals to be inserted on the population on each generation.
+    /// \param mutationProbability The probability that an individual mutates over a generation.
     /// \param runtimeMode Whether to evaluate the population on a single thread or in a thread pool.
     Environment(const Grammar& grammar, const std::function<double(SyntaxTree&)>& fitnessFunction,
                 int populationSize, int survivorsPerGeneration, int eliteIndividuals,
                 int immigrationIndividuals, double mutationProbability,
-                RuntimeMode runtimeMode = RuntimeMode::SingleThread)
+                RuntimeMode runtimeMode)
                 : _population(grammar, fitnessFunction)
     {
         _populationSize = populationSize;
@@ -61,8 +75,14 @@ public:
     }
 
     /// Optimizes a population via genetic optimization.
+    void Optimize()
+    {
+        Optimize(1);
+    }
+
+    /// Optimizes a population via genetic optimization.
     /// \param generations The number of generations to optimize.
-    void Optimize(unsigned generations = 1)
+    void Optimize(unsigned generations)
     {
         for (unsigned i = 0; i < generations; i++)
         {
