@@ -73,9 +73,8 @@ TEST_CASE("Test simple evaluation")
 
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
-    bool evaluationState = cst.Evaluate(context);
-    if (evaluationState)
-        cout << context.result() << endl;
+    cst.Evaluate(context);
+    cout << context.result() << endl;
 
-    CHECK((evaluationState == true));
+    CHECK((context.result().empty() == false));
 }

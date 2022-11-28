@@ -646,15 +646,13 @@ public:
     /// Evaluates the tree using the semantic actions of the grammar.
     /// \param ctx reference to the evaluation context.
     /// \return true if expression was evaluated correctly, false if not.
-    bool Evaluate(EvaluationContext& ctx) const
+    void Evaluate(EvaluationContext& ctx) const
     {
         std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
         for (auto node : treeTraversal) node->ClearEvaluation();
 
         while (treeTraversal.size() > 1)
             EvaluateFirst(treeTraversal, ctx);
-
-        return true;
     }
 
     /// Evaluates the tree using an external evaluator.
@@ -662,15 +660,9 @@ public:
     /// \param evaluator The function pointer to the evaluator.
     /// \param result Reference to the variable where the result will be stored.
     /// \return true if expression was evaluated correctly, false if not.
-    template<typename ReturnType = std::string> bool ExternalEvaluate(std::function<ReturnType(std::string)> evaluator, ReturnType& result) const
+    template<typename ReturnType = std::string> ReturnType ExternalEvaluate(std::function<ReturnType(std::string)> evaluator) const
     {
         std::string synthesis = SynthesizeExpression();
-        if (synthesis.empty())
-            return false;
-        else
-        {
-            result = evaluator(synthesis);
-            return true;
-        }
+        return evaluator(synthesis);
     }
 };

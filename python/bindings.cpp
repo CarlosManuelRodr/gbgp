@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
+#include <pybind11/functional.h>
 #include "../include/gbgp.h"
 namespace py = pybind11;
 using namespace std;
@@ -137,7 +138,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetTreeTraversal", &SyntaxTree::GetTreeTraversal, "Traverses the tree in a depth first post-order.")
             .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression, "Synthesizes the tree into an expression using the production rules of the grammar.")
             .def("Evaluate", py::overload_cast<EvaluationContext&>(&SyntaxTree::Evaluate, py::const_), "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
-            .def("ExternalEvaluate", py::overload_cast<function<string(string)>, string&>(&SyntaxTree::ExternalEvaluate<string>, py::const_), "Evaluates the tree using an external evaluator.", py::arg("evaluator"), py::arg("result"))
+            .def("ExternalEvaluate", py::overload_cast<function<string(string)>>(&SyntaxTree::ExternalEvaluate<string>, py::const_), "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
             .def("__repr__",
                  [](const SyntaxTree &tree) {
                      return "<gbgp.SyntaxTree '" + tree.ToString() + "'>";
