@@ -147,9 +147,8 @@ TEST_CASE("Test arithmetic evaluation")
 
     cst.PrintTree();
     cout << cst.SynthesizeExpression() << endl;
-    bool evaluationState = cst.Evaluate(arithmeticContext);
-    if (evaluationState)
-        cout << arithmeticContext.result() << endl;
+    cst.Evaluate(arithmeticContext);
+    cout << arithmeticContext.result() << endl;
 
-    CHECK((evaluationState == true));
+    CHECK(!arithmeticContext.result().empty());
 }

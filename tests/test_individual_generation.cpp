@@ -85,11 +85,10 @@ TEST_CASE("Test individual evaluation")
 
     cout << cst.SynthesizeExpression() << endl;
 
-    bool evaluationState = cst.Evaluate(evaluationContext);
-    if (evaluationState)
-        cout << evaluationContext.result() << endl;
+    cst.Evaluate(evaluationContext);
+    cout << evaluationContext.result() << endl;
 
-    CHECK((evaluationState == true));
+    CHECK(!evaluationContext.result().empty());
 }
 
 

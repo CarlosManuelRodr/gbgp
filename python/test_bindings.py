@@ -2,6 +2,16 @@ import gbgp
 from enum import Enum
 
 
+class ArithmeticContext(gbgp.EvaluationContext):
+    x: int
+    y: int
+
+    def __init__(self, x: int, y: int):
+        super().__init__()
+        self.x = x
+        self.y = y
+
+
 class Terms(Enum):
     Var = 1
     Plus = 2
@@ -23,21 +33,52 @@ exprNonTerm = gbgp.NonTerminal(Terms.Expr.value, "EXPR")
 termNonTerm = gbgp.NonTerminal(Terms.Term.value, "TERM")
 factorNonTerm = gbgp.NonTerminal(Terms.Factor.value, "FACTOR")
 
+
+def semantic_action1(ctx: gbgp.EvaluationContext):
+    n1 = int(ctx.SemanticValue(0))
+    n2 = int(ctx.SemanticValue(2))
+    ctx.SetResult(str(n1 + n2))
+
+
 rule1 = gbgp.ProductionRule(exprNonTerm,
                             [gbgp.ProductionElement(termNonTerm),
                              gbgp.ProductionElement(plusTerm),
-                             gbgp.ProductionElement(termNonTerm)])
+                             gbgp.ProductionElement(termNonTerm)],
+                            semantic_action1)
+
 rule2 = gbgp.ProductionRule(exprNonTerm, [gbgp.ProductionElement(termNonTerm)])
+
+
+def semantic_action2(ctx: gbgp.EvaluationContext):
+    n1 = int(ctx.SemanticValue(0))
+    n2 = int(ctx.SemanticValue(2))
+    ctx.SetResult(str(n1 * n2))
+
+
 rule3 = gbgp.ProductionRule(termNonTerm,
                             [gbgp.ProductionElement(termNonTerm),
                              gbgp.ProductionElement(timesTerm),
-                             gbgp.ProductionElement(factorNonTerm)])
+                             gbgp.ProductionElement(factorNonTerm)],
+                            semantic_action2)
 rule4 = gbgp.ProductionRule(termNonTerm, [gbgp.ProductionElement(factorNonTerm)])
 rule5 = gbgp.ProductionRule(factorNonTerm,
                             [gbgp.ProductionElement(leftParenthesisTerm),
                              gbgp.ProductionElement(exprNonTerm),
                              gbgp.ProductionElement(rightParenthesisTerm)])
-rule6 = gbgp.ProductionRule(factorNonTerm, [gbgp.ProductionElement(varTerm)])
+
+
+def semantic_action6(ctx: gbgp.EvaluationContext):
+    var = ctx.SemanticValue(0)
+    if var == "x":
+        var_value = ctx.x
+    elif var == "y":
+        var_value = ctx.y
+    else:
+        var_value = 1
+    ctx.SetResult(str(var_value))
+
+
+rule6 = gbgp.ProductionRule(factorNonTerm, [gbgp.ProductionElement(varTerm)], semantic_action6)
 
 print(rule1)
 print(rule2)
@@ -55,3 +96,7 @@ grammar.CreateRandomTree(tree, 100)
 
 print(tree)
 
+context = ArithmeticContext(2, 5)
+tree.Evaluate(context)
+
+print(context.GetResult())

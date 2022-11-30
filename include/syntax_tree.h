@@ -305,6 +305,7 @@ public:
     std::string ToString() const
     {
         std::stringstream ss;
+        ss << "\n";
         PrintTree(ss);
         return ss.str();
     }

@@ -83,12 +83,10 @@ PYBIND11_MODULE(gbgp, m) {
     py::class_<ProductionRule>(m, "ProductionRule")
             .def(py::init<>(), "Empty ProductionRule constructor.")
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&>(), "Production rule with default semantic action.", py::arg("pfrom"), py::arg("pto"))
-            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, int>(), "Production rule with default semantic action over element at index semanticTransferIndex.", py::arg("pfrom"), py::arg("pto"), py::arg("semanticTransferIndex"))
-            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>(), "Production rule with custom semantic action.", py::arg("pfrom"), py::arg("pto"), py::arg("pSemanticAction"))
+            .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>(), "Production rule with default semantic action over element at index semanticTransferIndex.", py::arg("pfrom"), py::arg("pto"), py::arg("pSemanticAction"))
             .def("NumberOfProductionElements", &ProductionRule::NumberOfProductionElements, "Returns the number of production elements.")
             .def("GetFrom", &ProductionRule::GetFrom, "Getter for the from list.")
             .def("GetTo", &ProductionRule::GetTo, "Getter for the to list.")
-            .def("GetSemanticAction", &ProductionRule::GetSemanticAction, "Getter for the semantic action.")
             .def("ToString", &ProductionRule::ToString, "Get a string representation.")
             .def("__repr__",
                  [](const ProductionRule &pr) {
@@ -137,8 +135,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def("ToString", &SyntaxTree::ToString, "Get string representation.")
             .def("GetTreeTraversal", &SyntaxTree::GetTreeTraversal, "Traverses the tree in a depth first post-order.")
             .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression, "Synthesizes the tree into an expression using the production rules of the grammar.")
-            .def("Evaluate", py::overload_cast<EvaluationContext&>(&SyntaxTree::Evaluate, py::const_), "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
-            .def("ExternalEvaluate", py::overload_cast<function<string(string)>>(&SyntaxTree::ExternalEvaluate<string>, py::const_), "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
+            .def("Evaluate", &SyntaxTree::Evaluate, "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
+            .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
             .def("__repr__",
                  [](const SyntaxTree &tree) {
                      return "<gbgp.SyntaxTree '" + tree.ToString() + "'>";
