@@ -237,7 +237,7 @@ struct TreeNode
         return !children.empty();
     }
 
-    /// Add the node as a child.
+    /// Add node as a child.
     /// \param node Reference to the child node.
     void AddChildNode(TreeNode* node, TreeNode* nodeParent = nullptr)
     {
@@ -250,7 +250,7 @@ struct TreeNode
     /// \param nonTerm NonTerminal instance.
     /// \param generatorPR Production rule from which this node is part of.
     /// \return Pointer to the newly created node.
-    TreeNode* AddChildNode(const NonTerminal& nonTerm, const ProductionRule& pgeneratorPR)
+    TreeNode* AddChildTerm(const NonTerminal& nonTerm, const ProductionRule& pgeneratorPR)
     {
         auto* newNode = new TreeNode(nonTerm);
         newNode->generatorPR = pgeneratorPR;
@@ -264,7 +264,7 @@ struct TreeNode
     /// \param target Node where the child will be placed.
     /// \param term Terminal instance.
     /// \return Pointer to the newly created node.
-    TreeNode* AddChildNode(const Terminal& term)
+    TreeNode* AddChildTerm(const Terminal& term)
     {
         auto* newNode = new TreeNode(term);
         newNode->termValue = term.GetRandomValue();
@@ -278,7 +278,7 @@ struct TreeNode
     /// \param term Terminal instance.
     /// \param termValue Terminal value.
     /// \return Pointer to the newly created node.
-    TreeNode* AddChildNode(const Terminal& term, const std::string& ptermValue)
+    TreeNode* AddChildTerm(const Terminal& term, const std::string& ptermValue)
     {
         auto* newNode = new TreeNode(term);
         newNode->termValue = ptermValue;

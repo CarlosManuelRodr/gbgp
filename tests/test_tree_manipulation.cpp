@@ -86,42 +86,42 @@ TEST_CASE("Testing subtree insertion")
     // First tree. Procedural construction.
     SyntaxTree ast1;
     ast1.SetRootRule(rule1);
-    auto leftExpr1 = ast1.Root()->AddChildNode(exprNonTerm, rule2);
-    auto middleSum1 = ast1.Root()->AddChildNode(plusTerm);
-    auto rightTerm1 = ast1.Root()->AddChildNode(termNonTerm, rule3);
+    auto leftExpr1 = ast1.Root()->AddChildTerm(exprNonTerm, rule2);
+    auto middleSum1 = ast1.Root()->AddChildTerm(plusTerm);
+    auto rightTerm1 = ast1.Root()->AddChildTerm(termNonTerm, rule3);
 
-    auto leftTerm1 = leftExpr1->AddChildNode(termNonTerm, rule4);
-    auto leftFactor1 = leftTerm1->AddChildNode(factorNonTerm, rule6);
-    auto leftVar1 = leftFactor1->AddChildNode(varTerm, "a");
+    auto leftTerm1 = leftExpr1->AddChildTerm(termNonTerm, rule4);
+    auto leftFactor1 = leftTerm1->AddChildTerm(factorNonTerm, rule6);
+    auto leftVar1 = leftFactor1->AddChildTerm(varTerm, "a");
 
-    auto rightLeftTerm1 = rightTerm1->AddChildNode(termNonTerm, rule4);
-    auto rightMultiplication1 = rightTerm1->AddChildNode(timesTerm);
-    auto rightRightFactor1 = rightTerm1->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftTerm1 = rightTerm1->AddChildTerm(termNonTerm, rule4);
+    auto rightMultiplication1 = rightTerm1->AddChildTerm(timesTerm);
+    auto rightRightFactor1 = rightTerm1->AddChildTerm(factorNonTerm, rule6);
 
-    auto rightLeftFactor1 = rightLeftTerm1->AddChildNode(factorNonTerm, rule6);
-    auto rightLeftVar1 = rightLeftFactor1->AddChildNode(varTerm, "a");
+    auto rightLeftFactor1 = rightLeftTerm1->AddChildTerm(factorNonTerm, rule6);
+    auto rightLeftVar1 = rightLeftFactor1->AddChildTerm(varTerm, "a");
 
-    auto rightRightVar1 = rightRightFactor1->AddChildNode(varTerm, "a");
+    auto rightRightVar1 = rightRightFactor1->AddChildTerm(varTerm, "a");
 
     // Second tree. Procedural construction.
     SyntaxTree ast2;
     ast2.SetRootRule(rule1);
-    auto leftExpr2 = ast2.Root()->AddChildNode(exprNonTerm, rule2);
-    auto middleSum2 = ast2.Root()->AddChildNode(plusTerm);
-    auto rightTerm2 = ast2.Root()->AddChildNode(termNonTerm, rule3);
+    auto leftExpr2 = ast2.Root()->AddChildTerm(exprNonTerm, rule2);
+    auto middleSum2 = ast2.Root()->AddChildTerm(plusTerm);
+    auto rightTerm2 = ast2.Root()->AddChildTerm(termNonTerm, rule3);
 
-    auto leftTerm2 = leftExpr2->AddChildNode(termNonTerm, rule4);
-    auto leftFactor2 = leftTerm2->AddChildNode(factorNonTerm, rule6);
-    auto leftVar2 = leftFactor2->AddChildNode(varTerm, "c");
+    auto leftTerm2 = leftExpr2->AddChildTerm(termNonTerm, rule4);
+    auto leftFactor2 = leftTerm2->AddChildTerm(factorNonTerm, rule6);
+    auto leftVar2 = leftFactor2->AddChildTerm(varTerm, "c");
 
-    auto rightLeftTerm2 = rightTerm2->AddChildNode(termNonTerm, rule4);
-    auto rightMultiplication2 = rightTerm2->AddChildNode(timesTerm);
-    auto rightRightFactor2 = rightTerm2->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftTerm2 = rightTerm2->AddChildTerm(termNonTerm, rule4);
+    auto rightMultiplication2 = rightTerm2->AddChildTerm(timesTerm);
+    auto rightRightFactor2 = rightTerm2->AddChildTerm(factorNonTerm, rule6);
 
-    auto rightLeftFactor2 = rightLeftTerm2->AddChildNode(factorNonTerm, rule6);
-    auto rightLeftVar2 = rightLeftFactor2->AddChildNode(varTerm, "b");
+    auto rightLeftFactor2 = rightLeftTerm2->AddChildTerm(factorNonTerm, rule6);
+    auto rightLeftVar2 = rightLeftFactor2->AddChildTerm(varTerm, "b");
 
-    auto rightRightVar2 = rightRightFactor2->AddChildNode(varTerm, "b");
+    auto rightRightVar2 = rightRightFactor2->AddChildTerm(varTerm, "b");
 
     // Third tree. Declarative construction.
     SyntaxTree ast3(
@@ -191,22 +191,22 @@ TEST_CASE("Test random subtree replacement")
     // Original tree.
     SyntaxTree tree;
     tree.SetRootRule(rule1);
-    auto leftExpr = tree.Root()->AddChildNode(exprNonTerm, rule2);
-    auto middleSum = tree.Root()->AddChildNode(plusTerm);
-    auto rightTerm = tree.Root()->AddChildNode(termNonTerm, rule3);
+    auto leftExpr = tree.Root()->AddChildTerm(exprNonTerm, rule2);
+    auto middleSum = tree.Root()->AddChildTerm(plusTerm);
+    auto rightTerm = tree.Root()->AddChildTerm(termNonTerm, rule3);
 
-    auto leftTerm = leftExpr->AddChildNode(termNonTerm, rule4);
-    auto leftFactor = leftTerm->AddChildNode(factorNonTerm, rule6);
-    auto leftVar = leftFactor->AddChildNode(varTerm, "a");
+    auto leftTerm = leftExpr->AddChildTerm(termNonTerm, rule4);
+    auto leftFactor = leftTerm->AddChildTerm(factorNonTerm, rule6);
+    auto leftVar = leftFactor->AddChildTerm(varTerm, "a");
 
-    auto rightLeftTerm = rightTerm->AddChildNode(termNonTerm, rule4);
-    auto rightMultiplication = rightTerm->AddChildNode(timesTerm);
-    auto rightRightFactor = rightTerm->AddChildNode(factorNonTerm, rule6);
+    auto rightLeftTerm = rightTerm->AddChildTerm(termNonTerm, rule4);
+    auto rightMultiplication = rightTerm->AddChildTerm(timesTerm);
+    auto rightRightFactor = rightTerm->AddChildTerm(factorNonTerm, rule6);
 
-    auto rightLeftFactor = rightLeftTerm->AddChildNode(factorNonTerm, rule6);
-    auto rightLeftVar = rightLeftFactor->AddChildNode(varTerm, "a");
+    auto rightLeftFactor = rightLeftTerm->AddChildTerm(factorNonTerm, rule6);
+    auto rightLeftVar = rightLeftFactor->AddChildTerm(varTerm, "a");
 
-    auto rightRightVar = rightRightFactor->AddChildNode(varTerm, "a");
+    auto rightRightVar = rightRightFactor->AddChildTerm(varTerm, "a");
 
     string originalSynth = tree.SynthesizeExpression();
     cout << "Original: " << originalSynth << endl;

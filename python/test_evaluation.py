@@ -1,3 +1,5 @@
+import random
+import unittest
 import gbgp
 from enum import Enum
 
@@ -35,8 +37,6 @@ factorNonTerm = gbgp.NonTerminal(Terms.Factor.value, "FACTOR")
 
 
 def semantic_action1(ctx: gbgp.EvaluationContext):
-    print(ctx.SemanticValue(0))
-    print(ctx.SemanticValue(2))
     n1 = int(ctx.SemanticValue(0))
     n2 = int(ctx.SemanticValue(2))
     ctx.SetResult(str(n1 + n2))
@@ -52,8 +52,6 @@ rule2 = gbgp.ProductionRule(exprNonTerm, [gbgp.ProductionElement(termNonTerm)])
 
 
 def semantic_action3(ctx: gbgp.EvaluationContext):
-    print(ctx.SemanticValue(0))
-    print(ctx.SemanticValue(2))
     n1 = int(ctx.SemanticValue(0))
     n2 = int(ctx.SemanticValue(2))
     ctx.SetResult(str(n1 * n2))
@@ -83,25 +81,27 @@ def semantic_action6(ctx: gbgp.EvaluationContext):
 
 
 rule6 = gbgp.ProductionRule(factorNonTerm, [gbgp.ProductionElement(varTerm)], semantic_action6)
-
-print(rule1)
-print(rule2)
-print(rule3)
-print(rule4)
-print(rule5)
-print(rule6)
-
 grammar = gbgp.Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
-print(grammar)
 
-tree = gbgp.SyntaxTree()
-grammar.CreateRandomTree(tree, 100)
+class TestEvaluation(unittest.TestCase):
+    def test_arithmetic_evaluation(self):
+        tree = gbgp.SyntaxTree()
+        grammar.CreateRandomTree(tree, 100)
+        synthesis = tree.SynthesizeExpression()
 
-print(tree)
-print(tree.SynthesizeExpression())
+        x = random.randrange(10)
+        y = random.randrange(10)
 
-context = ArithmeticContext(2, 5)
-tree.Evaluate(context)
+        context = ArithmeticContext(x, y)
+        tree.Evaluate(context)
+        result = int(context.GetResult())
 
-print(context.GetResult())
+        replaced_synth = synthesis.replace("x", str(x)).replace(y, str(y))
+        expected_result = eval(replaced_synth)
+
+        self.assertEqual(result, expected_result)
+
+
+if __name__ == '__main__':
+    unittest.main()

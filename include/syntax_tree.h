@@ -252,20 +252,29 @@ public:
                 auto* copySubtreeStartNode = new TreeNode(*subtreeStartNode);
 
                 // Find parent and replace child reference of insertNode to subtreeStartNode.
+                bool inserted = false;
                 for (TreeNode*& child : insertNode->parent->children)
                 {
                     if (child == insertNode)
                     {
                         child = copySubtreeStartNode;
                         child->parent = insertNode->parent;
+                        inserted = true;
                         break;
                     }
                 }
 
-                this->ClearEvaluation();
+                // Avoid memory leak if no insert node found.
+                if (!inserted)
+                {
+                    delete copySubtreeStartNode;
+                    throw std::runtime_error("Insert node was not found.");
+                }
+                else
+                    this->ClearEvaluation();
             }
             else
-                throw std::runtime_error("Cannot insert subtree of different type of insertNode");
+                throw std::runtime_error("Cannot insert subtree of different type of insertNode.");
         }
         else
         {
@@ -316,6 +325,7 @@ public:
     static std::vector<TreeNode*> CopyTreeTraversal(const std::vector<TreeNode*>& other)
     {
         std::vector<TreeNode*> copyNodes;
+        copyNodes.reserve(other.size());
         for (auto node : other)
             copyNodes.push_back(TreeNode::ShallowCopy(node));
         return copyNodes;
@@ -459,7 +469,7 @@ public:
                     FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,rule.NumberOfProductionElements()) :
                     FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex, rule.NumberOfProductionElements());
 
-            if (pos != std::nullopt)
+            if (pos.has_value())
             {
                 nodeToBuild->AddChildNode(treeTraversal[pos.value()], nodeToBuild);
                 toErase.push_back(pos.value());
@@ -527,7 +537,7 @@ public:
             {
                 const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
                                                                      rule.NumberOfProductionElements());
-                if (pos != std::nullopt)
+                if (pos.has_value())
                 {
                     synthesis += treeTraversal[pos.value()]->expressionSynthesis;
                     toErase.push_back(pos.value());
@@ -543,7 +553,7 @@ public:
             {
                 const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex,
                                                                   rule.NumberOfProductionElements());
-                if (pos != std::nullopt)
+                if (pos.has_value())
                 {
                     synthesis += treeTraversal[pos.value()]->termValue;
                     toErase.push_back(pos.value());
@@ -606,7 +616,7 @@ public:
             {
                 const std::optional<size_t> pos = FindIndexOfNonTerm(treeTraversal, se.nonterm.id, toErase, nextIndex,
                                                                      rule.NumberOfProductionElements());
-                if (pos != std::nullopt)
+                if (pos.has_value())
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->expressionEvaluation);
                     toErase.push_back(pos.value());
@@ -622,7 +632,7 @@ public:
             {
                 const std::optional<size_t> pos = FindIndexOfTerm(treeTraversal, se.term.id, toErase, nextIndex,
                                                                   rule.NumberOfProductionElements());
-                if (pos != -1)
+                if (pos.has_value() && pos != -1)
                 {
                     evaluationContext.PushSemanticValue(treeTraversal[pos.value()]->termValue);
                     toErase.push_back(pos.value());
