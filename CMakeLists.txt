@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.22)
 project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Python" CACHE STRING "Available build-types: Debug, Release and Python")
 
-if ((CMAKE_BUILD_TYPE MATCHES Debug) OR (CMAKE_BUILD_TYPE MATCHES Release))
+if(NOT DEFINED BUILD_TYPE)
+    set(BUILD_TYPE "Tests")
+endif()
+
+if (BUILD_TYPE MATCHES Tests)
     message("Compiling unit tests" )
 
     include_directories(third-party/doctest/doctest)
@@ -42,7 +45,7 @@ if ((CMAKE_BUILD_TYPE MATCHES Debug) OR (CMAKE_BUILD_TYPE MATCHES Release))
             util/arithmetic_parser.h
             util/arithmetic_parser.cpp)
 
-elseif(CMAKE_BUILD_TYPE MATCHES Python)
+elseif(BUILD_TYPE MATCHES Python)
     message("Compiling Python bindings" )
     add_subdirectory(third-party/pybind11)
 

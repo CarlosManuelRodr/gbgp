@@ -1,4 +1,3 @@
-import random
 import unittest
 import gbgp
 from enum import Enum
@@ -85,24 +84,40 @@ rule6 = gbgp.ProductionRule(factorNonTerm, [gbgp.ProductionElement(varTerm)], se
 grammar = gbgp.Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
 
-class TestEvaluation(unittest.TestCase):
-    def test_arithmetic_evaluation(self):
-        tree = gbgp.SyntaxTree()
-        grammar.CreateRandomTree(tree, 100)
-        synthesis = tree.SynthesizeExpression()
-        print(synthesis)
+def target_function(x: int, y: int) -> int:
+    return 1 + 2 * x + y * y * y
 
-        x = random.randrange(10)
-        y = random.randrange(10)
 
-        context = ArithmeticContext(x, y)
-        tree.Evaluate(context)
-        result = int(context.GetResult())
+def fitness_function(solution: gbgp.SyntaxTree) -> float:
+    diff = []
+    for x in range(9):
+        for y in range(9):
+            ctx = ArithmeticContext(x, y)
+            solution.Evaluate(ctx)
 
-        replaced_synth = synthesis.replace("x", str(x)).replace("y", str(y))
-        expected_result = eval(replaced_synth)
+            solution_value = int(ctx.GetResult())
+            expected_value = target_function(x, y)
+            diff.append(abs(solution_value - expected_value))
 
-        self.assertEqual(result, expected_result)
+    error = sum(diff) / len(diff)
+    return 1.0 / (1.0 + error)
+
+
+class TestOptimization(unittest.TestCase):
+    def test_population_optimization(self):
+        env = gbgp.Environment(grammar, fitness_function, 200, 100, 5, 5, 0.4)
+        last_generation = env.GetPopulation()
+        fittest = last_generation.GetFittestByRank(0)
+
+        i = 0
+        while i < 30 and fittest.GetFitness() < 1:
+            env.Optimize()
+            last_generation = env.GetPopulation()
+            fittest = last_generation.GetFittestByRank(0)
+            print(str(i) + "\t|\t" + str(fittest.GetFitness()) + "\t|\t" + str(fittest.GetExpression()))
+            i += 1
+
+        self.assertEqual(fittest.GetFitness(), 1.0)
 
 
 if __name__ == '__main__':
