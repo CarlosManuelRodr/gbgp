@@ -84,9 +84,17 @@ def semantic_action6(ctx: gbgp.EvaluationContext):
 rule6 = gbgp.ProductionRule(factorNonTerm, [gbgp.ProductionElement(varTerm)], semantic_action6)
 grammar = gbgp.Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
+test_x = 5
+test_y = 8
+
+
+def test_external_evaluator(expr: str) -> str:
+    replaced_expr = expr.replace("x", str(test_x)).replace("y", str(test_y))
+    return str(eval(replaced_expr))
+
 
 class TestEvaluation(unittest.TestCase):
-    def test_arithmetic_evaluation(self):
+    def test_context_evaluation(self):
         tree = gbgp.SyntaxTree()
         grammar.CreateRandomTree(tree, 100)
         synthesis = tree.SynthesizeExpression()
@@ -103,6 +111,22 @@ class TestEvaluation(unittest.TestCase):
         expected_result = eval(replaced_synth)
 
         self.assertEqual(result, expected_result)
+
+    def test_external_evaluation(self):
+        tree = gbgp.SyntaxTree()
+        grammar.CreateRandomTree(tree, 100)
+        synthesis = tree.SynthesizeExpression()
+        print(synthesis)
+
+        eval_result = int(tree.ExternalEvaluate(test_external_evaluator))
+        print("Evaluation result: ", eval_result)
+
+        replaced_synth = synthesis.replace("x", str(test_x)).replace("y", str(test_y))
+        expected_result = eval(replaced_synth)
+        print("Expected result: ", expected_result)
+
+        self.assertEqual(eval_result, expected_result)
+
 
 
 if __name__ == '__main__':
