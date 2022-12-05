@@ -66,7 +66,7 @@ public:
     {
         _individuals.reserve(populationSize);
 
-        for (int i = 0; i < populationSize; i++)
+        for (unsigned i = 0; i < populationSize; i++)
         {
             Individual newIndividual(_fitnessFunction);
             newIndividual.CreateRandom(_generatingGrammar);

@@ -197,7 +197,7 @@ struct ProductionRule
         std::string output = from.label;
         output += " -> ";
 
-        int index = 0;
+        size_t index = 0;
         for (const auto& prodElement: to)
         {
             output += prodElement.GetValue() + ((index == to.size() - 1) ? "" : " ");

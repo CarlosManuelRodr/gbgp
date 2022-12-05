@@ -75,7 +75,7 @@ inline int pow2(int n)
     return 1 << (n);
 }
 template<typename RandomGenerator>
-std::vector<size_t> random_weighted_sample_indexes(const std::vector<int>& weights, int ntake, RandomGenerator& g)
+std::vector<size_t> random_weighted_sample_indexes(const std::vector<int>& weights, size_t ntake, RandomGenerator& g)
 {
     size_t rnd_max = weights.size();
 
