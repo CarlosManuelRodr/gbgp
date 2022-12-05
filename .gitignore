@@ -34,6 +34,8 @@
 
 # IDE
 .idea
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
 cmake-build-debug
 cmake-build-release
 cmake-build-python
