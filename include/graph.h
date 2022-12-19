@@ -42,7 +42,7 @@ public:
                 if (i == _edge.first)
                 {
                     int childIndex = _edge.second;
-                    treeNodes[i]->AddChildNode(treeNodes[childIndex], treeNodes[i]);
+                    treeNodes[i]->AddChildNode(treeNodes[childIndex]);
                 }
             }
         }

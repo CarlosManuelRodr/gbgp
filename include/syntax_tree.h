@@ -358,7 +358,7 @@ public:
         return {nodes, edges};
     }
 
-    TreeNode* FromGraph(const Graph& graph)
+    static TreeNode* FromGraph(const Graph& graph)
     {
         std::vector<TreeNode*> treeNodes = graph.GetTreeNodes();
         return treeNodes.back();
@@ -546,7 +546,7 @@ public:
 
             if (pos.has_value())
             {
-                nodeToBuild->AddChildNode(treeTraversal[pos.value()], nodeToBuild);
+                nodeToBuild->AddChildNode(treeTraversal[pos.value()]);
                 toErase.push_back(pos.value());
             }
             else

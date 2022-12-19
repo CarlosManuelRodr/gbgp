@@ -179,7 +179,7 @@ struct TreeNode : Node
         parent = nullptr;
 
         for (const auto& c : children)
-            AddChildNode(new TreeNode(c), this);
+            AddChildNode(new TreeNode(c));
     }
 
     /// NonTerminal node constructor with generator production rule.
@@ -205,7 +205,7 @@ struct TreeNode : Node
         parent = nullptr;
 
         for (const auto& c : children)
-            AddChildNode(new TreeNode(c), this);
+            AddChildNode(new TreeNode(c));
     }
 
     /// Terminal node constructor.
@@ -233,7 +233,7 @@ struct TreeNode : Node
     {
         parent = nullptr;
         for (auto c : other.children)
-            AddChildNode(new TreeNode(*c), this);
+            AddChildNode(new TreeNode(*c));
     }
 
     /// Performs a copy of the node term without children.
@@ -291,10 +291,9 @@ struct TreeNode : Node
 
     /// Add node as a child.
     /// \param node Reference to the child node.
-    void AddChildNode(TreeNode* node, TreeNode* nodeParent = nullptr)
+    void AddChildNode(TreeNode* node)
     {
-        if (nodeParent != nullptr)
-            node->parent = nodeParent;
+        node->parent = this;
         children.push_back(node);
     }
 
@@ -304,9 +303,7 @@ struct TreeNode : Node
     /// \return Pointer to the newly created node.
     TreeNode* AddChildTerm(const NonTerminal& nonTerm, const ProductionRule& pgeneratorPR)
     {
-        auto* newNode = new TreeNode(nonTerm);
-        newNode->generatorPR = pgeneratorPR;
-        newNode->parent = this;
+        auto* newNode = new TreeNode(pgeneratorPR, nonTerm);
         AddChildNode(newNode);
         return newNode;
     }
@@ -318,9 +315,7 @@ struct TreeNode : Node
     /// \return Pointer to the newly created node.
     TreeNode* AddChildTerm(const Terminal& term)
     {
-        auto* newNode = new TreeNode(term);
-        newNode->termValue = term.GetRandomValue();
-        newNode->parent = this;
+        auto* newNode = new TreeNode(term, term.GetRandomValue());
         AddChildNode(newNode);
         return newNode;
     }
@@ -332,9 +327,7 @@ struct TreeNode : Node
     /// \return Pointer to the newly created node.
     TreeNode* AddChildTerm(const Terminal& term, const std::string& ptermValue)
     {
-        auto* newNode = new TreeNode(term);
-        newNode->termValue = ptermValue;
-        newNode->parent = this;
+        auto* newNode = new TreeNode(term, ptermValue);
         this->AddChildNode(newNode);
         return newNode;
     }
