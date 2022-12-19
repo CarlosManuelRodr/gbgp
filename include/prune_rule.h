@@ -28,14 +28,14 @@ public:
     /// \param pruneRuleTo Prune rule to as SyntaxTree.
     PruneRule(const SyntaxTree& pruneRuleFrom, const SyntaxTree& pruneRuleTo)
     {
-        _pruneRuleFromTraversal = pruneRuleFrom.GetTreeTraversal();
-        _pruneRuleToTraversal = pruneRuleTo.GetTreeTraversal();
+        _pruneRuleFromTraversal = pruneRuleFrom.GetPostOrderTreeTraversal();
+        _pruneRuleToTraversal = pruneRuleTo.GetPostOrderTreeTraversal();
     }
 
     /// Does the target tree can be simplified further with this rule?
     bool CanBeApplied(const SyntaxTree& target)
     {
-        std::vector<TreeNode*> treeTraversal = target.GetTreeTraversal();
+        std::vector<TreeNode*> treeTraversal = target.GetPostOrderTreeTraversal();
         unsigned index = SyntaxTree::FindIndexOfTraversalSubsequence(treeTraversal, _pruneRuleFromTraversal);
         return index != treeTraversal.size();
     }
@@ -45,7 +45,7 @@ public:
     /// \return The pruned SyntaxTree.
     void Apply(SyntaxTree& target)
     {
-        std::vector<TreeNode*> treeTraversal = target.GetTreeTraversal();
+        std::vector<TreeNode*> treeTraversal = target.GetPostOrderTreeTraversal();
         std::vector<TreeNode*> replacedTraversal = SyntaxTree::ReplaceTraversalSubsequence(treeTraversal,
                                                                                            _pruneRuleFromTraversal,
                                                                                            _pruneRuleToTraversal);

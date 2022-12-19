@@ -8,8 +8,7 @@ enum class TreeNodeType
     None, NonTerminal, Terminal
 };
 
-/// Represents a node of an n-ary tree
-struct TreeNode
+struct Node
 {
     /// Type of the node.
     TreeNodeType type;
@@ -23,14 +22,121 @@ struct TreeNode
     /// Production rule from which this node is part of.
     ProductionRule generatorPR;
 
+    /// Value of the terminal used if the node is of Terminal type.
+    std::string termValue;
+
+    Node()
+    {
+        type = TreeNodeType::None;
+        termInstance = Terminal();
+        nonTermInstance = NonTerminal();
+    }
+
+    /// NonTerminal node constructor.
+    /// \param nt The NonTerminal type.
+    explicit Node(const NonTerminal& nt)
+    {
+        type = TreeNodeType::NonTerminal;
+        nonTermInstance = nt;
+        termInstance = Terminal();
+    }
+
+    /// Terminal node constructor.
+    /// \param t The terminal.
+    explicit Node(const Terminal& t)
+    {
+        type = TreeNodeType::Terminal;
+        nonTermInstance = NonTerminal();
+        termInstance = t;
+    }
+
+    /// NonTerminal node constructor with generator production rule.
+    /// \param productionRule The production rule that builds this node.
+    /// \param nt The NonTerminal type.
+    Node(const ProductionRule& productionRule, const NonTerminal& nt)
+    {
+        type = TreeNodeType::NonTerminal;
+        nonTermInstance = nt;
+        termInstance = Terminal();
+        generatorPR = productionRule;
+    }
+
+    /// Terminal node with value constructor.
+    /// \param t The terminal.
+    /// \param value The value.
+    Node(const Terminal& t, const std::string& value)
+    {
+        type = TreeNodeType::Terminal;
+        nonTermInstance = NonTerminal();
+        termInstance = t;
+        termValue = value;
+    }
+
+    Node(const Node& other)
+    {
+        type = other.type;
+        nonTermInstance = other.nonTermInstance;
+        termInstance = other.termInstance;
+        generatorPR = other.generatorPR;
+        termValue = other.termValue;
+    }
+
+    bool operator==(const Node& other) const
+    {
+        const bool sameType = this->type == other.type;
+        const bool sameTerm = this->termInstance == other.termInstance;
+        const bool sameNonTerm = this->nonTermInstance == other.nonTermInstance;
+        const bool sameValue = this->termValue == other.termValue;
+        return sameType && sameTerm && sameNonTerm && sameValue;
+    }
+    bool operator!=(const Node& other) const
+    {
+        return !(*this == other);
+    }
+
+    /// Returns the value of the node.
+    [[nodiscard]]
+    std::string GetValue() const
+    {
+        return termValue;
+    }
+
+    /// Returns a formatted label of the node.
+    [[nodiscard]]
+    std::string GetLabel() const
+    {
+        return (type == TreeNodeType::NonTerminal) ?
+               nonTermInstance.label :
+               termInstance.label + " [" + termValue + "]";
+    }
+
+    /// Check if both nodes have the same term ID.
+    /// \param other The other node.
+    /// \return Whether nodes have the same ID.
+    [[nodiscard]]
+    bool SameID(const Node& other) const
+    {
+        bool sameType = this->type == other.type;
+        if (!sameType)
+            return false;
+
+        if (type == TreeNodeType::NonTerminal)
+            return this->nonTermInstance == other.nonTermInstance;
+        else if (type == TreeNodeType::Terminal)
+            return this->termInstance == other.termInstance;
+        else
+            return false;
+    }
+};
+
+/// Represents a node of an n-ary tree
+struct TreeNode : Node
+{
     /// Parent of the node. If the node is a root, its value will be null.
     TreeNode* parent;
 
     /// List of references to the children of this node.
     std::vector<TreeNode*> children;
-
-    /// Value of the terminal used if the node is of Terminal type.
-    std::string termValue;
 
     /// Result of the synthesis of this node.
     std::string expressionSynthesis;
@@ -39,11 +145,16 @@ struct TreeNode
     std::string expressionEvaluation;
 
     /// Constructor of an empty node.
-    TreeNode()
+    TreeNode() : Node()
     {
-        type = TreeNodeType::None;
-        termInstance = Terminal();
-        nonTermInstance = NonTerminal();
+        expressionSynthesis = "";
+        expressionEvaluation = "";
+        parent = nullptr;
+    }
+
+    /// Node copy constructor.
+    explicit TreeNode(const Node& other) : Node(other)
+    {
         expressionSynthesis = "";
         expressionEvaluation = "";
         parent = nullptr;
@@ -51,11 +162,8 @@ struct TreeNode
 
     /// NonTerminal node constructor.
     /// \param nt The NonTerminal type.
-    explicit TreeNode(const NonTerminal& nt)
+    explicit TreeNode(const NonTerminal& nt) : Node(nt)
     {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
         expressionSynthesis = "";
         expressionEvaluation = "";
         parent = nullptr;
@@ -64,11 +172,8 @@ struct TreeNode
     /// NonTerminal node constructor.
     /// \param nt The NonTerminal type.
     /// \param children Children instances that tells this node how to build its own children nodes.
-    TreeNode(const NonTerminal& nt, const std::vector<TreeNode>& children)
+    TreeNode(const NonTerminal& nt, const std::vector<TreeNode>& children) : Node(nt)
     {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
         expressionSynthesis = "";
         expressionEvaluation = "";
         parent = nullptr;
@@ -80,16 +185,11 @@ struct TreeNode
     /// NonTerminal node constructor with generator production rule.
     /// \param productionRule The production rule that builds this node.
     /// \param nt The NonTerminal type.
-    TreeNode(const ProductionRule& productionRule, const NonTerminal& nt)
+    TreeNode(const ProductionRule& productionRule, const NonTerminal& nt) : Node(productionRule, nt)
     {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
         expressionSynthesis = "";
-        termValue = "";
         expressionEvaluation = "";
         parent = nullptr;
-        generatorPR = productionRule;
     }
 
     /// NonTerminal node constructor that takes TreeNode instances as children and uses them as a blueprint to
@@ -98,15 +198,11 @@ struct TreeNode
     /// \param nt The NonTerminal type.
     /// \param children Children instances that tells this node how to build its own children nodes.
     TreeNode(const ProductionRule& productionRule, const NonTerminal& nt, const std::vector<TreeNode>& children)
+        : Node(productionRule, nt)
     {
-        type = TreeNodeType::NonTerminal;
-        nonTermInstance = nt;
-        termInstance = Terminal();
         expressionSynthesis = "";
-        termValue = "";
         expressionEvaluation = "";
         parent = nullptr;
-        generatorPR = productionRule;
 
         for (const auto& c : children)
             AddChildNode(new TreeNode(c), this);
@@ -114,11 +210,8 @@ struct TreeNode
 
     /// Terminal node constructor.
     /// \param t The terminal.
-    explicit TreeNode(const Terminal& t)
+    explicit TreeNode(const Terminal& t) : Node(t)
     {
-        type = TreeNodeType::Terminal;
-        nonTermInstance = NonTerminal();
-        termInstance = t;
         expressionSynthesis = "";
         expressionEvaluation = "";
         parent = nullptr;
@@ -127,28 +220,18 @@ struct TreeNode
     /// Terminal node with value constructor.
     /// \param t The terminal.
     /// \param value The value.
-    TreeNode(const Terminal& t, const std::string& value)
+    TreeNode(const Terminal& t, const std::string& value) : Node(t, value)
     {
-        type = TreeNodeType::Terminal;
-        nonTermInstance = NonTerminal();
-        termInstance = t;
         expressionSynthesis = "";
-        termValue = value;
         expressionEvaluation = "";
         parent = nullptr;
     }
 
     /// Copy constructor that copies all linked nodes.
     /// \param other The other node.
-    TreeNode(const TreeNode& other)
+    TreeNode(const TreeNode& other) : Node(other)
     {
-        type = other.type;
-        nonTermInstance = other.nonTermInstance;
-        termInstance = other.termInstance;
-        generatorPR = other.generatorPR;
-        termValue = other.termValue;
         parent = nullptr;
-
         for (auto c : other.children)
             AddChildNode(new TreeNode(*c), this);
     }
@@ -171,37 +254,6 @@ struct TreeNode
     {
         parent = nullptr;
         children.clear();
-    }
-
-    bool operator==(const TreeNode& other) const
-    {
-        const bool sameType = this->type == other.type;
-        const bool sameTerm = this->termInstance == other.termInstance;
-        const bool sameNonTerm = this->nonTermInstance == other.nonTermInstance;
-        const bool sameValue = this->termValue == other.termValue;
-        return sameType && sameTerm && sameNonTerm && sameValue;
-    }
-    bool operator!=(const TreeNode& other) const
-    {
-        return !(*this == other);
-    }
-
-    /// Check if both nodes have the same term ID.
-    /// \param other The other node.
-    /// \return Whether nodes have the same ID.
-    [[nodiscard]]
-    bool SameID(const TreeNode& other) const
-    {
-        bool sameType = this->type == other.type;
-        if (!sameType)
-            return false;
-
-        if (type == TreeNodeType::NonTerminal)
-            return this->nonTermInstance == other.nonTermInstance;
-        else if (type == TreeNodeType::Terminal)
-            return this->termInstance == other.termInstance;
-        else
-            return false;
     }
 
     /// Reset the synthesis of this node.
@@ -285,22 +337,6 @@ struct TreeNode
         newNode->parent = this;
         this->AddChildNode(newNode);
         return newNode;
-    }
-
-    /// Returns the value of the node.
-    [[nodiscard]]
-    std::string GetValue() const
-    {
-        return termValue;
-    }
-
-    /// Returns a formatted label of the node.
-    [[nodiscard]]
-    std::string GetLabel() const
-    {
-        return (type == TreeNodeType::NonTerminal) ?
-               nonTermInstance.label :
-               termInstance.label + " [" + termValue + "]";
     }
 
     /// Get node representation as string.

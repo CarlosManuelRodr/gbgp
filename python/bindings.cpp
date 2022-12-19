@@ -143,7 +143,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def("IsEmpty", &SyntaxTree::IsEmpty, "Check if the tree is empty.")
             .def("SetRootRule", &SyntaxTree::SetRootRule, "Set the production rule of the root node.", py::arg("startRule"))
             .def("ToString", &SyntaxTree::ToString, "Get string representation.")
-            .def("GetTreeTraversal", &SyntaxTree::GetTreeTraversal, "Traverses the tree in a depth first post-order.")
+            .def("GetPostOrderTreeTraversal", &SyntaxTree::GetPostOrderTreeTraversal, "Traverses the tree in a depth first post-order.")
             .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression, "Synthesizes the tree into an expression using the production rules of the grammar.")
             .def("Evaluate", &SyntaxTree::Evaluate, "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
             .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))

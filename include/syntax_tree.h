@@ -8,14 +8,15 @@
 #include <exception>
 #include <utility>
 #include <optional>
-#include "tree_node.h"
+#include "graph.h"
 
-/// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating the tree.
+/// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating
+/// the tree.
 class SyntaxTree
 {
 private:
     /// Root of the tree.
-    TreeNode* _root;
+    TreeNode* _root{};
 
     /// Find the first position of a NonTerminal of type id.
     /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
@@ -25,8 +26,9 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns nullopt.
     [[nodiscard]]
-    static std::optional<size_t> FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
-                                                    unsigned currentPosition, int elementsToSynthesize)
+    static std::optional<size_t> FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id,
+                                                    const std::vector<size_t>& avoid, unsigned currentPosition,
+                                                    int elementsToSynthesize)
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
@@ -45,8 +47,9 @@ private:
     /// \param elementsToSynthesize Number of nodes left to be synthesized.
     /// \return Position as index. If the search fails, returns nullopt.
     [[nodiscard]]
-    static std::optional<size_t> FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id, const std::vector<size_t>& avoid,
-                                                 unsigned currentPosition, int elementsToSynthesize)
+    static std::optional<size_t> FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id,
+                                                 const std::vector<size_t>& avoid, unsigned currentPosition,
+                                                 int elementsToSynthesize)
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
@@ -121,6 +124,13 @@ public:
         this->ClearEvaluation();
     }
 
+    /// Graph constructor.
+    /// \param graph The graph container.
+    explicit SyntaxTree(const Graph& graph)
+    {
+        _root = FromGraph(graph);
+    }
+
     ~SyntaxTree()
     {
         this->Destroy();
@@ -144,7 +154,7 @@ public:
     {
         if (_root != nullptr)
         {
-            std::vector<TreeNode*> nodeList = GetTreeTraversal(_root);
+            std::vector<TreeNode*> nodeList = GetPostOrderTreeTraversal(_root);
             for (TreeNode*& n : nodeList)
             {
                 if (n != nullptr)
@@ -160,7 +170,7 @@ public:
     /// Clear the expressionSynthesis and expressionEvaluation of every node.
     void ClearEvaluation()
     {
-        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(_root);
+        std::vector<TreeNode*> nodeList = this->GetPostOrderTreeTraversal(_root);
         for (TreeNode* n : nodeList)
         {
             if (n->type == TreeNodeType::NonTerminal)
@@ -213,7 +223,7 @@ public:
     /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
     void DeleteSubtree(TreeNode* rootOfSubtree)
     {
-        std::vector<TreeNode*> nodeList = this->GetTreeTraversal(rootOfSubtree);
+        std::vector<TreeNode*> nodeList = this->GetPostOrderTreeTraversal(rootOfSubtree);
         nodeList.pop_back();
         for (TreeNode*& n : nodeList)
         {
@@ -293,9 +303,9 @@ public:
         InsertSubtree(insertNode, subtree.Root());
     }
 
-    //**********************
-    //*      Utilities     *
-    //*********************/
+    //************************
+    //*      Conversions     *
+    //***********************/
 
     /// Prints the tree in the output stream.
     void PrintTree(std::ostream& stream = std::cout) const
@@ -318,6 +328,45 @@ public:
         PrintTree(ss);
         return ss.str();
     }
+
+    /// Export the tree into a graph.
+    /// \return A Graph object.
+    [[nodiscard]]
+    Graph ToGraph() const
+    {
+        std::vector<Node> nodes;
+        std::vector<std::pair<int, int>> edges;
+
+        // Get nodes.
+        std::vector<TreeNode*> treeNodes = GetPreOrderTreeTraversal();
+        nodes.reserve(treeNodes.size());
+        for (TreeNode* node : treeNodes)
+        {
+            nodes.push_back(*node);
+        }
+
+        // Get edges.
+        for (int i = 0; i < treeNodes.size(); i++)
+        {
+            for (int j = 0; j < treeNodes.size(); j++)
+            {
+                if (treeNodes[j]->parent == treeNodes[i])
+                    edges.emplace_back(i, j);
+            }
+        }
+
+        return {nodes, edges};
+    }
+
+    TreeNode* FromGraph(const Graph& graph)
+    {
+        std::vector<TreeNode*> treeNodes = graph.GetTreeNodes();
+        return treeNodes.back();
+    }
+
+    //***************************
+    //*     Tree traversals     *
+    //**************************/
 
     /// Performs a shallow copy of each node.
     /// \param other The traversal of the tree to copy.
@@ -393,14 +442,40 @@ public:
         return copyNodes;
     }
 
-    //***************************
-    //*     Tree traversals     *
-    //**************************/
+    /// Traverses the tree in a depth first pre-order.
+    /// \param node Start node. The default value is the root of the tree.
+    /// \return List of references of the traversed nodes.
+    std::vector<TreeNode*> GetPreOrderTreeTraversal(TreeNode* node = nullptr) const
+    {
+        /*
+          Algorithm Preorder(tree)
+          1. Visit the root.
+          2. Traverse the left subtree, i.e., call Preorder(left-subtree)
+          3. Traverse the right subtree, i.e., call Preorder(right-subtree)
+        */
+        // TODO: Replace recursive implementation with iterative.
+        std::vector<TreeNode*> output;
+
+        if (node == nullptr)
+        {
+            node = _root;
+            output.push_back(node);
+        }
+
+        for (TreeNode* n : node->children)
+        {
+            output.push_back(n);
+            const std::vector<TreeNode*> childrenTreeNodes = GetPreOrderTreeTraversal(n);
+            output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
+        }
+
+        return output;
+    }
 
     /// Traverses the tree in a depth first post-order.
     /// \param node Start node. The default value is the root of the tree.
     /// \return List of references of the traversed nodes.
-    std::vector<TreeNode*> GetTreeTraversal(TreeNode* node = nullptr) const
+    std::vector<TreeNode*> GetPostOrderTreeTraversal(TreeNode* node = nullptr) const
     {
         /*
           Algorithm Postorder(tree)
@@ -422,7 +497,7 @@ public:
 
         for (TreeNode* n : node->children)
         {
-            const std::vector<TreeNode*> childrenTreeNodes = GetTreeTraversal(n);
+            const std::vector<TreeNode*> childrenTreeNodes = GetPostOrderTreeTraversal(n);
             output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
         }
         output.push_back(node);
@@ -433,7 +508,7 @@ public:
     [[nodiscard]]
     std::vector<TreeNode*> GetTermsOfType(TreeNodeType type) const
     {
-        std::vector<TreeNode*> traversal = GetTreeTraversal();
+        std::vector<TreeNode*> traversal = GetPostOrderTreeTraversal();
         std::vector<size_t> terminalIndexes = find_indexes_if(traversal, [type](TreeNode* node) { return node->type == type; });
 
         return extract_elements_at_indexes(traversal, terminalIndexes);
@@ -573,7 +648,7 @@ public:
     [[nodiscard]]
     std::string SynthesizeExpression() const
     {
-        std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
+        std::vector<TreeNode*> treeTraversal = this->GetPostOrderTreeTraversal();
         for (auto node : treeTraversal) node->ClearSynthesis();
 
         while (treeTraversal.size() > 1)
@@ -659,7 +734,7 @@ public:
     /// \return true if expression was evaluated correctly, false if not.
     void Evaluate(EvaluationContext& ctx) const
     {
-        std::vector<TreeNode*> treeTraversal = this->GetTreeTraversal();
+        std::vector<TreeNode*> treeTraversal = this->GetPostOrderTreeTraversal();
         for (auto node : treeTraversal) node->ClearEvaluation();
 
         while (treeTraversal.size() > 1)

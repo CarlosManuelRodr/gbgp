@@ -101,6 +101,7 @@ public:
     /// \return True if creation is successful, false if not.
     bool TryCreateRandomTree(int maxDepth, int depth, TreeNode* node) const
     {
+        // TODO: Enforce a terminal node selection when limit is reached.
         if (node->type == TreeNodeType::NonTerminal)
         {
             // Create children nodes based on the current node production rule.
@@ -139,7 +140,7 @@ public:
     /// \return True if creation is successful, false if not.
     bool TryCreateRandomTree(SyntaxTree& syntaxTree, int maxDepth, const std::optional<ProductionRule>& rootRule) const
     {
-        syntaxTree.SetRootRule(rootRule != std::nullopt ? rootRule.value() : GetRootRule());
+        syntaxTree.SetRootRule(rootRule.has_value() ? rootRule.value() : GetRootRule());
 
         // Create children nodes based on the selected rule.
         std::vector<TreeNode*> newNodes;

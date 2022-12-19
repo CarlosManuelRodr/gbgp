@@ -16,6 +16,7 @@ if (BUILD_TYPE MATCHES Tests)
     add_executable(gbgp
             include/thread_pool.h
             include/syntax_tree.h
+            include/graph.h
             include/grammar.h
             include/individual.h
             include/vector_ops.h
@@ -52,6 +53,7 @@ elseif(BUILD_TYPE MATCHES Python)
     pybind11_add_module(gbgp
             include/thread_pool.h
             include/syntax_tree.h
+            include/graph.h
             include/grammar.h
             include/individual.h
             include/vector_ops.h

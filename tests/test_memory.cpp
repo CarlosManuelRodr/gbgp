@@ -79,7 +79,7 @@ TEST_CASE("Test traversal copy/delete")
     SyntaxTree tree;
     grammar.CreateRandomTree(tree, 20);
 
-    std::vector<TreeNode*> traversal = tree.GetTreeTraversal();
+    std::vector<TreeNode*> traversal = tree.GetPostOrderTreeTraversal();
     std::vector<TreeNode*> copy = SyntaxTree::CopyTreeTraversal(traversal);
 
     SyntaxTree::DeleteTreeTraversal(copy);

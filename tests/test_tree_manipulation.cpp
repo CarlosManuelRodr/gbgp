@@ -276,7 +276,7 @@ TEST_CASE("Test tree traversals")
                 })
     );
 
-    std::vector<TreeNode*> treeTraversal = ast.GetTreeTraversal();
+    std::vector<TreeNode*> treeTraversal = ast.GetPostOrderTreeTraversal();
     std::vector<TreeNode*> copyNodes;
 
     for (auto node : treeTraversal) copyNodes.push_back(TreeNode::ShallowCopy(node));
