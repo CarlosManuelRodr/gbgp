@@ -361,7 +361,7 @@ public:
     static TreeNode* FromGraph(const Graph& graph)
     {
         std::vector<TreeNode*> treeNodes = graph.GetTreeNodes();
-        return treeNodes.back();
+        return treeNodes.front();
     }
 
     //***************************

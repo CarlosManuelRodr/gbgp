@@ -42,6 +42,7 @@ if (BUILD_TYPE MATCHES Tests)
             tests/test_genetic_operators.cpp
             tests/test_optimization.cpp
             tests/test_logic_gates.cpp
+            tests/test_graph.cpp
 
             util/arithmetic_parser.h
             util/arithmetic_parser.cpp)
