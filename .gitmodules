@@ -7,3 +7,6 @@
 [submodule "third-party/cpp-peglib"]
 	path = third-party/cpp-peglib
 	url = https://github.com/yhirose/cpp-peglib
+[submodule "third-party/cereal"]
+	path = third-party/cereal
+	url = https://github.com/USCiLab/cereal
