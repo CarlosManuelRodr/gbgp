@@ -208,4 +208,22 @@ public:
     {
         return "rules='" + std::to_string(_grammarRules.size()) + "'";
     }
+
+    /// Since functions cannot be serialized-deserialized, this utility restore the correct semanticAction to the
+    /// target production rule.
+    /// \param target The target production rule.
+    /// \return True if a match was found and the semantic action was restored. False otherwise.
+    bool RestoreSemanticAction(ProductionRule& target) const
+    {
+        for (ProductionRule rule : _grammarRules)
+        {
+            if (rule.SameRule(target))
+            {
+                target.semanticAction = rule.semanticAction;
+                return true;
+            }
+        }
+
+        return false;
+    }
 };

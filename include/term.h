@@ -75,6 +75,12 @@ struct Terminal
     {
         return "id='" + std::to_string(id) + "', label='" + label + "', values='" + vector_to_string(values);
     }
+
+    /// Serialization hook.
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(id, label, values);
+    }
 };
 
 //*****************************
@@ -120,5 +126,11 @@ struct NonTerminal
     std::string ToString() const
     {
         return "id='" + std::to_string(id) + "', label='" + label + "'";
+    }
+
+    /// Serialization hook.
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(id, label);
     }
 };

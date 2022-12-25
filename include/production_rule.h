@@ -6,6 +6,7 @@
 //* Production element definition *
 //********************************/
 
+/// Enumeration of the type of element that the production element contains.
 enum class ProductionElementType
 {
     Unassigned, NonTerminal, Terminal
@@ -18,6 +19,14 @@ struct ProductionElement
     ProductionElementType type;
     NonTerminal nonterm;
     Terminal term;
+
+    /// Empty constructor.
+    ProductionElement()
+    {
+        type = ProductionElementType::Unassigned;
+        term = Terminal();
+        nonterm = NonTerminal();
+    }
 
     /// Terminal element constructor.
     /// \param pterm The Terminal element.
@@ -101,6 +110,22 @@ struct ProductionElement
     std::string ToString() const
     {
         return "type='" + GetTypeStr() + "', value='" + GetValue();
+    }
+
+    bool operator==(const ProductionElement& other) const
+    {
+        return type == other.type && nonterm == other.nonterm && term == other.term;
+    }
+
+    bool operator!=(const ProductionElement& other) const
+    {
+        return type != other.type || nonterm != other.nonterm || term != other.term;
+    }
+
+    /// Serialization hook.
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(type, nonterm, term);
     }
 };
 
@@ -204,5 +229,31 @@ struct ProductionRule
             index++;
         }
         return output;
+    }
+
+    [[nodiscard]]
+    bool SameRule(const ProductionRule& other) const
+    {
+        return from == other.from && to == other.to;
+    }
+
+    bool operator==(const ProductionRule& other) const
+    {
+        bool thisSemanticActionAssigned = (semanticAction != nullptr);
+        bool otherSemanticActionAssigned = (other.semanticAction != nullptr);
+        return SameRule(other) && thisSemanticActionAssigned == otherSemanticActionAssigned;
+    }
+
+    bool operator!=(const ProductionRule& other) const
+    {
+        bool thisSemanticActionAssigned = (semanticAction != nullptr);
+        bool otherSemanticActionAssigned = (other.semanticAction != nullptr);
+        return SameRule(other) || thisSemanticActionAssigned == otherSemanticActionAssigned;
+    }
+
+    /// Serialization hook.
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(from, to);
     }
 };

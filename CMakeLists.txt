@@ -12,6 +12,7 @@ if (BUILD_TYPE MATCHES Tests)
 
     include_directories(third-party/doctest/doctest)
     include_directories(third-party/cpp-peglib)
+    include_directories(third-party/cereal/include)
 
     add_executable(gbgp
             include/thread_pool.h
@@ -43,6 +44,7 @@ if (BUILD_TYPE MATCHES Tests)
             tests/test_optimization.cpp
             tests/test_logic_gates.cpp
             tests/test_graph.cpp
+            tests/test_serialization.cpp
 
             util/arithmetic_parser.h
             util/arithmetic_parser.cpp)
