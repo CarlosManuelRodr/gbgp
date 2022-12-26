@@ -1,6 +1,7 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
+#include <cereal/types/utility.hpp>
 #include <sstream>
 #include "../include/environment.h"
 #include "doctest.h"
@@ -158,25 +159,53 @@ TEST_CASE("Test ProductionRule serialization/deserialization")
     CHECK((rule1 == deserialized));
 }
 
-TEST_CASE("Test node serialization/deserialization")
+TEST_CASE("Test Node serialization/deserialization")
 {
-    TreeNode node = TreeNode(factorNonTerm,{ TreeNode(varTerm, "b") });
-    //std::ofstream os("node.bin", std::ios::binary);
-    //cereal::BinaryOutputArchive archive( os );
+    Node node = Node(rule1, factorNonTerm);
+    std::stringstream ss;
+
+    // Serialize
+    {
+        cereal::BinaryOutputArchive oArchive(ss);
+        oArchive(node);
+        cout << "Serialized Node: " << node.ToString() << endl;
+    }
+
+    // Deserialize
+    Node deserialized;
+    {
+        cereal::BinaryInputArchive iArchive(ss);
+        iArchive(deserialized);
+        cout << "Deserialized Node: " << deserialized.ToString() << endl;
+    }
+    grammar.RestoreSemanticAction(deserialized);
+
+    CHECK((node == deserialized));
 }
 
-TEST_CASE("Test tree serialization/deserialization")
+TEST_CASE("Test graph serialization/deserialization")
 {
     // GP Generator grammar
-    SyntaxTree cst;
+    SyntaxTree tree;
     EvaluationContext evaluationContext;
-    grammar.CreateRandomTree(cst, 100);
+    grammar.CreateRandomTree(tree, 100);
 
-    // Get original expr.
-    string originalExpr = cst.SynthesizeExpression();
+    // Get original Graph.
+    Graph original = tree.ToGraph();
+    std::stringstream ss;
 
-    // Serialize tree.
-/*    std::ofstream os("out.cereal", std::ios::binary);
-    cereal::BinaryOutputArchive archive( os );
-    archive(cst);*/
+    // Serialize
+    {
+        cereal::BinaryOutputArchive oArchive(ss);
+        oArchive(original);
+        cout << "Serialized Graph: " << original.ToString() << endl;
+    }
+
+    // Deserialize
+    Graph deserialized;
+    {
+        cereal::BinaryInputArchive iArchive(ss);
+        iArchive(deserialized);
+        cout << "Deserialized Graph: " << deserialized.ToString() << endl;
+    }
 }

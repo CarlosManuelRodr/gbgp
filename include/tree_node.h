@@ -8,6 +8,8 @@ enum class TreeNodeType
     None, NonTerminal, Terminal
 };
 
+/// Simple node that contains either a Terminal or NonTerminal with the ProductionRule used to create it.
+/// This struct is intended for exporting and serialization.
 struct Node
 {
     /// Type of the node.
@@ -87,7 +89,8 @@ struct Node
         const bool sameTerm = this->termInstance == other.termInstance;
         const bool sameNonTerm = this->nonTermInstance == other.nonTermInstance;
         const bool sameValue = this->termValue == other.termValue;
-        return sameType && sameTerm && sameNonTerm && sameValue;
+        const bool sameGeneratorPR = this->generatorPR == other.generatorPR;
+        return sameType && sameTerm && sameNonTerm && sameValue && sameGeneratorPR;
     }
     bool operator!=(const Node& other) const
     {
@@ -127,9 +130,22 @@ struct Node
         else
             return false;
     }
+
+    /// Get node representation as string.
+    [[nodiscard]]
+    virtual std::string ToString() const
+    {
+        return GetLabel();
+    }
+
+    /// Serialization hook.
+    template<class Archive> void serialize(Archive& ar)
+    {
+        ar(type, nonTermInstance, termInstance, generatorPR, termValue);
+    }
 };
 
-/// Represents a node of an n-ary tree
+/// Represents a node of an n-ary tree. This struct is not serializable.
 struct TreeNode : Node
 {
     /// Parent of the node. If the node is a root, its value will be null.
@@ -334,12 +350,12 @@ struct TreeNode : Node
 
     /// Get node representation as string.
     [[nodiscard]]
-    std::string ToString() const
+    std::string ToString() const override
     {
         std::string output = GetLabel();
         output += " -> ";
         for (auto child : children)
-            output += child->GetLabel() + + ((child == children.back()) ? "" : ", ");
+            output += child->GetLabel() + ((child == children.back()) ? "" : ", ");
         return output;
     }
 };

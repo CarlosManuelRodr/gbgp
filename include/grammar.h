@@ -215,7 +215,7 @@ public:
     /// \return True if a match was found and the semantic action was restored. False otherwise.
     bool RestoreSemanticAction(ProductionRule& target) const
     {
-        for (ProductionRule rule : _grammarRules)
+        for (const ProductionRule& rule : _grammarRules)
         {
             if (rule.SameRule(target))
             {
@@ -225,5 +225,10 @@ public:
         }
 
         return false;
+    }
+
+    bool RestoreSemanticAction(Node& target) const
+    {
+        return RestoreSemanticAction(target.generatorPR);
     }
 };

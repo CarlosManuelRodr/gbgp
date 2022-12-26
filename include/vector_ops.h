@@ -202,7 +202,7 @@ T vector_to_string(const std::vector<T>& v)
         size_t i = &elem - &v[0];
         s += "'" + elem + "'";
         if (i != v.size() - 1)
-            s += ",";
+            s += ", ";
     }
     s += "]";
     return s;
