@@ -2,8 +2,8 @@
 #include <string>
 #include "production_rule.h"
 
-/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty tree nodes.
-enum class TreeNodeType
+/// A node can be either a Terminal or a NonTerminal. A None type is provided to instantiate empty nodes.
+enum class NodeType
 {
     None, NonTerminal, Terminal
 };
@@ -13,7 +13,7 @@ enum class TreeNodeType
 struct Node
 {
     /// Type of the node.
-    TreeNodeType type;
+    NodeType type;
 
     /// NonTerminal instance used if the node is of NonTerminal type.
     NonTerminal nonTermInstance;
@@ -29,7 +29,7 @@ struct Node
 
     Node()
     {
-        type = TreeNodeType::None;
+        type = NodeType::None;
         termInstance = Terminal();
         nonTermInstance = NonTerminal();
     }
@@ -38,7 +38,7 @@ struct Node
     /// \param nt The NonTerminal type.
     explicit Node(const NonTerminal& nt)
     {
-        type = TreeNodeType::NonTerminal;
+        type = NodeType::NonTerminal;
         nonTermInstance = nt;
         termInstance = Terminal();
     }
@@ -47,7 +47,7 @@ struct Node
     /// \param t The terminal.
     explicit Node(const Terminal& t)
     {
-        type = TreeNodeType::Terminal;
+        type = NodeType::Terminal;
         nonTermInstance = NonTerminal();
         termInstance = t;
     }
@@ -57,7 +57,7 @@ struct Node
     /// \param nt The NonTerminal type.
     Node(const ProductionRule& productionRule, const NonTerminal& nt)
     {
-        type = TreeNodeType::NonTerminal;
+        type = NodeType::NonTerminal;
         nonTermInstance = nt;
         termInstance = Terminal();
         generatorPR = productionRule;
@@ -68,12 +68,14 @@ struct Node
     /// \param value The value.
     Node(const Terminal& t, const std::string& value)
     {
-        type = TreeNodeType::Terminal;
+        type = NodeType::Terminal;
         nonTermInstance = NonTerminal();
         termInstance = t;
         termValue = value;
     }
 
+    /// Copy constructor.
+    /// \param other The node to be copied.
     Node(const Node& other)
     {
         type = other.type;
@@ -81,6 +83,17 @@ struct Node
         termInstance = other.termInstance;
         generatorPR = other.generatorPR;
         termValue = other.termValue;
+    }
+
+    /// Parameter by parameter constructor.
+    Node(NodeType ptype, const NonTerminal& pNonTermInstance, const Terminal& pTermInstance,
+         const ProductionRule& pGeneratorPR, const std::string& pTermValue)
+    {
+        type = ptype;
+        nonTermInstance = pNonTermInstance;
+        termInstance = pTermInstance;
+        generatorPR = pGeneratorPR;
+        termValue = pTermValue;
     }
 
     bool operator==(const Node& other) const
@@ -92,6 +105,7 @@ struct Node
         const bool sameGeneratorPR = this->generatorPR == other.generatorPR;
         return sameType && sameTerm && sameNonTerm && sameValue && sameGeneratorPR;
     }
+
     bool operator!=(const Node& other) const
     {
         return !(*this == other);
@@ -108,7 +122,7 @@ struct Node
     [[nodiscard]]
     std::string GetLabel() const
     {
-        return (type == TreeNodeType::NonTerminal) ?
+        return (type == NodeType::NonTerminal) ?
                nonTermInstance.label :
                termInstance.label + " [" + termValue + "]";
     }
@@ -123,9 +137,9 @@ struct Node
         if (!sameType)
             return false;
 
-        if (type == TreeNodeType::NonTerminal)
+        if (type == NodeType::NonTerminal)
             return this->nonTermInstance == other.nonTermInstance;
-        else if (type == TreeNodeType::Terminal)
+        else if (type == NodeType::Terminal)
             return this->termInstance == other.termInstance;
         else
             return false;

@@ -66,6 +66,17 @@ struct ProductionElement
         nonterm = pnonterm;
     }
 
+    /// Set all members constructor.
+    /// \param ptype The production element type.
+    /// \param pterm The Terminal.
+    /// \param pnonterm The NonTerminal.
+    ProductionElement(const ProductionElementType& ptype, const Terminal& pterm, const NonTerminal& pnonterm)
+    {
+        type = ptype;
+        term = pterm;
+        nonterm = pnonterm;
+    }
+
     /// Get the production element type.
     [[nodiscard]]
     ProductionElementType GetType() const

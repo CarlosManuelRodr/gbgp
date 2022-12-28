@@ -212,7 +212,7 @@ TEST_CASE("Test random subtree replacement")
     cout << "Original: " << originalSynth << endl;
 
     // Select random branch.
-    std::vector<TreeNode*> nonTerminals = tree.GetTermsOfType(TreeNodeType::NonTerminal);
+    std::vector<TreeNode*> nonTerminals = tree.GetTermsOfType(NodeType::NonTerminal);
     TreeNode* randomNonTerm = *random_choice(nonTerminals.begin(), nonTerminals.end());
 
     // Remove branch and create subtree.

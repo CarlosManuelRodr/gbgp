@@ -59,16 +59,27 @@ public:
     /// Copy constructor.
     Grammar(const Grammar& other) = default;
 
+    /// Only production rules initializer list constructor.
+    /// \param productionRuleList
     Grammar(std::initializer_list<ProductionRule> productionRuleList) : _grammarRules(productionRuleList) {}
 
+    /// Initializer list constructor.
+    /// \param productionRuleList
+    /// \param pruneRuleList
     Grammar(std::initializer_list<ProductionRule> productionRuleList,
             std::initializer_list<PruneRule> pruneRuleList)
             : _grammarRules(productionRuleList), _pruneRules(pruneRuleList) {}
 
+    /// Only production rules constructor.
+    /// \param productionRuleList
     explicit Grammar(const std::vector<ProductionRule>& productionRuleList)
     {
         _grammarRules = productionRuleList;
     }
+
+    /// Parameter by parameter constructor.
+    /// \param productionRuleList
+    /// \param pruneRuleList
     Grammar(const std::vector<ProductionRule>& productionRuleList, const std::vector<PruneRule>& pruneRuleList)
     {
         _grammarRules = productionRuleList;
@@ -102,7 +113,7 @@ public:
     bool TryCreateRandomTree(int maxDepth, int depth, TreeNode* node) const
     {
         // TODO: Enforce a terminal node selection when limit is reached.
-        if (node->type == TreeNodeType::NonTerminal)
+        if (node->type == NodeType::NonTerminal)
         {
             // Create children nodes based on the current node production rule.
             std::vector<TreeNode*> newNodes;
@@ -227,8 +238,26 @@ public:
         return false;
     }
 
+    /// Restores the unserializable function pointer of the ProductionRule of a node. Always call this method
+    /// when deserializing a node with a production rule that contained a semantic action.
+    /// \param target The target node.
+    /// \return True if a match was found and the semantic action was restored. False otherwise.
     bool RestoreSemanticAction(Node& target) const
     {
         return RestoreSemanticAction(target.generatorPR);
+    }
+
+    /// Restores the unserializable function pointer of the ProductionRule of nodes inside a graph.
+    /// Always call this method when deserializing a Graph that contains a node with a production rule with
+    /// a semantic action.
+    /// \param target The target graph.
+    /// \return True if a match was found on any node and the semantic action was restored. False otherwise.
+    bool RestoreSemanticAction(Graph& target) const
+    {
+        bool result = false;
+        for (auto &node: target.GetNodes())
+            result |= RestoreSemanticAction(node);
+
+        return result;
     }
 };

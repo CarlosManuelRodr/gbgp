@@ -30,7 +30,21 @@ PYBIND11_MODULE(gbgp, m) {
                  [](const Terminal &t) {
                      return "<gbgp.Terminal " + t.ToString() + ">";
                  }
-            );
+            )
+            .def(py::pickle(
+                    [](const Terminal &t) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        return py::make_tuple(t.id, t.label, t.values);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 3)
+                            throw std::runtime_error("Invalid state!");
+
+                        /* Create a new C++ instance */
+                        Terminal p(t[0].cast<int>(), t[1].cast<std::string>(), t[2].cast<std::vector<std::string>>());
+                        return p;
+                    }
+            ));
 
     py::class_<NonTerminal>(m, "NonTerminal")
             .def(py::init<>())
@@ -42,7 +56,21 @@ PYBIND11_MODULE(gbgp, m) {
                  [](const NonTerminal &nt) {
                      return "<gbgp.NonTerminal " + nt.ToString() + ">";
                  }
-            );
+            )
+            .def(py::pickle(
+                    [](const NonTerminal &nt) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        return py::make_tuple(nt.id, nt.label);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 2)
+                            throw std::runtime_error("Invalid state!");
+
+                        /* Create a new C++ instance */
+                        NonTerminal p(t[0].cast<int>(), t[1].cast<std::string>());
+                        return p;
+                    }
+            ));
 
     py::class_<EvaluationContext>(m, "EvaluationContext", py::dynamic_attr())
             .def(py::init<>())
@@ -78,7 +106,21 @@ PYBIND11_MODULE(gbgp, m) {
                  [](const ProductionElement &pe) {
                      return "<gbgp.ProductionElement " + pe.ToString() + ">";
                  }
-            );
+            )
+            .def(py::pickle(
+                    [](const ProductionElement &pe) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        return py::make_tuple(pe.type, pe.nonterm, pe.term);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 3)
+                            throw std::runtime_error("Invalid state!");
+
+                        /* Create a new C++ instance */
+                        ProductionElement pe(t[0].cast<ProductionElementType>(), t[1].cast<Terminal>(), t[2].cast<NonTerminal>());
+                        return pe;
+                    }
+            ));
 
     py::class_<ProductionRule>(m, "ProductionRule")
             .def(py::init<>(), "Empty ProductionRule constructor.")
@@ -91,28 +133,73 @@ PYBIND11_MODULE(gbgp, m) {
             .def("ToString", &ProductionRule::ToString, "Get a string representation.")
             .def("__repr__",
                  [](const ProductionRule &pr) {
-                     return "<gbgp.ProductionRule '" + pr.ToString() + "'>";
+                     return "<gbgp.ProductionRule " + pr.ToString() + ">";
                  }
-            );
+            )
+            .def(py::pickle(
+                    [](const ProductionRule &pr) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        return py::make_tuple(pr.from, pr.to);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 2)
+                            throw std::runtime_error("Invalid state!");
 
-    py::enum_<TreeNodeType>(m, "TreeNodeType")
-            .value("None", TreeNodeType::None)
-            .value("NonTerminal", TreeNodeType::NonTerminal)
-            .value("Terminal", TreeNodeType::Terminal);
+                        /* Create a new C++ instance */
+                        ProductionRule pr(t[0].cast<NonTerminal>(), t[1].cast<std::vector<ProductionElement>>());
+                        return pr;
+                    }
+            ));
 
-    py::class_<TreeNode>(m, "TreeNode")
+    py::enum_<NodeType>(m, "NodeType")
+            .value("None", NodeType::None)
+            .value("NonTerminal", NodeType::NonTerminal)
+            .value("Terminal", NodeType::Terminal);
+
+    py::class_<Node>(m, "Node")
             .def(py::init<>(), "Constructor of an empty node.")
+            .def(py::init<const Terminal&>(), "Terminal tree node constructor.", py::arg("t"))
+            .def(py::init<const Terminal&, const std::string&>(), "Terminal tree node with value constructor.", py::arg("t"), py::arg("value"))
+            .def(py::init<const NonTerminal&>(), "NonTerminal tree node constructor.", py::arg("nt"))
+            .def(py::init<const ProductionRule&, const NonTerminal&>(), "NonTerminal tree node constructor with generator production rule.", py::arg("productionRule"), py::arg("nt"))
+            .def(py::self == py::self)
+            .def(py::self != py::self)
+            .def("GetValue", &Node::GetValue, "Returns the value of the node.")
+            .def("GetLabel", &Node::GetLabel, "Returns a formatted label of the node.")
+            .def("ToString", &Node::ToString, "Get node representation as string.")
+            .def("__repr__",
+                 [](const Node &node) {
+                     return "<gbgp.Node " + node.ToString() + ">";
+                 }
+            )
+            .def(py::pickle(
+                    [](const Node &node) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        return py::make_tuple(node.type, node.nonTermInstance, node.termInstance, node.generatorPR, node.termValue);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 5)
+                            throw std::runtime_error("Invalid state!");
+
+                        /* Create a new C++ instance */
+                        Node node(t[0].cast<NodeType>(), t[1].cast<NonTerminal>(), t[2].cast<Terminal>(), t[3].cast<ProductionRule>(), t[4].cast<std::string>());
+                        return node;
+                    }
+            ));
+
+    py::class_<TreeNode, Node>(m, "TreeNode")
+            .def(py::init<>(), "Constructor of an empty tree node.")
             .def(py::init<const TreeNode&>(), "Copy constructor that copies all linked nodes.", py::arg("other"))
-            .def(py::init<const Terminal&>(), "Terminal node constructor.", py::arg("t"))
-            .def(py::init<const Terminal&, const std::string&>(), "Terminal node with value constructor.", py::arg("t"), py::arg("value"))
-            .def(py::init<const NonTerminal&>(), "NonTerminal node constructor.", py::arg("nt"))
-            .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor with explicit children instances.", py::arg("nt"), py::arg("children"))
-            .def(py::init<const ProductionRule&, const NonTerminal&>(), "NonTerminal node constructor with generator production rule.", py::arg("productionRule"), py::arg("nt"))
-            .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal node constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own children nodes.",py::arg("productionRule"), py::arg("nt"), py::arg("children"))
+            .def(py::init<const Terminal&>(), "Terminal tree node constructor.", py::arg("t"))
+            .def(py::init<const Terminal&, const std::string&>(), "Terminal tree node with value constructor.", py::arg("t"), py::arg("value"))
+            .def(py::init<const NonTerminal&>(), "NonTerminal tree node constructor.", py::arg("nt"))
+            .def(py::init<const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal tree node constructor with explicit children instances.", py::arg("nt"), py::arg("children"))
+            .def(py::init<const ProductionRule&, const NonTerminal&>(), "NonTerminal tree node constructor with generator production rule.", py::arg("productionRule"), py::arg("nt"))
+            .def(py::init<const ProductionRule&, const NonTerminal&, const std::vector<TreeNode>&>(), "NonTerminal tree node constructor that takes TreeNode instances as children and uses them as a blueprint to construct its own children nodes.",py::arg("productionRule"), py::arg("nt"), py::arg("children"))
             .def(py::self == py::self)
             .def(py::self != py::self)
             .def("SameID", &TreeNode::SameID, "Check if both nodes have the same term ID.", py::arg("other"))
-            .def("AddChildNode", &TreeNode::AddChildNode, "Add node as a child.", py::arg("node"), py::arg("nodeParent") = nullptr)
+            .def("AddChildNode", &TreeNode::AddChildNode, "Add node as a child.", py::arg("node"))
             .def("AddChildTerm", py::overload_cast<const NonTerminal&, const ProductionRule&>(&TreeNode::AddChildTerm), py::return_value_policy::reference, "Add child NonTerminal node to the target.", py::arg("nonTerm"), py::arg("generatorPR"))
             .def("AddChildTerm", py::overload_cast<const Terminal&>(&TreeNode::AddChildTerm), py::return_value_policy::reference, "Add child Terminal node to the target. If the Terminal has only one possible value, sets it as the termValue.", py::arg("term"))
             .def("AddChildTerm", py::overload_cast<const Terminal&, const std::string&>(&TreeNode::AddChildTerm), py::return_value_policy::reference, "Add child Terminal node to the target.", py::arg("term"), py::arg("ptermValue"))
@@ -121,12 +208,10 @@ PYBIND11_MODULE(gbgp, m) {
             .def("ClearEvaluation", &TreeNode::ClearEvaluation, "Reset the evaluation of this node.")
             .def("IsEvaluated", &TreeNode::IsEvaluated, "Check if this node has been evaluated.")
             .def("HasChildren", &TreeNode::HasChildren, "Check if this node has children.")
-            .def("GetValue", &TreeNode::GetValue, "Returns the value of the node.")
-            .def("GetLabel", &TreeNode::GetLabel, "Returns a formatted label of the node.")
-            .def("ToString", &TreeNode::ToString, "Get node representation as string.")
+            .def("ToString", &TreeNode::ToString, "Get tree node representation as string.")
             .def("__repr__",
-                 [](const TreeNode &node) {
-                     return "<gbgp.TreeNode '" + node.ToString() + "'>";
+                 [](const TreeNode &treeNode) {
+                     return "<gbgp.TreeNode " + treeNode.ToString() + ">";
                  }
             );
 
@@ -149,9 +234,25 @@ PYBIND11_MODULE(gbgp, m) {
             .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
             .def("__repr__",
                  [](const SyntaxTree &tree) {
-                     return "<gbgp.SyntaxTree '" + tree.ToString() + "'>";
+                     return "<gbgp.SyntaxTree " + tree.ToString() + ">";
                  }
-            );
+            )
+            .def(py::pickle(
+                    [](const SyntaxTree &tree) { // __getstate__
+                        /* Return a tuple that fully encodes the state of the object */
+                        Graph treeAsGraph = tree.ToGraph();
+                        return py::make_tuple(treeAsGraph);
+                    },
+                    [](const py::tuple& t) { // __setstate__
+                        if (t.size() != 1)
+                            throw std::runtime_error("Invalid state!");
+
+                        /* Create a new C++ instance */
+                        auto deserializedGraph = t[0].cast<Graph>();
+                        SyntaxTree tree(deserializedGraph);
+                        return tree;
+                    }
+            ));
 
     py::class_<PruneRule>(m, "PruneRule")
             .def(py::init<const SyntaxTree&, const SyntaxTree&>(), "Constructor by SyntaxTree.")
@@ -160,16 +261,17 @@ PYBIND11_MODULE(gbgp, m) {
             .def("ToString", &PruneRule::ToString, "Get string representation.")
             .def("__repr__",
                  [](const PruneRule &pruneRule) {
-                     return "<gbgp.PruneRule '" + pruneRule.ToString() + "'>";
+                     return "<gbgp.PruneRule " + pruneRule.ToString() + ">";
                  }
             );
 
     py::class_<Grammar>(m, "Grammar")
             .def(py::init<>(), "Empty constructor.")
-            .def(py::init<std::initializer_list<ProductionRule>>(), "")
-            .def(py::init<std::initializer_list<ProductionRule>, std::initializer_list<PruneRule>>(), "")
+            .def(py::init<std::initializer_list<ProductionRule>>(), "Only production rules initializer list constructor.")
+            .def(py::init<std::initializer_list<ProductionRule>, std::initializer_list<PruneRule>>(), "Initializer list constructor.")
             .def(py::init<const Grammar&>(), "Copy constructor.")
-            .def(py::init<const std::vector<ProductionRule>&>(), "")
+            .def(py::init<const std::vector<ProductionRule>&>(), "Only production rules constructor.")
+            .def(py::init<const std::vector<ProductionRule>&, const std::vector<PruneRule>&>(), "Parameter by parameter constructor.")
 
             .def("GetRootRule", &Grammar::GetRootRule, "Get the root rule of the grammar.")
             .def("Size", &Grammar::Size, "Get the number of production rules of this grammar.")
@@ -177,9 +279,12 @@ PYBIND11_MODULE(gbgp, m) {
             .def("CreateRandomTree", py::overload_cast<SyntaxTree&, int>(&Grammar::CreateRandomTree, py::const_), "Create random tree safely by creating random trees until there is a success.", py::arg("syntaxTree"), py::arg("maxDepth"))
             .def("PruneTree", &Grammar::PruneTree, " Applies the grammar prune rules repeatedly until no further simplification can be performed.", py::arg("syntaxTree"))
             .def("ToString", &Grammar::ToString, "Get string representation.")
+            .def("RestoreSemanticAction", py::overload_cast<ProductionRule&>(&Grammar::RestoreSemanticAction, py::const_), "Restore the appropriate semantic action of the production rule.", py::arg("target"))
+            .def("RestoreSemanticAction", py::overload_cast<Node&>(&Grammar::RestoreSemanticAction, py::const_), "Restore the appropriate semantic action of the production rule.", py::arg("target"))
+            .def("RestoreSemanticAction", py::overload_cast<Graph&>(&Grammar::RestoreSemanticAction, py::const_), "Restore the appropriate semantic action of the production rule.", py::arg("target"))
             .def("__repr__",
                  [](const Grammar &grammar) {
-                     return "<gbgp.Grammar '" + grammar.ToString() + "'>";
+                     return "<gbgp.Grammar " + grammar.ToString() + ">";
                  }
             );
 

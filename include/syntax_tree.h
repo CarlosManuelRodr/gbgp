@@ -32,7 +32,7 @@ private:
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
-            if (treeTraversal[i]->type == TreeNodeType::NonTerminal &&
+            if (treeTraversal[i]->type == NodeType::NonTerminal &&
                 treeTraversal[i]->nonTermInstance.id == id && !vector_contains_q(avoid, i))
                 return i;
         }
@@ -53,7 +53,7 @@ private:
     {
         for (size_t i = currentPosition - elementsToSynthesize; i < treeTraversal.size(); i++)
         {
-            if (treeTraversal[i]->type == TreeNodeType::Terminal && treeTraversal[i]->termInstance.id == id &&
+            if (treeTraversal[i]->type == NodeType::Terminal && treeTraversal[i]->termInstance.id == id &&
                 !vector_contains_q(avoid, i))
                 return i;
         }
@@ -173,7 +173,7 @@ public:
         std::vector<TreeNode*> nodeList = this->GetPostOrderTreeTraversal(_root);
         for (TreeNode* n : nodeList)
         {
-            if (n->type == TreeNodeType::NonTerminal)
+            if (n->type == NodeType::NonTerminal)
             {
                 n->expressionSynthesis = "";
                 n->expressionEvaluation = "";
@@ -254,7 +254,7 @@ public:
     void InsertSubtree(TreeNode* insertNode, TreeNode* subtreeStartNode)
     {
         // Check that both nodes are NonTerminals
-        if (insertNode->type == TreeNodeType::NonTerminal && subtreeStartNode->type == TreeNodeType::NonTerminal)
+        if (insertNode->type == NodeType::NonTerminal && subtreeStartNode->type == NodeType::NonTerminal)
         {
             // Check that both nodes are of the same type.
             if (insertNode->nonTermInstance.id == subtreeStartNode->nonTermInstance.id)
@@ -288,9 +288,9 @@ public:
         }
         else
         {
-            if (insertNode->type != TreeNodeType::NonTerminal)
+            if (insertNode->type != NodeType::NonTerminal)
                 throw std::runtime_error("Cannot insert subtree in Terminal " + insertNode->termInstance.label);
-            if (subtreeStartNode->type != TreeNodeType::NonTerminal)
+            if (subtreeStartNode->type != NodeType::NonTerminal)
                 throw std::runtime_error("Cannot insert subtree of type Terminal " + subtreeStartNode->termInstance.label);
         }
     }
@@ -506,7 +506,7 @@ public:
     }
 
     [[nodiscard]]
-    std::vector<TreeNode*> GetTermsOfType(TreeNodeType type) const
+    std::vector<TreeNode*> GetTermsOfType(NodeType type) const
     {
         std::vector<TreeNode*> traversal = GetPostOrderTreeTraversal();
         std::vector<size_t> terminalIndexes = find_indexes_if(traversal, [type](TreeNode* node) { return node->type == type; });
@@ -521,7 +521,7 @@ public:
     static unsigned NextToBuild(std::vector<TreeNode*>& treeTraversal)
     {
         for (unsigned i = 0; i < treeTraversal.size(); i++)
-            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->HasChildren())
+            if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->HasChildren())
                 return i;
         return treeTraversal.size();
     }
@@ -587,7 +587,7 @@ public:
     static unsigned NextToSynthesize(std::vector<TreeNode*>& treeTraversal)
     {
         for (unsigned i = 0; i < treeTraversal.size(); i++)
-            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->IsSynthesized())
+            if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->IsSynthesized())
                 return i;
         return treeTraversal.size();
     }
@@ -664,7 +664,7 @@ public:
     static unsigned NextToEvaluate(std::vector<TreeNode*>& treeTraversal)
     {
         for (unsigned i = 0; i < treeTraversal.size(); i++)
-            if (treeTraversal[i]->type == TreeNodeType::NonTerminal && !treeTraversal[i]->IsEvaluated())
+            if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->IsEvaluated())
                 return i;
         return treeTraversal.size();
     }

@@ -48,10 +48,10 @@ private:
     /// \param tree The tree.
     /// \param type Can be Terminal or NonTerminal.
     /// \return A list of mutable nodes.
-    static std::vector<TreeNode*> GetMutableTermsOfType(const SyntaxTree& tree, TreeNodeType type)
+    static std::vector<TreeNode*> GetMutableTermsOfType(const SyntaxTree& tree, NodeType type)
     {
         std::vector<TreeNode*> terms = tree.GetTermsOfType(type);
-        std::vector<TreeNode*> mutableTerms = type == TreeNodeType::NonTerminal ?
+        std::vector<TreeNode*> mutableTerms = type == NodeType::NonTerminal ?
                 GetMutableNonTerminalNodes(terms) : GetMutableTerminalNodes(terms);
         return mutableTerms;
     }
@@ -61,7 +61,7 @@ private:
     static void MutateIndividualTerminal(Individual& individual)
     {
         // Select random terminal.
-        std::vector<TreeNode*> mutableTerminals = GetMutableTermsOfType(individual.GetTree(), TreeNodeType::Terminal);
+        std::vector<TreeNode*> mutableTerminals = GetMutableTermsOfType(individual.GetTree(), NodeType::Terminal);
         TreeNode* randomTerminalNode = *random_choice(mutableTerminals.begin(), mutableTerminals.end());
         Terminal randomTerminal = randomTerminalNode->termInstance;
 
@@ -76,7 +76,7 @@ private:
         SyntaxTree& tree = individual.GetTree();
 
         // Select random non-terminal.
-        std::vector<TreeNode*> mutableNonTerminals = GetMutableTermsOfType(tree, TreeNodeType::NonTerminal);
+        std::vector<TreeNode*> mutableNonTerminals = GetMutableTermsOfType(tree, NodeType::NonTerminal);
         TreeNode* randomNonTerm = *random_choice(mutableNonTerminals.begin(), mutableNonTerminals.end());
 
         // Remove branch and create subtree.
@@ -144,8 +144,8 @@ public:
         SyntaxTree treeParent1 = parent1.GetTree();
         SyntaxTree treeParent2 = parent2.GetTree();
 
-        std::vector<TreeNode*> mutableNonTerminalsParent1 = GetMutableTermsOfType(treeParent1, TreeNodeType::NonTerminal);
-        std::vector<TreeNode*> mutableNonTerminalsParent2 = GetMutableTermsOfType(treeParent2, TreeNodeType::NonTerminal);
+        std::vector<TreeNode*> mutableNonTerminalsParent1 = GetMutableTermsOfType(treeParent1, NodeType::NonTerminal);
+        std::vector<TreeNode*> mutableNonTerminalsParent2 = GetMutableTermsOfType(treeParent2, NodeType::NonTerminal);
 
         std::vector<NonTerminal> sharedNonTerminals = GetSharedNonTerminals(mutableNonTerminalsParent1, mutableNonTerminalsParent2);
         TreeNode* randomNonTermParent1 = GetRandomNodeOfType(mutableNonTerminalsParent1, sharedNonTerminals);
