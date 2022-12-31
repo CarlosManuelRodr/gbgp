@@ -134,6 +134,8 @@ TEST_CASE("Test fitness function")
 
     double fitness = s_fitness_function(tree);
     cout << "Fitness: " << fitness << endl;
+
+    CHECK((fitness > -0.001)); // Floating point arithmetic can produce small negative "zeroes".
 }
 
 TEST_CASE("Test arithmetic evaluation")

@@ -22,7 +22,8 @@ struct Terminal
     Terminal()
     {
         id = -1;
-        label = '\0';
+        label = "";
+        values.clear();
     }
     explicit Terminal(const std::string& value)
     {
@@ -100,7 +101,7 @@ struct NonTerminal
     NonTerminal()
     {
         id = -1;
-        label = '\0';
+        label = "";
     }
 
     /// Constructor by id and label.

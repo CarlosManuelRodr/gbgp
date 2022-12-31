@@ -18,11 +18,11 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::init<const std::string&>(), py::arg("value"))
             .def(py::init<int, const std::string&>(), py::arg("pid"), py::arg("plabel"))
             .def(py::init<int, const std::string&, const std::vector<std::string>&>(), py::arg("pid"), py::arg("plabel"), py::arg("pvalues"))
+            .def(py::self == py::self)
+            .def(py::self != py::self)
             .def("IsMutable", &Terminal::IsMutable, "Does this terminal have multiple possible values?")
             .def("GetRandomValue", &Terminal::GetRandomValue, "Get a random value of the set of possible values.")
             .def("ToString", &Terminal::ToString, "Get the string representation.")
-            .def(py::self == py::self)
-            .def(py::self != py::self)
             .def_readwrite("id", &Terminal::id, "The term type.")
             .def_readwrite("label", &Terminal::label, "The label used visual representation and debugging.")
             .def_readwrite("values", &Terminal::values, "List of possible terminal values that a node of this type can contain.")
@@ -49,6 +49,8 @@ PYBIND11_MODULE(gbgp, m) {
     py::class_<NonTerminal>(m, "NonTerminal")
             .def(py::init<>())
             .def(py::init<int, const std::string&>(), py::arg("pid"), py::arg("plabel"))
+            .def(py::self == py::self)
+            .def(py::self != py::self)
             .def("ToString", &NonTerminal::ToString, "Get the string representation.")
             .def_readwrite("id", &NonTerminal::id, "The term type.")
             .def_readwrite("label", &NonTerminal::label, "The label used visual representation and debugging.")
@@ -98,6 +100,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::init<const Terminal&>(), "Terminal element constructor.", py::arg("pterm"))
             .def(py::init<const NonTerminal&>(), "NonTerminal element constructor.", py::arg("pnonterm"))
             .def(py::init<int, const std::string&, const std::vector<std::string>&>(), "Terminal constructor with various possible values.", py::arg("id"), py::arg("label"), py::arg("values"))
+            .def(py::self == py::self)
+            .def(py::self != py::self)
             .def("GetType", &ProductionElement::GetType, "Get the production element type.")
             .def("GetTypeStr", &ProductionElement::GetTypeStr, "Get production element type as a string.")
             .def("GetValue", &ProductionElement::GetValue, "Get the label value of the production element.")
@@ -110,7 +114,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::pickle(
                     [](const ProductionElement &pe) { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
-                        return py::make_tuple(pe.type, pe.nonterm, pe.term);
+                        return py::make_tuple(pe.type, pe.term, pe.nonterm);
                     },
                     [](const py::tuple& t) { // __setstate__
                         if (t.size() != 3)
@@ -127,6 +131,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&>(), "Production rule with default semantic action.", py::arg("pfrom"), py::arg("pto"))
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>(), "Production rule with custom semantic action.", py::arg("pfrom"), py::arg("pto"), py::arg("pSemanticAction"))
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, int>(), "Production rule with default transfer semantic action over element at index semanticTransferIndex.", py::arg("pfrom"), py::arg("pto"), py::arg("semanticTransferIndex"))
+            .def(py::self == py::self)
+            .def(py::self != py::self)
             .def("NumberOfProductionElements", &ProductionRule::NumberOfProductionElements, "Returns the number of production elements.")
             .def("GetFrom", &ProductionRule::GetFrom, "Getter for the from list.")
             .def("GetTo", &ProductionRule::GetTo, "Getter for the to list.")
@@ -146,7 +152,7 @@ PYBIND11_MODULE(gbgp, m) {
                             throw std::runtime_error("Invalid state!");
 
                         /* Create a new C++ instance */
-                        ProductionRule pr(t[0].cast<NonTerminal>(), t[1].cast<std::vector<ProductionElement>>());
+                        ProductionRule pr(t[0].cast<NonTerminal>(), t[1].cast<std::vector<ProductionElement>>(), nullptr);
                         return pr;
                     }
             ));
@@ -182,7 +188,12 @@ PYBIND11_MODULE(gbgp, m) {
                             throw std::runtime_error("Invalid state!");
 
                         /* Create a new C++ instance */
-                        Node node(t[0].cast<NodeType>(), t[1].cast<NonTerminal>(), t[2].cast<Terminal>(), t[3].cast<ProductionRule>(), t[4].cast<std::string>());
+                        auto type = t[0].cast<NodeType>();
+                        auto nonTermInstance = t[1].cast<NonTerminal>();
+                        auto termInstance = t[2].cast<Terminal>();
+                        auto generatorPR = t[3].cast<ProductionRule>();
+                        auto termValue = t[4].cast<std::string>();
+                        Node node(type, nonTermInstance, termInstance, generatorPR, termValue);
                         return node;
                     }
             ));

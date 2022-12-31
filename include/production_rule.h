@@ -250,16 +250,12 @@ struct ProductionRule
 
     bool operator==(const ProductionRule& other) const
     {
-        bool thisSemanticActionAssigned = (semanticAction != nullptr);
-        bool otherSemanticActionAssigned = (other.semanticAction != nullptr);
-        return SameRule(other) && thisSemanticActionAssigned == otherSemanticActionAssigned;
+        return SameRule(other);
     }
 
     bool operator!=(const ProductionRule& other) const
     {
-        bool thisSemanticActionAssigned = (semanticAction != nullptr);
-        bool otherSemanticActionAssigned = (other.semanticAction != nullptr);
-        return SameRule(other) || thisSemanticActionAssigned == otherSemanticActionAssigned;
+        return !SameRule(other);
     }
 
     /// Serialization hook.

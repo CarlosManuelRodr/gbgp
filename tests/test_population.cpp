@@ -133,11 +133,18 @@ TEST_CASE("Test population initialization")
     population.Evaluate();
 
     cout << "Initial population scores" << endl;
-    for (auto fitness : population.GetFitness())
-        cout << fitness << endl;
+    std::vector<double> fitnessValues = population.GetFitness();
+    for (int i = 0; i < population.Size(); i++)
+    {
+        cout << population.GetIndividual(i).GetExpression() << endl;
+        cout << fitnessValues[i] << endl;
+    }
 
     cout << "Population scores after selection" << endl;
     GeneticOperators::Selection(population, 10);
     for (auto fitness : population.GetFitness())
         cout << fitness << endl;
+
+    Individual fittest = population.GetFittestByRank(0);
+    CHECK((fittest.GetFitness() > 0.0));
 }

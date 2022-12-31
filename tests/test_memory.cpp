@@ -62,7 +62,7 @@ const ProductionRule rule6(
 /****************************
 *       Test routines       *
 ****************************/
-TEST_CASE("Test memory allocation/deallocation")
+TEST_CASE("Test memory allocation/de-allocation")
 {
     Grammar grammar{rule1, rule2, rule3, rule4, rule5, rule6};
 

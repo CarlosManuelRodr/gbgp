@@ -32,6 +32,8 @@ struct Node
         type = NodeType::None;
         termInstance = Terminal();
         nonTermInstance = NonTerminal();
+        generatorPR = ProductionRule();
+        termValue = std::string();
     }
 
     /// NonTerminal node constructor.
@@ -41,6 +43,8 @@ struct Node
         type = NodeType::NonTerminal;
         nonTermInstance = nt;
         termInstance = Terminal();
+        generatorPR = ProductionRule();
+        termValue = std::string();
     }
 
     /// Terminal node constructor.
@@ -50,6 +54,8 @@ struct Node
         type = NodeType::Terminal;
         nonTermInstance = NonTerminal();
         termInstance = t;
+        generatorPR = ProductionRule();
+        termValue = std::string();
     }
 
     /// NonTerminal node constructor with generator production rule.
@@ -61,6 +67,7 @@ struct Node
         nonTermInstance = nt;
         termInstance = Terminal();
         generatorPR = productionRule;
+        termValue = std::string();
     }
 
     /// Terminal node with value constructor.
@@ -72,6 +79,7 @@ struct Node
         nonTermInstance = NonTerminal();
         termInstance = t;
         termValue = value;
+        generatorPR = ProductionRule();
     }
 
     /// Copy constructor.
@@ -145,11 +153,25 @@ struct Node
             return false;
     }
 
+    [[nodiscard]]
+    virtual std::string GetTypeString() const
+    {
+        switch (type) {
+            case NodeType::NonTerminal:
+                return "NonTerminal";
+            case NodeType::Terminal:
+                return "Terminal";
+            case NodeType::None:
+            default:
+                return "None";
+        }
+    }
+
     /// Get node representation as string.
     [[nodiscard]]
     virtual std::string ToString() const
     {
-        return GetLabel();
+        return "type=" + GetTypeString() + ", label=" + GetLabel() + " , generatrPR=" + generatorPR.ToString();
     }
 
     /// Serialization hook.
@@ -160,7 +182,7 @@ struct Node
 };
 
 /// Represents a node of an n-ary tree. This struct is not serializable.
-struct TreeNode : Node
+struct TreeNode final : Node
 {
     /// Parent of the node. If the node is a root, its value will be null.
     TreeNode* parent;

@@ -346,9 +346,9 @@ public:
         }
 
         // Get edges.
-        for (int i = 0; i < treeNodes.size(); i++)
+        for (int i = 0; i < static_cast<int>(treeNodes.size()); i++)
         {
-            for (int j = 0; j < treeNodes.size(); j++)
+            for (int j = 0; j < static_cast<int>(treeNodes.size()); j++)
             {
                 if (treeNodes[j]->parent == treeNodes[i])
                     edges.emplace_back(i, j);

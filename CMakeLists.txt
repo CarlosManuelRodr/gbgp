@@ -76,7 +76,7 @@ elseif(BUILD_TYPE MATCHES Python)
     add_custom_command(TARGET gbgp POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy
             "$<TARGET_FILE:gbgp>"
-            "${CMAKE_CURRENT_SOURCE_DIR}/python/$<TARGET_FILE_NAME:gbgp>"
+            "${CMAKE_CURRENT_SOURCE_DIR}/python/tests/$<TARGET_FILE_NAME:gbgp>"
             COMMENT "Copying to output directory")
 endif()
 

@@ -70,7 +70,7 @@ const ProductionRule rule2(
                 r = a && b;
             else if (op == "Or")
                 r = a || b;
-            else if (op == "Xor")
+            else //if (op == "Xor")
                 r = a ^ b;
 
             ctx.result() = to_string(r);
@@ -102,7 +102,7 @@ const ProductionRule rule4(
             bool r;
             if (var == "x0")
                 r = booleanContext.x0;
-            else if (var == "x1")
+            else //if (var == "x1")
                 r = booleanContext.x1;
 
             ctx.result() = to_string(r);
@@ -120,7 +120,7 @@ double logic_fitness_function(SyntaxTree& solution)
             if (x0 == false && x1 == false) { y0 = false; y1 = false; }
             else if (x0 == false && x1 == true) { y0 = false; y1 = true; }
             else if (x0 == true && x1 == false) { y0 = false; y1 = true; }
-            else if (x0 == true && x1 == true) { y0 = true; y1 = false; }
+            else { y0 = true; y1 = false; }
 
             BooleanContext ctx;
             ctx.x0 = x0;
@@ -201,10 +201,12 @@ TEST_CASE("Test half adder optimization")
     Population& lastGeneration = env.GetPopulation();
     Individual fittest = lastGeneration.GetFittestByRank(0);
 
-    for (int i = 0; i < 30 && fittest.GetFitness() < 1; i++)
+    for (int i = 0; i < 50 && fittest.GetFitness() < 1; i++)
     {
         env.Optimize();
         fittest = lastGeneration.GetFittestByRank(0);
         cout << i << "\t|\t" << fittest.GetFitness() << "\t|\t" << fittest.GetExpression() << endl;
     }
+
+    CHECK((fittest.GetFitness() == 1.0));
 }

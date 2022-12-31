@@ -54,7 +54,7 @@ public:
         for (const auto & _node : _nodes)
             treeNodes.push_back(new TreeNode(_node));
 
-        for (int i = 0; i < treeNodes.size(); i++)
+        for (int i = 0; i < static_cast<int>(treeNodes.size()); i++)
         {
             for (auto & _edge : _edges)
             {
@@ -77,12 +77,14 @@ public:
         std::vector<std::string> nodesAsStr;
         for (const Node &node: _nodes)
             nodesAsStr.push_back(node.ToString());
+
         std::string output = "nodes=" + vector_to_string(nodesAsStr);
 
         // Edges.
         std::vector<std::string> edgesAsStr;
-        for (const std::pair<int, int> edge : _edges)
+        for (const std::pair<int, int>& edge : _edges)
             edgesAsStr.push_back(EdgeToString(edge));
+
         output += ", edges=" + vector_to_string(edgesAsStr);
 
         return output;

@@ -79,6 +79,10 @@ TEST_CASE("Test tree node")
     CHECK((nonTermNode1 == nonTermNode3));
     CHECK((nonTermNode2 == nonTermNode3));
     CHECK((nonTermNode4 != nonTermNode1));
+
+    auto ruleNode = Node(rule2, exprNonTerm);
+    string nodeAsStr = ruleNode.ToString();
+    CHECK((nodeAsStr == "type=NonTerminal, label=EXPR , generatrPR=EXPR -> TERM"));
 }
 
 TEST_CASE("Testing subtree insertion")
