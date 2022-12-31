@@ -82,7 +82,7 @@ TEST_CASE("Test tree node")
 
     auto ruleNode = Node(rule2, exprNonTerm);
     string nodeAsStr = ruleNode.ToString();
-    CHECK((nodeAsStr == "type=NonTerminal, label=EXPR , generatrPR=EXPR -> TERM"));
+    CHECK((nodeAsStr == "type=NonTerminal, label=EXPR , generatorPR=EXPR -> TERM"));
 }
 
 TEST_CASE("Testing subtree insertion")
@@ -282,8 +282,10 @@ TEST_CASE("Test tree traversals")
 
     std::vector<TreeNode*> treeTraversal = ast.GetPostOrderTreeTraversal();
     std::vector<TreeNode*> copyNodes;
+    copyNodes.reserve(treeTraversal.size());
 
-    for (auto node : treeTraversal) copyNodes.push_back(TreeNode::ShallowCopy(node));
+    for (auto node : treeTraversal)
+        copyNodes.push_back(TreeNode::ShallowCopy(node));
 
     SyntaxTree reconstruction;
     SyntaxTree::BuildFromTraversal(reconstruction, copyNodes);
@@ -447,7 +449,8 @@ TEST_CASE("Test multiple pass pruning")
         cout << "Expression before pruning: " << unprunedSynth << endl;
 
         int i = 1;
-        while (pruneRule.CanBeApplied(tree)) {
+        while (pruneRule.CanBeApplied(tree))
+        {
             pruneRule.Apply(tree);
             cout << "Pruning iteration " << i << ": " << tree.SynthesizeExpression() << endl;
             i++;

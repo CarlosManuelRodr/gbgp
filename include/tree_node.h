@@ -171,7 +171,7 @@ struct Node
     [[nodiscard]]
     virtual std::string ToString() const
     {
-        return "type=" + GetTypeString() + ", label=" + GetLabel() + " , generatrPR=" + generatorPR.ToString();
+        return "type=" + GetTypeString() + ", label=" + GetLabel() + " , generatorPR=" + generatorPR.ToString();
     }
 
     /// Serialization hook.
