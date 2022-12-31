@@ -1,4 +1,3 @@
-import pickle
 import unittest
 from enum import Enum
 
@@ -52,45 +51,21 @@ rule6 = ProductionRule(factorNonTerm, [ProductionElement(varTerm)])
 grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
 
-class TestSerialization(unittest.TestCase):
-    def test_term_pickling(self):
-        pickled_object = pickle.dumps(varTerm)
-        unpickled_object = pickle.loads(pickled_object)
+class TestGrammar(unittest.TestCase):
+    def test_rule_representation(self):
+        rule1_string = rule1.ToString()
+        rule2_string = rule2.ToString()
+        rule3_string = rule3.ToString()
+        rule4_string = rule4.ToString()
+        rule5_string = rule5.ToString()
+        rule6_string = rule6.ToString()
 
-        self.assertEqual(varTerm, unpickled_object)
-
-    def test_nonterm_pickling(self):
-        pickled_object = pickle.dumps(exprNonTerm)
-        unpickled_object = pickle.loads(pickled_object)
-
-        self.assertEqual(exprNonTerm, unpickled_object)
-
-    def test_production_element_pickling(self):
-        pe = ProductionElement(exprNonTerm)
-        pickled_object = pickle.dumps(pe)
-        unpickled_object = pickle.loads(pickled_object)
-
-        self.assertEqual(pe, unpickled_object)
-
-    def test_production_rule_pickling(self):
-        pickled_object = pickle.dumps(rule1)
-        unpickled_object = pickle.loads(pickled_object)
-
-        self.assertEqual(rule1, unpickled_object)
-
-    def test_empty_node_pickling(self):
-        node = Node()
-        pickled_object = pickle.dumps(node)
-        unpickled_object = pickle.loads(pickled_object)
-
-        self.assertEqual(node, unpickled_object)
-
-    def test_node_pickling(self):
-        node = Node(rule1, factorNonTerm)
-        pickled_object = pickle.dumps(node)
-        unpickled_object = pickle.loads(pickled_object)
-
-        self.assertEqual(node, unpickled_object)
+        self.assertEqual("EXPR -> EXPR Plus TERM", rule1_string)
+        self.assertEqual("EXPR -> TERM", rule2_string)
+        self.assertEqual("TERM -> TERM Times FACTOR", rule3_string)
+        self.assertEqual("TERM -> FACTOR", rule4_string)
+        self.assertEqual("FACTOR -> LeftParenthesis EXPR RightParenthesis", rule5_string)
+        self.assertEqual("FACTOR -> var", rule6_string)
 
 
 if __name__ == '__main__':

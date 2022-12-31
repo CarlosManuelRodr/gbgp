@@ -43,7 +43,7 @@ def semantic_action1(ctx: EvaluationContext):
 
 
 rule1 = ProductionRule(exprNonTerm,
-                       [ProductionElement(termNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm)],
+                       [ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm)],
                        semantic_action1)
 
 rule2 = ProductionRule(exprNonTerm, [ProductionElement(termNonTerm)])
