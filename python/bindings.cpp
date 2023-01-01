@@ -233,6 +233,7 @@ PYBIND11_MODULE(gbgp, m) {
             .def_static("CopySubtree", &SyntaxTree::CopySubtree, "Get subtree starting from subTreeStartNode.", py::arg("subTreeStartNode"))
             .def("Root", &SyntaxTree::Root, "Returns a reference to the root.", py::return_value_policy::reference)
             .def("SetRoot", &SyntaxTree::SetRoot, "Set the root node.", py::arg("rootNode"))
+            .def("GetRoot", &SyntaxTree::GetRoot, "Get the root node instance.")
             .def("DeleteSubtree", &SyntaxTree::DeleteSubtree, "Removes the subtree starting from rootOfSubtree.", py::arg("rootOfSubtree"))
             .def("InsertSubtree", py::overload_cast<TreeNode*, TreeNode*>(&SyntaxTree::InsertSubtree), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtreeStartNode"))
             .def("InsertSubtree", py::overload_cast<TreeNode*, const SyntaxTree&>(&SyntaxTree::InsertSubtree), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtree"))

@@ -74,6 +74,151 @@ class TestTreeManipulation(unittest.TestCase):
         node_as_str = rule_node.ToString()
         self.assertEqual("type=NonTerminal, label=EXPR , generatorPR=EXPR -> TERM", node_as_str)
 
+    def test_subtree_insertion(self):
+        tree = SyntaxTree(
+            TreeNode(
+                rule1,
+                exprNonTerm,
+                [
+                    TreeNode(
+                        rule2,
+                        exprNonTerm,
+                        [
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                [
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        [
+                                            TreeNode(varTerm, "c")
+                                        ])
+                                ])
+                        ]),
+                    TreeNode(plusTerm, "+"),
+                    TreeNode(
+                        rule3,
+                        termNonTerm,
+                        [
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                [
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        [
+                                            TreeNode(varTerm, "b")
+                                        ])
+                                ]),
+                            TreeNode(timesTerm, "*"),
+                            TreeNode(
+                                rule6,
+                                factorNonTerm,
+                                [
+                                    TreeNode(varTerm, "b")
+                                ])
+                        ])
+                ])
+        )
+
+        self.assertEqual("c+b*b", tree.SynthesizeExpression())
+
+    def test_pruning(self):
+        tree = SyntaxTree(
+            TreeNode(
+                rule2,
+                exprNonTerm,
+                [
+                    TreeNode(
+                        rule3,
+                        termNonTerm,
+                        [
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                [
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        [
+                                            TreeNode(varTerm, "a")
+                                        ])
+                                ]),
+                            TreeNode(timesTerm, "*"),
+                            TreeNode(
+                                rule5,
+                                factorNonTerm,
+                                [
+                                    TreeNode(leftParenthesisTerm, "("),
+                                    TreeNode(
+                                        rule2,
+                                        exprNonTerm,
+                                        [
+                                            TreeNode(
+                                                rule4,
+                                                termNonTerm,
+                                                [
+                                                    TreeNode(
+                                                        rule6,
+                                                        factorNonTerm,
+                                                        [
+                                                            TreeNode(varTerm, "b")
+                                                        ])
+                                                ])
+                                        ]),
+                                    TreeNode(rightParenthesisTerm, ")")
+                                ])
+                        ])
+                ])
+        )
+
+        prune_rule_from = SyntaxTree(
+            TreeNode(
+                rule5,
+                factorNonTerm,
+                [
+                    TreeNode(leftParenthesisTerm, "("),
+                    TreeNode(
+                        rule2,
+                        exprNonTerm,
+                        [
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                [
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        [
+                                            TreeNode(varTerm)
+                                        ])
+                                ])
+                        ]),
+                    TreeNode(rightParenthesisTerm, ")")
+                ])
+        )
+
+        prune_rule_to = SyntaxTree(
+            TreeNode(
+                rule6,
+                factorNonTerm,
+                [
+                    TreeNode(varTerm)
+                ])
+        )
+
+        prune_rule = PruneRule(prune_rule_from, prune_rule_to)
+        prune_grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6], [prune_rule])
+
+        unpruned_synth = tree.SynthesizeExpression()
+        prune_grammar.PruneTree(tree)
+        pruned_synth = tree.SynthesizeExpression()
+
+        self.assertEqual("a*(b)", unpruned_synth)
+        self.assertEqual("a*b", pruned_synth)
+
 
 if __name__ == '__main__':
     unittest.main()

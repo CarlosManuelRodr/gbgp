@@ -85,7 +85,7 @@ TEST_CASE("Test tree node")
     CHECK((nodeAsStr == "type=NonTerminal, label=EXPR , generatorPR=EXPR -> TERM"));
 }
 
-TEST_CASE("Testing subtree insertion")
+TEST_CASE("Test subtree insertion")
 {
     // First tree. Procedural construction.
     SyntaxTree ast1;

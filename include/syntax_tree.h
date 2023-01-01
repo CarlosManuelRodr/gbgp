@@ -209,6 +209,13 @@ public:
         return _root;
     }
 
+    /// Return the root node instance.
+    [[nodiscard]]
+    TreeNode GetRoot() const
+    {
+        return *_root;
+    }
+
     /// Set the root node.
     /// \param rootNode Pointer to the root node.
     void SetRoot(TreeNode* rootNode)
