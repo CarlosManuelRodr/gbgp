@@ -226,6 +226,17 @@ PYBIND11_MODULE(gbgp, m) {
                  }
             );
 
+    py::class_<Graph>(m, "Graph")
+            .def(py::init<>(), "Creates an empty Graph.")
+            .def(py::init<const std::vector<Node>&, const std::vector<std::pair<int, int>>&>(), "Graph constructor.")
+            .def("GetNodes", &Graph::GetNodes, "Getter for the nodes.")
+            .def("GetNodeIndexes", &Graph::GetNodeIndexes, "Get the indexes of the nodes.")
+            .def("GetEdges", &Graph::GetEdges, "Getter for the edges.")
+            .def("GetLabels", &Graph::GetLabels, "Get the labels as a map.")
+            .def("GetTreeNodes", &Graph::GetTreeNodes, "Rebuild the TreeNode pointer chain from this graph.")
+            .def("ToString", &Graph::ToString, "Get string representation.")
+            ;
+
     py::class_<SyntaxTree>(m, "SyntaxTree")
             .def(py::init<>(), "Creates an empty SyntaxTree.")
             .def(py::init<const TreeNode&>(), "Builds a tree from a root node.", py::arg("root"))

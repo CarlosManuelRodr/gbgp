@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <map>
 #include "tree_node.h"
 
 /// A graph is an intermediate data structure for a syntax tree used for plotting and serialization/deserialization.
@@ -22,7 +23,7 @@ public:
     /// Empty constructor.
     Graph() = default;
 
-    /// Constructor.
+    /// Graph constructor.
     /// \param nodes The list of nodes.
     /// \param edges The list of edges.
     Graph(const std::vector<Node>& nodes, const std::vector<std::pair<int, int>>& edges)
@@ -37,10 +38,30 @@ public:
         return _nodes;
     }
 
+    /// Get the indexes of the nodes.
+    /// \return A list of indexes.
+    std::vector<int> GetNodeIndexes()
+    {
+        std::vector<int> nodeIndexes(_nodes.size());
+        std::iota(nodeIndexes.begin(), nodeIndexes.end(), 1);
+        return nodeIndexes;
+    }
+
     /// Getter for the edges.
     std::vector<std::pair<int, int>> GetEdges()
     {
         return _edges;
+    }
+
+    /// Get the labels as a map.
+    /// \return The label map.
+    std::map<int, std::string> GetLabels()
+    {
+        std::map<int, std::string> labels;
+        for (int i = 0; i < _nodes.size(); i++)
+            labels[i] = _nodes[i].GetLabel();
+
+        return labels;
     }
 
     /// Rebuild the TreeNode pointer chain from this graph.

@@ -27,6 +27,7 @@ struct Node
     /// Value of the terminal used if the node is of Terminal type.
     std::string termValue;
 
+    /// Empty constructor.
     Node()
     {
         type = NodeType::None;

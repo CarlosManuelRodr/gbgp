@@ -82,3 +82,69 @@ TEST_CASE("Test Graph conversion")
     }
     CHECK(areEqual);
 }
+
+TEST_CASE("Test graph nodes and edges")
+{
+    SyntaxTree tree(
+            TreeNode(
+                    rule2,
+                    exprNonTerm,
+                    {
+                            TreeNode(
+                                    rule3,
+                                    termNonTerm,
+                                    {
+                                            TreeNode(
+                                                    rule4,
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    rule6,
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(varTerm, "a")
+                                                                    })
+                                                    }),
+                                            TreeNode(timesTerm, "*"),
+                                            TreeNode(
+                                                    rule5,
+                                                    factorNonTerm,
+                                                    {
+                                                            TreeNode(leftParenthesisTerm, "("),
+                                                            TreeNode(
+                                                                    rule2,
+                                                                    exprNonTerm,
+                                                                    {
+                                                                            TreeNode(
+                                                                                    rule4,
+                                                                                    termNonTerm,
+                                                                                    {
+                                                                                            TreeNode(
+                                                                                                    rule6,
+                                                                                                    factorNonTerm,
+                                                                                                    {
+                                                                                                            TreeNode(varTerm, "b")
+                                                                                                    })
+                                                                                    })
+                                                                    }),
+                                                            TreeNode(rightParenthesisTerm, ")")
+                                                    })
+                                    })
+                    })
+    );
+
+    Graph graph = tree.ToGraph();
+
+    std::vector<int> nodes = graph.GetNodeIndexes();
+    std::vector<std::pair<int, int>> edges = graph.GetEdges();
+    std::map<int, std::string> labels = graph.GetLabels();
+
+    for (int i = 0; i < nodes.size(); i++)
+        CHECK((nodes[i] == i+1));
+
+    CHECK((edges[4].first == 2));
+    CHECK((edges[4].second == 3));
+
+    CHECK((labels[5] == "Times [*]"));
+    CHECK((labels[6] == "FACTOR"));
+}
