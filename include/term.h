@@ -3,135 +3,138 @@
 #include <vector>
 #include "vector_ops.h"
 
-//*****************************
-//*         Terminal          *
-//****************************/
-
-/// Terminal term. A terminal is a leaf node in the expression tree that contains a value.
-struct Terminal
+namespace gbgp
 {
-    /// The term type.
-    int id;
+    //*****************************
+    //*         Terminal          *
+    //****************************/
 
-    /// The label used visual representation and debugging of rules and trees.
-    std::string label;
+    /// Terminal term. A terminal is a leaf node in the expression tree that contains a value.
+    struct Terminal
+    {
+        /// The term type.
+        int id;
 
-    /// List of possible terminal values that a node of this type can contain.
-    std::vector<std::string> values;
+        /// The label used visual representation and debugging of rules and trees.
+        std::string label;
 
-    Terminal()
-    {
-        id = -1;
-        label = "";
-        values.clear();
-    }
-    explicit Terminal(const std::string& value)
-    {
-        id = -1;
-        label = value;
-        values.push_back(value);
-    }
-    Terminal(int pid, const std::string& plabel)
-    {
-        id = pid;
-        label = plabel;
-        values.push_back(plabel);
-    }
-    Terminal(int pid, const std::string& plabel, const std::vector<std::string>& pvalues)
-    {
-        id = pid;
-        label = plabel;
-        values = pvalues;
-    }
+        /// List of possible terminal values that a node of this type can contain.
+        std::vector<std::string> values;
 
-    bool operator==(const Terminal& other) const
-    {
-        return id != -1 ? id == other.id : label == other.label;
-    }
-    bool operator!=(const Terminal& other) const
-    {
-        return id != -1 ? id != other.id : label != other.label;
-    }
+        Terminal()
+        {
+            id = -1;
+            label = "";
+            values.clear();
+        }
+        explicit Terminal(const std::string& value)
+        {
+            id = -1;
+            label = value;
+            values.push_back(value);
+        }
+        Terminal(int pid, const std::string& plabel)
+        {
+            id = pid;
+            label = plabel;
+            values.push_back(plabel);
+        }
+        Terminal(int pid, const std::string& plabel, const std::vector<std::string>& pvalues)
+        {
+            id = pid;
+            label = plabel;
+            values = pvalues;
+        }
 
-    /// Does this terminal have multiple possible values?
-    [[nodiscard]]
-    bool IsMutable() const
+        bool operator==(const Terminal& other) const
+        {
+            return id != -1 ? id == other.id : label == other.label;
+        }
+        bool operator!=(const Terminal& other) const
+        {
+            return id != -1 ? id != other.id : label != other.label;
+        }
+
+        /// Does this terminal have multiple possible values?
+        [[nodiscard]]
+        bool IsMutable() const
+        {
+            return values.size() > 1;
+        }
+
+        /// Get a random value of the set of possible values.
+        [[nodiscard]]
+        std::string GetRandomValue() const
+        {
+            if (values.size() == 1)
+                return values.front();
+            else
+                return *random_choice(values.begin(), values.end());
+        }
+
+        /// Get string representation.
+        [[nodiscard]]
+        std::string ToString() const
+        {
+            return "id='" + std::to_string(id) + "', label='" + label + "', values='" + vector_to_string(values);
+        }
+
+        /// Serialization hook.
+        template<class Archive> void serialize(Archive& ar)
+        {
+            ar(id, label, values);
+        }
+    };
+
+    //*****************************
+    //*        NonTerminal        *
+    //****************************/
+
+    /// Non-Terminal term. A non-terminal is a part of the expression tree that contains other children nodes.
+    struct NonTerminal
     {
-        return values.size() > 1;
-    }
+        /// The term type.
+        int id;
 
-    /// Get a random value of the set of possible values.
-    [[nodiscard]]
-    std::string GetRandomValue() const
-    {
-        if (values.size() == 1)
-            return values.front();
-        else
-            return *random_choice(values.begin(), values.end());
-    }
+        /// Used for debugging and visual representation of rules and trees.
+        std::string label;
 
-    /// Get string representation.
-    [[nodiscard]]
-    std::string ToString() const
-    {
-        return "id='" + std::to_string(id) + "', label='" + label + "', values='" + vector_to_string(values);
-    }
+        /// Empty constructor.
+        NonTerminal()
+        {
+            id = -1;
+            label = "";
+        }
 
-    /// Serialization hook.
-    template<class Archive> void serialize(Archive& ar)
-    {
-        ar(id, label, values);
-    }
-};
+        /// Constructor by id and label.
+        /// \param pid The id.
+        /// \param plabel The label.
+        NonTerminal(int pid, const std::string& plabel)
+        {
+            id = pid;
+            label = plabel;
+        }
 
-//*****************************
-//*        NonTerminal        *
-//****************************/
+        bool operator==(const NonTerminal& other) const
+        {
+            return id != -1 ? id == other.id : label == other.label;
+        }
+        bool operator!=(const NonTerminal& other) const
+        {
+            return id != -1 ? id != other.id : label != other.label;
+        }
 
-/// Non-Terminal term. A non-terminal is a part of the expression tree that contains other children nodes.
-struct NonTerminal
-{
-    /// The term type.
-    int id;
+        /// Get string representation.
+        [[nodiscard]]
+        std::string ToString() const
+        {
+            return "id='" + std::to_string(id) + "', label='" + label + "'";
+        }
 
-    /// Used for debugging and visual representation of rules and trees.
-    std::string label;
-
-    /// Empty constructor.
-    NonTerminal()
-    {
-        id = -1;
-        label = "";
-    }
-
-    /// Constructor by id and label.
-    /// \param pid The id.
-    /// \param plabel The label.
-    NonTerminal(int pid, const std::string& plabel)
-    {
-        id = pid;
-        label = plabel;
-    }
-
-    bool operator==(const NonTerminal& other) const
-    {
-        return id != -1 ? id == other.id : label == other.label;
-    }
-    bool operator!=(const NonTerminal& other) const
-    {
-        return id != -1 ? id != other.id : label != other.label;
-    }
-
-    /// Get string representation.
-    [[nodiscard]]
-    std::string ToString() const
-    {
-        return "id='" + std::to_string(id) + "', label='" + label + "'";
-    }
-
-    /// Serialization hook.
-    template<class Archive> void serialize(Archive& ar)
-    {
-        ar(id, label);
-    }
-};
+        /// Serialization hook.
+        template<class Archive> void serialize(Archive& ar)
+        {
+            ar(id, label);
+        }
+    };
+}

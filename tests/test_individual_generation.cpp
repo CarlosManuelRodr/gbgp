@@ -2,6 +2,7 @@
 #include "../util/arithmetic_parser.h"
 #include "../include/gbgp.h"
 using namespace std;
+using namespace gbgp;
 
 //*****************************
 //*     Types declaration     *

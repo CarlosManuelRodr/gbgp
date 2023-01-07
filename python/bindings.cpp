@@ -5,6 +5,7 @@
 #include "../include/gbgp.h"
 namespace py = pybind11;
 using namespace std;
+using namespace gbgp;
 
 //*****************************
 //*         Bindings          *
