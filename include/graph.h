@@ -45,7 +45,7 @@ namespace gbgp
         std::vector<int> GetNodeIndexes()
         {
             std::vector<int> nodeIndexes(_nodes.size());
-            std::iota(nodeIndexes.begin(), nodeIndexes.end(), 1);
+            std::iota(nodeIndexes.begin(), nodeIndexes.end(), 0);
             return nodeIndexes;
         }
 
