@@ -58,7 +58,7 @@ public:
     std::map<int, std::string> GetLabels()
     {
         std::map<int, std::string> labels;
-        for (int i = 0; i < _nodes.size(); i++)
+        for (size_t i = 0; i < _nodes.size(); i++)
             labels[i] = _nodes[i].GetLabel();
 
         return labels;

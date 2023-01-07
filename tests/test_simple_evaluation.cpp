@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/grammar.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 //*****************************

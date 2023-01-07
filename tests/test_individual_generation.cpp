@@ -1,6 +1,6 @@
 #include "doctest.h"
 #include "../util/arithmetic_parser.h"
-#include "../include/individual.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 //*****************************

@@ -1,6 +1,6 @@
-#include "doctest.h"
-#include "../include/grammar.h"
 #include <numeric>
+#include "doctest.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 //*****************************

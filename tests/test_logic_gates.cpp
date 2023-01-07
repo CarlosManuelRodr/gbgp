@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "../include/environment.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 //*****************************

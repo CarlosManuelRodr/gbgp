@@ -1,6 +1,5 @@
 #include "doctest.h"
-#include "../include/syntax_tree.h"
-#include "../include/individual.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 /****************************

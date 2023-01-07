@@ -365,6 +365,9 @@ public:
         return {nodes, edges};
     }
 
+    /// Build syntax tree from a graph.
+    /// \param graph The graph that contains the structure of the tree to be built.
+    /// \return The root node of the rebuilt tree.
     static TreeNode* FromGraph(const Graph& graph)
     {
         std::vector<TreeNode*> treeNodes = graph.GetTreeNodes();
@@ -401,8 +404,8 @@ public:
                                                     const std::vector<TreeNode*>& subsequence)
     {
         auto it =  std::search(traversal.begin(), traversal.end(),
-                                          subsequence.begin(), subsequence.end(),
-                                          [](TreeNode* n1, TreeNode* n2) { return n1->SameID(*n2); });
+                               subsequence.begin(), subsequence.end(),
+                               [](TreeNode* n1, TreeNode* n2) { return n1->SameID(*n2); });
 
         return std::distance(traversal.begin(), it);
     }
@@ -530,6 +533,7 @@ public:
         for (unsigned i = 0; i < treeTraversal.size(); i++)
             if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->HasChildren())
                 return i;
+
         return treeTraversal.size();
     }
 
@@ -596,6 +600,7 @@ public:
         for (unsigned i = 0; i < treeTraversal.size(); i++)
             if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->IsSynthesized())
                 return i;
+
         return treeTraversal.size();
     }
 

@@ -3,8 +3,8 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/utility.hpp>
 #include <sstream>
-#include "../include/environment.h"
 #include "doctest.h"
+#include "../include/gbgp.h"
 using namespace std;
 
 //*****************************
