@@ -2,10 +2,63 @@
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
 #include <pybind11/functional.h>
+#include <utility>
 #include "../include/gbgp.h"
 namespace py = pybind11;
 using namespace std;
 using namespace gbgp;
+
+
+//*****************************
+//*          Aliases          *
+//****************************/
+
+// Factory alias for
+// <const NonTerminal&, const std::vector<ProductionElement>&, int> with a python list.
+ProductionRule productionRuleAlias3ArgsSI(const NonTerminal& from, const py::list& to, int semanticTransferIndex)
+{
+    std::vector<ProductionElement> toVector;
+    toVector.reserve(to.size());
+
+    for (auto& toItem : to)
+    {
+        if (py::isinstance<Terminal>(toItem))
+            toVector.emplace_back(toItem.cast<Terminal>());
+        else if (py::isinstance<NonTerminal>(toItem))
+            toVector.emplace_back(toItem.cast<NonTerminal>());
+        else if (py::isinstance<string>(toItem))
+            toVector.emplace_back(toItem.cast<string>());
+    }
+
+    return {from, toVector, semanticTransferIndex};
+}
+
+// Factory alias for
+// <const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>> with a python list.
+ProductionRule productionRuleAlias3ArgsSA(const NonTerminal& from, const py::list& to, std::function<void(EvaluationContext&)> semanticAction)
+{
+    std::vector<ProductionElement> toVector;
+    toVector.reserve(to.size());
+
+    for (auto& toItem : to)
+    {
+        if (py::isinstance<Terminal>(toItem))
+            toVector.emplace_back(toItem.cast<Terminal>());
+        else if (py::isinstance<NonTerminal>(toItem))
+            toVector.emplace_back(toItem.cast<NonTerminal>());
+        else if (py::isinstance<string>(toItem))
+            toVector.emplace_back(toItem.cast<string>());
+    }
+
+    return {from, toVector, std::move(semanticAction)};
+}
+
+// Factory alias for
+// <const NonTerminal&, const std::vector<ProductionElement>&> with a python list.
+ProductionRule productionRuleAlias2Args(const NonTerminal& from, const py::list& to)
+{
+    return productionRuleAlias3ArgsSI(from, to, 0);
+}
 
 //*****************************
 //*         Bindings          *
@@ -132,6 +185,9 @@ PYBIND11_MODULE(gbgp, m) {
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&>(), "Production rule with default semantic action.", py::arg("pfrom"), py::arg("pto"))
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>(), "Production rule with custom semantic action.", py::arg("pfrom"), py::arg("pto"), py::arg("pSemanticAction"))
             .def(py::init<const NonTerminal&, const std::vector<ProductionElement>&, int>(), "Production rule with default transfer semantic action over element at index semanticTransferIndex.", py::arg("pfrom"), py::arg("pto"), py::arg("semanticTransferIndex"))
+            .def(py::init(&productionRuleAlias2Args), "Python array constructor alias with two arguments.")
+            .def(py::init(&productionRuleAlias3ArgsSI), "Python array constructor alias with three arguments and a semantic transfer index.")
+            .def(py::init(&productionRuleAlias3ArgsSA), "Python array constructor alias with three arguments and a semantic action.")
             .def(py::self == py::self)
             .def(py::self != py::self)
             .def("NumberOfProductionElements", &ProductionRule::NumberOfProductionElements, "Returns the number of production elements.")
@@ -139,16 +195,19 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetTo", &ProductionRule::GetTo, "Getter for the to list.")
             .def("ToString", &ProductionRule::ToString, "Get a string representation.")
             .def("__repr__",
-                 [](const ProductionRule &pr) {
+                 [](const ProductionRule &pr)
+                 {
                      return "<gbgp.ProductionRule " + pr.ToString() + ">";
                  }
             )
             .def(py::pickle(
-                    [](const ProductionRule &pr) { // __getstate__
+                    [](const ProductionRule &pr)
+                    { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(pr.from, pr.to);
                     },
-                    [](const py::tuple& t) { // __setstate__
+                    [](const py::tuple& t)
+                    { // __setstate__
                         if (t.size() != 2)
                             throw std::runtime_error("Invalid state!");
 
@@ -175,16 +234,19 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetLabel", &Node::GetLabel, "Returns a formatted label of the node.")
             .def("ToString", &Node::ToString, "Get node representation as string.")
             .def("__repr__",
-                 [](const Node &node) {
+                 [](const Node &node)
+                 {
                      return "<gbgp.Node " + node.ToString() + ">";
                  }
             )
             .def(py::pickle(
-                    [](const Node &node) { // __getstate__
+                    [](const Node &node)
+                    { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(node.type, node.nonTermInstance, node.termInstance, node.generatorPR, node.termValue);
                     },
-                    [](const py::tuple& t) { // __setstate__
+                    [](const py::tuple& t)
+                    { // __setstate__
                         if (t.size() != 5)
                             throw std::runtime_error("Invalid state!");
 
@@ -222,7 +284,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def("HasChildren", &TreeNode::HasChildren, "Check if this node has children.")
             .def("ToString", &TreeNode::ToString, "Get tree node representation as string.")
             .def("__repr__",
-                 [](const TreeNode &treeNode) {
+                 [](const TreeNode &treeNode)
+                 {
                      return "<gbgp.TreeNode " + treeNode.ToString() + ">";
                  }
             );
@@ -260,17 +323,20 @@ PYBIND11_MODULE(gbgp, m) {
             .def("Evaluate", &SyntaxTree::Evaluate, "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
             .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
             .def("__repr__",
-                 [](const SyntaxTree &tree) {
+                 [](const SyntaxTree &tree)
+                 {
                      return "<gbgp.SyntaxTree " + tree.ToString() + ">";
                  }
             )
             .def(py::pickle(
-                    [](const SyntaxTree &tree) { // __getstate__
+                    [](const SyntaxTree &tree)
+                    { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         Graph treeAsGraph = tree.ToGraph();
                         return py::make_tuple(treeAsGraph);
                     },
-                    [](const py::tuple& t) { // __setstate__
+                    [](const py::tuple& t)
+                    { // __setstate__
                         if (t.size() != 1)
                             throw std::runtime_error("Invalid state!");
 

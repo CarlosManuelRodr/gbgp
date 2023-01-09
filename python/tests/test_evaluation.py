@@ -43,31 +43,10 @@ def semantic_action1(ctx: EvaluationContext):
     ctx.SetResult(str(n1 + n2))
 
 
-rule1 = ProductionRule(exprNonTerm,
-                       [ProductionElement(exprNonTerm), ProductionElement(plusTerm), ProductionElement(termNonTerm)],
-                       semantic_action1)
-
-rule2 = ProductionRule(exprNonTerm, [ProductionElement(termNonTerm)])
-
-
 def semantic_action3(ctx: EvaluationContext):
     n1 = int(ctx.SemanticValue(0))
     n2 = int(ctx.SemanticValue(2))
     ctx.SetResult(str(n1 * n2))
-
-
-rule3 = ProductionRule(termNonTerm,
-                       [ProductionElement(termNonTerm), ProductionElement(timesTerm), ProductionElement(factorNonTerm)],
-                       semantic_action3)
-
-rule4 = ProductionRule(termNonTerm, [ProductionElement(factorNonTerm)])
-rule5 = ProductionRule(factorNonTerm,
-                       [
-                           ProductionElement(leftParenthesisTerm),
-                           ProductionElement(exprNonTerm),
-                           ProductionElement(rightParenthesisTerm)
-                       ],
-                       1)
 
 
 def semantic_action6(ctx: EvaluationContext):
@@ -81,7 +60,12 @@ def semantic_action6(ctx: EvaluationContext):
     ctx.SetResult(str(var_value))
 
 
-rule6 = ProductionRule(factorNonTerm, [ProductionElement(varTerm)], semantic_action6)
+rule1 = ProductionRule(exprNonTerm, [exprNonTerm, plusTerm, termNonTerm], semantic_action1)
+rule2 = ProductionRule(exprNonTerm, [termNonTerm])
+rule3 = ProductionRule(termNonTerm, [termNonTerm, timesTerm, factorNonTerm], semantic_action3)
+rule4 = ProductionRule(termNonTerm, [factorNonTerm])
+rule5 = ProductionRule(factorNonTerm, [leftParenthesisTerm, exprNonTerm, rightParenthesisTerm], 1)
+rule6 = ProductionRule(factorNonTerm, [varTerm], semantic_action6)
 grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
 test_x = 5

@@ -25,29 +25,12 @@ exprNonTerm = NonTerminal(Terms.Expr.value, "EXPR")
 termNonTerm = NonTerminal(Terms.Term.value, "TERM")
 factorNonTerm = NonTerminal(Terms.Factor.value, "FACTOR")
 
-
-rule1 = ProductionRule(exprNonTerm,
-                       [
-                           ProductionElement(exprNonTerm),
-                           ProductionElement(plusTerm),
-                           ProductionElement(termNonTerm)
-                       ])
-rule2 = ProductionRule(exprNonTerm, [ProductionElement(termNonTerm)])
-rule3 = ProductionRule(termNonTerm,
-                       [
-                           ProductionElement(termNonTerm),
-                           ProductionElement(timesTerm),
-                           ProductionElement(factorNonTerm)
-                       ])
-rule4 = ProductionRule(termNonTerm, [ProductionElement(factorNonTerm)])
-rule5 = ProductionRule(factorNonTerm,
-                       [
-                           ProductionElement(leftParenthesisTerm),
-                           ProductionElement(exprNonTerm),
-                           ProductionElement(rightParenthesisTerm)
-                       ])
-rule6 = ProductionRule(factorNonTerm, [ProductionElement(varTerm)])
-
+rule1 = ProductionRule(exprNonTerm, [exprNonTerm, plusTerm, termNonTerm])
+rule2 = ProductionRule(exprNonTerm, [termNonTerm])
+rule3 = ProductionRule(termNonTerm, [termNonTerm, timesTerm, factorNonTerm])
+rule4 = ProductionRule(termNonTerm, [factorNonTerm])
+rule5 = ProductionRule(factorNonTerm, [leftParenthesisTerm, exprNonTerm, rightParenthesisTerm])
+rule6 = ProductionRule(factorNonTerm, [varTerm])
 grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
 

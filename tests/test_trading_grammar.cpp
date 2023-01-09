@@ -19,7 +19,7 @@ const Terminal notTerm(Not, "not", { "!" });
 const Terminal numOpTerm(NumOp, "numOp", { ">", ">=", "<", "<=" });
 const Terminal percentileTerm(Percentile, "percentile", { "0.05", "0.15", "0.25", "0.75", "0.85", "0.95" });
 const Terminal priceIndTerm(PriceInd, "priceInd", { "OpenPrice", "ClosePrice", "HighPrice", "LowPrice",
-                                                             "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
+                                                    "WeightedClose", "TypicalPrice", "MedianPrice", "EMA" });
 
 const Terminal volumeIndTerm(VolumeInd, "volumeInd", { "TradingVolume" });
 const Terminal signedIndTerm(SignedInd, "signedInd", { "PricePercentageChangeOpenToClose", "ExtensionRatio" });
