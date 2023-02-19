@@ -26,16 +26,18 @@ ProductionRule productionRuleAlias3ArgsSI(const NonTerminal& from, const py::lis
             toVector.emplace_back(toItem.cast<Terminal>());
         else if (py::isinstance<NonTerminal>(toItem))
             toVector.emplace_back(toItem.cast<NonTerminal>());
-        else if (py::isinstance<string>(toItem))
-            toVector.emplace_back(toItem.cast<string>());
+        else if (py::isinstance<py::str>(toItem))
+            toVector.emplace_back(toItem.cast<py::str>());
     }
 
     return {from, toVector, semanticTransferIndex};
 }
 
 // Factory alias for
-// <const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>> with a python list.
-ProductionRule productionRuleAlias3ArgsSA(const NonTerminal& from, const py::list& to, std::function<void(EvaluationContext&)> semanticAction)
+// <const NonTerminal&, const std::vector<ProductionElement>&, std::function<void(EvaluationContext&)>>
+// with a python list.
+ProductionRule productionRuleAlias3ArgsSA(const NonTerminal& from, const py::list& to,
+                                          std::function<void(EvaluationContext&)> semanticAction)
 {
     std::vector<ProductionElement> toVector;
     toVector.reserve(to.size());
@@ -46,8 +48,8 @@ ProductionRule productionRuleAlias3ArgsSA(const NonTerminal& from, const py::lis
             toVector.emplace_back(toItem.cast<Terminal>());
         else if (py::isinstance<NonTerminal>(toItem))
             toVector.emplace_back(toItem.cast<NonTerminal>());
-        else if (py::isinstance<string>(toItem))
-            toVector.emplace_back(toItem.cast<string>());
+        else if (py::isinstance<py::str>(toItem))
+            toVector.emplace_back(toItem.cast<py::str>());
     }
 
     return {from, toVector, std::move(semanticAction)};
