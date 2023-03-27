@@ -233,7 +233,7 @@ namespace gbgp
             output += "grammar='" + _generatingGrammar.ToString();
             output += "individuals=[\n";
 
-            for (int i = 0; i < _individuals.size(); i++)
+            for (size_t i = 0; i < _individuals.size(); i++)
             {
                 output += std::to_string(i) + ": ";
                 output += _individuals[i].ToString();
