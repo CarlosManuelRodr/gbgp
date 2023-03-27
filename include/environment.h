@@ -109,7 +109,7 @@ namespace gbgp
 
         static std::string RuntimeModeToString(RuntimeMode runtimeMode)
         {
-            return runtimeMode == RuntimeMode::MultiThread ? "MultiThread" : "SingleThread");
+            return runtimeMode == RuntimeMode::MultiThread ? "MultiThread" : "SingleThread";
         }
 
 
