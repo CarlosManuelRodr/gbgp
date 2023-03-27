@@ -230,7 +230,7 @@ namespace gbgp
         {
             std::string output = "Population(\n";
 
-            output += "grammar='" + _generatingGrammar.ToString();
+            output += "grammar='" + _generatingGrammar.ToString() + "',\n";
             output += "individuals=[\n";
 
             for (size_t i = 0; i < _individuals.size(); i++)

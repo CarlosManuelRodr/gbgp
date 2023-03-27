@@ -127,7 +127,7 @@ namespace gbgp
             output += "immigrationIndividuals='" + std::to_string(_immigrationIndividuals) + "'\n";
             output += "mutationProbability='" + std::to_string(_mutationProbability) + "'\n";
             output += "runtimeMode='" + RuntimeModeToString(_runtimeMode) + "'\n";
-            output += "_population=[\n";
+            output += "population=[\n";
             output += _population.ToString();
             output += "\n])";
 
