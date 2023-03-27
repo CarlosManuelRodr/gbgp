@@ -222,5 +222,27 @@ namespace gbgp
         {
             return _fitnessFunction;
         }
+
+        /// Get a string representation of this object.
+        /// \return The string representation.
+        [[nodiscard]]
+        std::string ToString() const
+        {
+            std::string output = "Population(\n";
+
+            output += "grammar='" + _generatingGrammar.ToString();
+            output += "individuals=[\n";
+
+            for (int i = 0; i < _individuals.size(); i++)
+            {
+                output += std::to_string(i) + ": ";
+                output += _individuals[i].ToString();
+                if (i != _individuals.size() - 1)
+                    output += ", \n";
+            }
+
+            output += "\n])";
+            return output;
+        }
     };
 }

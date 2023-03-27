@@ -76,7 +76,8 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "id='" + std::to_string(id) + "', label='" + label + "', values='" + vector_to_string(values);
+            return "Terminal(id='" + std::to_string(id) + "', label='" + label + "', values='"
+                   + vector_to_string(values) + ")";
         }
 
         /// Serialization hook.
@@ -128,7 +129,7 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "id='" + std::to_string(id) + "', label='" + label + "'";
+            return "NonTerminal(id='" + std::to_string(id) + "', label='" + label + "')";
         }
 
         /// Serialization hook.

@@ -106,5 +106,32 @@ namespace gbgp
                 _population.Prune();
             }
         }
+
+        static std::string RuntimeModeToString(RuntimeMode runtimeMode)
+        {
+            return runtimeMode == RuntimeMode::MultiThread ? "MultiThread" : "SingleThread");
+        }
+
+
+        /// Get a string representation of this object.
+        /// \return The string representation.
+        [[nodiscard]]
+        std::string ToString() const
+        {
+            std::string output = "Environment(";
+
+            output += "populationSize='" + std::to_string(_populationSize) + "'\n";
+            output += "survivorsPerGeneration='" + std::to_string(_survivorsPerGeneration) + "'\n";
+            output += "childrenByPair='" + std::to_string(_childrenByPair) + "'\n";
+            output += "eliteIndividuals='" + std::to_string(_eliteIndividuals) + "'\n";
+            output += "immigrationIndividuals='" + std::to_string(_immigrationIndividuals) + "'\n";
+            output += "mutationProbability='" + std::to_string(_mutationProbability) + "'\n";
+            output += "runtimeMode='" + RuntimeModeToString(_runtimeMode) + "'\n";
+            output += "_population=[\n";
+            output += _population.ToString();
+            output += "\n])";
+
+            return output;
+        }
     };
 }

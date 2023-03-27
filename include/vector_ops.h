@@ -13,10 +13,11 @@ namespace gbgp {
 
     // Source: https://stackoverrun.com/es/q/3539074#30312659
     template<typename IntType>
-    std::vector<IntType> range(IntType start, IntType stop, IntType step) {
-        if (step == IntType(0)) {
-            throw std::invalid_argument("step for range must be non-zero");
-        }
+    std::vector<IntType> range(IntType start, IntType stop, IntType step)
+    {
+        if (step == IntType(0))
+            throw std::invalid_argument("Step for range must be non-zero.");
+
 
         std::vector<IntType> result;
         IntType i = start;
@@ -29,12 +30,14 @@ namespace gbgp {
     }
 
     template<typename IntType>
-    std::vector<IntType> range(IntType start, IntType stop) {
+    std::vector<IntType> range(IntType start, IntType stop)
+    {
         return range(start, stop, IntType(1));
     }
 
     template<typename IntType>
-    std::vector<IntType> range(IntType stop) {
+    std::vector<IntType> range(IntType stop)
+    {
         return range(IntType(0), stop, IntType(1));
     }
 
@@ -43,34 +46,39 @@ namespace gbgp {
     ****************************/
 
     template<typename Iter, typename RandomGenerator>
-    Iter random_choice(Iter start, Iter end, RandomGenerator &g) {
+    Iter random_choice(Iter start, Iter end, RandomGenerator &g)
+    {
         std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
         std::advance(start, dis(g));
         return start;
     }
 
     template<typename Iter>
-    Iter random_choice(Iter start, Iter end) {
+    Iter random_choice(Iter start, Iter end)
+    {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         return random_choice(start, end, gen);
     }
 
     template<typename T>
-    void shuffle(std::vector<T> &data) {
+    void shuffle(std::vector<T> &data)
+    {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::shuffle(std::begin(data), std::end(data), gen);
     }
 
     // Source: https://stackoverflow.com/a/57616877
-    inline int pow2(int n) {
+    inline int pow2(int n)
+    {
         return 1 << (n);
     }
 
     template<typename RandomGenerator>
     std::vector<size_t>
-    random_weighted_sample_indexes(const std::vector<int> &weights, size_t ntake, RandomGenerator &g) {
+    random_weighted_sample_indexes(const std::vector<int> &weights, size_t ntake, RandomGenerator &g)
+    {
         size_t rnd_max = weights.size();
 
         /* determine the smallest power of two that is larger than N */
@@ -121,14 +129,16 @@ namespace gbgp {
         return sampled;
     }
 
-    inline std::vector<size_t> random_weighted_sample_indexes(const std::vector<int> &weights, int ntake) {
+    inline std::vector<size_t> random_weighted_sample_indexes(const std::vector<int> &weights, int ntake)
+    {
         static std::random_device rd;
         static std::mt19937 gen(rd());
         return random_weighted_sample_indexes(weights, ntake, gen);
     }
 
     template<typename T>
-    std::vector<T> extract_elements_at_indexes(const std::vector<T> &data, const std::vector<size_t> &extractIndexes) {
+    std::vector<T> extract_elements_at_indexes(const std::vector<T> &data, const std::vector<size_t> &extractIndexes)
+    {
         std::vector<T> extracted;
         for (size_t extractIndex: extractIndexes)
             extracted.push_back(data[extractIndex]);
@@ -138,7 +148,8 @@ namespace gbgp {
 
     // Source: https://stackoverflow.com/a/3487814
     template<typename T>
-    void delete_elements_at_indexes(std::vector<T> &data, const std::vector<size_t> &deleteIndexes) {
+    void delete_elements_at_indexes(std::vector<T> &data, const std::vector<size_t> &deleteIndexes)
+    {
         std::vector<bool> markedElements(data.size(), false);
         std::vector<T> tempBuffer;
         tempBuffer.reserve(data.size() - deleteIndexes.size());
@@ -155,12 +166,14 @@ namespace gbgp {
 
     // Source: https://www.techiedelight.com/check-vector-contains-given-element-cpp/
     template<typename T>
-    bool vector_contains_q(const std::vector<T> &v, const T &key) {
+    bool vector_contains_q(const std::vector<T> &v, const T &key)
+    {
         return std::find(v.begin(), v.end(), key) != v.end();
     }
 
     template<typename T, class UnaryPredicate>
-    std::vector<size_t> find_indexes_if(const std::vector<T> &v, UnaryPredicate pred) {
+    std::vector<size_t> find_indexes_if(const std::vector<T> &v, UnaryPredicate pred)
+    {
         std::vector<size_t> indexes;
         auto it = v.begin();
 
@@ -177,7 +190,8 @@ namespace gbgp {
     ****************************/
 
     template<typename T>
-    T vector_to_string(const std::vector<T> &v) {
+    T vector_to_string(const std::vector<T> &v)
+    {
         std::string s = "[";
         for (auto &elem: v) {
             size_t i = &elem - &v[0];

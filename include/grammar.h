@@ -219,7 +219,7 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "rules='" + std::to_string(_grammarRules.size()) + "'";
+            return "Grammar(rules='" + std::to_string(_grammarRules.size()) + "')";
         }
 
         /// Since functions cannot be serialized-deserialized, this utility restore the correct semanticAction to the

@@ -101,7 +101,8 @@ namespace gbgp
             for (const Node &node: _nodes)
                 nodesAsStr.push_back(node.ToString());
 
-            std::string output = "nodes=" + vector_to_string(nodesAsStr);
+            std::string output = "Graph(";
+            output = "nodes=" + vector_to_string(nodesAsStr);
 
             // Edges.
             std::vector<std::string> edgesAsStr;
@@ -109,6 +110,7 @@ namespace gbgp
                 edgesAsStr.push_back(EdgeToString(edge));
 
             output += ", edges=" + vector_to_string(edgesAsStr);
+            output += ")";
 
             return output;
         }

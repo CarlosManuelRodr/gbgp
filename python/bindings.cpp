@@ -83,18 +83,18 @@ PYBIND11_MODULE(gbgp, m) {
             .def_readwrite("label", &Terminal::label, "The label used visual representation and debugging.")
             .def_readwrite("values", &Terminal::values, "List of possible terminal values that a node of this type can contain.")
             .def("__repr__",
-                 [](const Terminal &t) {
-                     return "<gbgp.Terminal " + t.ToString() + ">";
+                 [](const Terminal& t) {
+                     return t.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const Terminal &t) { // __getstate__
+                    [](const Terminal& t) { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(t.id, t.label, t.values);
                     },
                     [](const py::tuple& t) { // __setstate__
                         if (t.size() != 3)
-                            throw std::runtime_error("Invalid state!");
+                            throw std::runtime_error("Invalid state.");
 
                         /* Create a new C++ instance */
                         Terminal p(t[0].cast<int>(), t[1].cast<std::string>(), t[2].cast<std::vector<std::string>>());
@@ -111,18 +111,18 @@ PYBIND11_MODULE(gbgp, m) {
             .def_readwrite("id", &NonTerminal::id, "The term type.")
             .def_readwrite("label", &NonTerminal::label, "The label used visual representation and debugging.")
             .def("__repr__",
-                 [](const NonTerminal &nt) {
-                     return "<gbgp.NonTerminal " + nt.ToString() + ">";
+                 [](const NonTerminal& nt) {
+                     return nt.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const NonTerminal &nt) { // __getstate__
+                    [](const NonTerminal& nt) { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(nt.id, nt.label);
                     },
                     [](const py::tuple& t) { // __setstate__
                         if (t.size() != 2)
-                            throw std::runtime_error("Invalid state!");
+                            throw std::runtime_error("Invalid state.");
 
                         /* Create a new C++ instance */
                         NonTerminal p(t[0].cast<int>(), t[1].cast<std::string>());
@@ -141,8 +141,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def("TransferSemanticValueToResult", &EvaluationContext::TransferSemanticValueToResult, "Transfer the semantic value at the specified index to the result.", py::arg("index") = 0)
             .def("ToString", &EvaluationContext::ToString, "Get a string representation.")
             .def("__repr__",
-                 [](const EvaluationContext &ctx) {
-                     return "<gbgp.EvaluationContext " + ctx.ToString() + ">";
+                 [](const EvaluationContext& ctx) {
+                     return ctx.ToString();
                  }
             );
 
@@ -163,18 +163,18 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetValue", &ProductionElement::GetValue, "Get the label value of the production element.")
             .def("ToString", &ProductionElement::ToString, "Get a string representation.")
             .def("__repr__",
-                 [](const ProductionElement &pe) {
-                     return "<gbgp.ProductionElement " + pe.ToString() + ">";
+                 [](const ProductionElement& pe) {
+                     return pe.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const ProductionElement &pe) { // __getstate__
+                    [](const ProductionElement& pe) { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(pe.type, pe.term, pe.nonterm);
                     },
                     [](const py::tuple& t) { // __setstate__
                         if (t.size() != 3)
-                            throw std::runtime_error("Invalid state!");
+                            throw std::runtime_error("Invalid state.");
 
                         /* Create a new C++ instance */
                         ProductionElement pe(t[0].cast<ProductionElementType>(), t[1].cast<Terminal>(), t[2].cast<NonTerminal>());
@@ -197,13 +197,13 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetTo", &ProductionRule::GetTo, "Getter for the to list.")
             .def("ToString", &ProductionRule::ToString, "Get a string representation.")
             .def("__repr__",
-                 [](const ProductionRule &pr)
+                 [](const ProductionRule& pr)
                  {
-                     return "<gbgp.ProductionRule " + pr.ToString() + ">";
+                     return pr.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const ProductionRule &pr)
+                    [](const ProductionRule& pr)
                     { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(pr.from, pr.to);
@@ -236,13 +236,13 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetLabel", &Node::GetLabel, "Returns a formatted label of the node.")
             .def("ToString", &Node::ToString, "Get node representation as string.")
             .def("__repr__",
-                 [](const Node &node)
+                 [](const Node& node)
                  {
-                     return "<gbgp.Node " + node.ToString() + ">";
+                     return node.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const Node &node)
+                    [](const Node& node)
                     { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         return py::make_tuple(node.type, node.nonTermInstance, node.termInstance, node.generatorPR, node.termValue);
@@ -286,9 +286,9 @@ PYBIND11_MODULE(gbgp, m) {
             .def("HasChildren", &TreeNode::HasChildren, "Check if this node has children.")
             .def("ToString", &TreeNode::ToString, "Get tree node representation as string.")
             .def("__repr__",
-                 [](const TreeNode &treeNode)
+                 [](const TreeNode& treeNode)
                  {
-                     return "<gbgp.TreeNode " + treeNode.ToString() + ">";
+                     return treeNode.ToString();
                  }
             );
 
@@ -301,6 +301,12 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetLabels", &Graph::GetLabels, "Get the labels as a map.")
             .def("GetTreeNodes", &Graph::GetTreeNodes, "Rebuild the TreeNode pointer chain from this graph.")
             .def("ToString", &Graph::ToString, "Get string representation.")
+            .def("__repr__",
+                 [](const Graph& graph)
+                 {
+                     return graph.ToString();
+                 }
+            )
             ;
 
     py::class_<SyntaxTree>(m, "SyntaxTree")
@@ -325,13 +331,13 @@ PYBIND11_MODULE(gbgp, m) {
             .def("Evaluate", &SyntaxTree::Evaluate, "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
             .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))
             .def("__repr__",
-                 [](const SyntaxTree &tree)
+                 [](const SyntaxTree& tree)
                  {
-                     return "<gbgp.SyntaxTree " + tree.ToString() + ">";
+                     return tree.ToString();
                  }
             )
             .def(py::pickle(
-                    [](const SyntaxTree &tree)
+                    [](const SyntaxTree& tree)
                     { // __getstate__
                         /* Return a tuple that fully encodes the state of the object */
                         Graph treeAsGraph = tree.ToGraph();
@@ -355,8 +361,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def("Apply", &PruneRule::Apply, "Create a new SyntaxTree where the prune rule has been applied.")
             .def("ToString", &PruneRule::ToString, "Get string representation.")
             .def("__repr__",
-                 [](const PruneRule &pruneRule) {
-                     return "<gbgp.PruneRule " + pruneRule.ToString() + ">";
+                 [](const PruneRule& pruneRule) {
+                     return pruneRule.ToString();
                  }
             );
 
@@ -378,8 +384,8 @@ PYBIND11_MODULE(gbgp, m) {
             .def("RestoreSemanticAction", py::overload_cast<Node&>(&Grammar::RestoreSemanticAction, py::const_), "Restore the appropriate semantic action of the production rule.", py::arg("target"))
             .def("RestoreSemanticAction", py::overload_cast<Graph&>(&Grammar::RestoreSemanticAction, py::const_), "Restore the appropriate semantic action of the production rule.", py::arg("target"))
             .def("__repr__",
-                 [](const Grammar &grammar) {
-                     return "<gbgp.Grammar " + grammar.ToString() + ">";
+                 [](const Grammar& grammar) {
+                     return grammar.ToString();
                  }
             );
 
@@ -397,6 +403,11 @@ PYBIND11_MODULE(gbgp, m) {
             .def("Evaluate", &Individual::Evaluate, "Evaluates the fitness function and assign the fitness value.")
             .def("Prune", &Individual::Prune, "Prunes the tree.", py::arg("grammar"))
             .def("CreateRandom", &Individual::CreateRandom, "Generates a random individual using the production rules and prune rules of the grammar.", py::arg("grammar"))
+            .def("__repr__",
+                 [](const Individual& individual) {
+                     return individual.ToString();
+                 }
+            )
             ;
 
     py::class_<Population>(m, "Population")
@@ -417,6 +428,11 @@ PYBIND11_MODULE(gbgp, m) {
             .def("Size", &Population::Size, "Get the size of the population.")
             .def("GetGeneratingGrammar", &Population::GetGeneratingGrammar, "Grammar getter.")
             .def("GetFitnessFunction", &Population::GetFitnessFunction, "Fitness function getter.")
+            .def("__repr__",
+                 [](const Population& population) {
+                     return population.ToString();
+                 }
+            )
             ;
 
     py::class_<GeneticOperators>(m, "GeneticOperators")
@@ -435,5 +451,10 @@ PYBIND11_MODULE(gbgp, m) {
             .def("GetPopulation", &Environment::GetPopulation, "Population getter.")
             .def("Optimize", py::overload_cast<>(&Environment::Optimize), "Optimizes a population via genetic optimization.")
             .def("Optimize", py::overload_cast<unsigned>(&Environment::Optimize), "Optimizes a population via genetic optimization.", py::arg("generations"))
+            .def("__repr__",
+                 [](const Environment& environment) {
+                     return environment.ToString();
+                 }
+            )
             ;
 }

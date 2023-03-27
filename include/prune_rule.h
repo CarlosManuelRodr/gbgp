@@ -58,7 +58,8 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "from=" + TraversalToString(_pruneRuleFromTraversal) + ", to=" + TraversalToString(_pruneRuleToTraversal);
+            return "PruneRule(from=" + TraversalToString(_pruneRuleFromTraversal) + ", to="
+                   + TraversalToString(_pruneRuleToTraversal) + ")";
         }
     };
 }

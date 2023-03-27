@@ -76,7 +76,8 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "result='" + result() + "', semanticValues='" + vector_to_string(GetSemanticValues());
+            return "EvaluationContext(result='" + result() + "', semanticValues='"
+                   + vector_to_string(GetSemanticValues()) + ")";
         }
     };
 }

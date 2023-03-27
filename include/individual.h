@@ -108,5 +108,14 @@ namespace gbgp
             grammar.CreateRandomTree(_tree);
             Prune(grammar);
         }
+
+        /// Get a string representation of this object.
+        /// \return The string representation.
+        [[nodiscard]]
+        std::string ToString() const
+        {
+            return std::string("Individual(expression='") + GetExpression() + "', fitness="
+                   + std::to_string(GetFitness()) + ")";
+        }
     };
 }

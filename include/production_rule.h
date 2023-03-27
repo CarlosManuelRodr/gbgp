@@ -122,7 +122,7 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            return "type='" + GetTypeStr() + "', value='" + GetValue();
+            return "ProductionElement(type='" + GetTypeStr() + "', value='" + GetValue() + ")";
         }
 
         bool operator==(const ProductionElement& other) const
@@ -232,7 +232,8 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const
         {
-            std::string output = from.label;
+            std::string output = "ProductionRule(";
+            output += from.label;
             output += " -> ";
 
             size_t index = 0;
@@ -241,6 +242,8 @@ namespace gbgp
                 output += prodElement.GetValue() + ((index == to.size() - 1) ? "" : " ");
                 index++;
             }
+
+            output += ")";
             return output;
         }
 

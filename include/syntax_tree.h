@@ -335,7 +335,7 @@ namespace gbgp
             std::stringstream ss;
             ss << "\n";
             PrintTree(ss);
-            return ss.str();
+            return std::string("SyntaxTree(") + ss.str() + ")";
         }
 
         /// Export the tree into a graph.

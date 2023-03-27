@@ -174,7 +174,8 @@ namespace gbgp
         [[nodiscard]]
         virtual std::string ToString() const
         {
-            return "type=" + GetTypeString() + ", label=" + GetLabel() + " , generatorPR=" + generatorPR.ToString();
+            return "Node(type=" + GetTypeString() + ", label=" + GetLabel() + " , generatorPR="
+                   + generatorPR.ToString() + ")";
         }
 
         /// Serialization hook.
@@ -391,10 +392,15 @@ namespace gbgp
         [[nodiscard]]
         std::string ToString() const override
         {
-            std::string output = GetLabel();
+            std::string output = "TreeNode(";
+
+            output += GetLabel();
             output += " -> ";
+
             for (auto child : children)
                 output += child->GetLabel() + ((child == children.back()) ? "" : ", ");
+
+            output += ")";
             return output;
         }
     };
