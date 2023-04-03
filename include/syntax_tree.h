@@ -69,7 +69,17 @@ namespace gbgp
         static void PrintNodeAsTree(std::ostream& stream, TreeNode* node, int depth)
         {
             std::string output = "|";
-            output.append(depth, '-');
+
+            if (depth > 2)
+            {
+                output.append(depth - 2, '-');
+                output.append("|-");
+            }
+            else if (depth == 2)
+                output.append("-|-");
+            else if (depth == 1)
+                output.append("-");
+
             output += node->GetLabel();
             stream << output << "\n";
         }
