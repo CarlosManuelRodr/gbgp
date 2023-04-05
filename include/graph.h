@@ -60,7 +60,9 @@ namespace gbgp
         std::map<int, std::string> GetLabels()
         {
             std::map<int, std::string> labels;
-            for (size_t i = 0; i < _nodes.size(); i++)
+            const int nodesSize = static_cast<int>(_nodes.size());
+
+            for (int i = 0; i < nodesSize; i++)
                 labels[i] = _nodes[i].GetLabel();
 
             return labels;
@@ -77,7 +79,8 @@ namespace gbgp
             for (const auto & _node : _nodes)
                 treeNodes.push_back(new TreeNode(_node));
 
-            for (int i = 0; i < static_cast<int>(treeNodes.size()); i++)
+            const int treeNodesSize = static_cast<int>(treeNodes.size());
+            for (int i = 0; i < treeNodesSize; i++)
             {
                 for (auto & _edge : _edges)
                 {

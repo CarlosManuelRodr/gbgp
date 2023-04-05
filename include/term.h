@@ -19,7 +19,7 @@ namespace gbgp
         std::string label;
 
         /// List of possible terminal values that a node of this type can contain.
-        std::vector<std::string> values;
+        std::vector<std::string> values; // TODO: Find a way to include ephemeral constants.
 
         Terminal()
         {

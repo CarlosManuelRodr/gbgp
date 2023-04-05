@@ -17,16 +17,16 @@ namespace gbgp
         /// Type of the node.
         NodeType type;
 
-        /// NonTerminal instance used if the node is of NonTerminal type.
+        /// NonTerminal instance used when the node is of NonTerminal type.
         NonTerminal nonTermInstance;
 
-        /// Terminal instance used if the node is of Terminal type.
+        /// Terminal instance used when the node is of Terminal type.
         Terminal termInstance;
 
         /// Production rule from which this node is part of.
         ProductionRule generatorPR;
 
-        /// Value of the terminal used if the node is of Terminal type.
+        /// Value of the terminal used when the node is of Terminal type.
         std::string termValue;
 
         /// Empty constructor.
@@ -174,7 +174,7 @@ namespace gbgp
         [[nodiscard]]
         virtual std::string ToString() const
         {
-            return "Node(type=" + GetTypeString() + ", label=" + GetLabel() + " , generatorPR="
+            return "Node(type=" + GetTypeString() + ", label=" + GetLabel() + ", generatorPR="
                    + generatorPR.ToString() + ")";
         }
 
@@ -199,6 +199,9 @@ namespace gbgp
 
         /// Result of the evaluation of this node.
         std::string expressionEvaluation;
+
+        /// Capture ID for copying terminals on prune rules.
+        std::optional<int> captureID = std::nullopt;
 
         /// Constructor of an empty node.
         TreeNode() : Node()
@@ -266,8 +269,19 @@ namespace gbgp
 
         /// Terminal node constructor.
         /// \param t The terminal.
-        explicit TreeNode(const Terminal& t) : Node(t)
+        explicit TreeNode(const Terminal& t)
         {
+            expressionSynthesis = "";
+            expressionEvaluation = "";
+            parent = nullptr;
+        }
+
+        /// Terminal node constructor.
+        /// \param t The terminal.
+        /// \param pCaptureID The capture ID for copying values. If none, set to -1.
+        TreeNode(const Terminal& t, int pCaptureID) : Node(t)
+        {
+            captureID = pCaptureID;
             expressionSynthesis = "";
             expressionEvaluation = "";
             parent = nullptr;
@@ -288,6 +302,8 @@ namespace gbgp
         TreeNode(const TreeNode& other) : Node(other)
         {
             parent = nullptr;
+            captureID = other.captureID;
+
             for (auto c : other.children)
                 AddChildNode(new TreeNode(*c));
         }
@@ -303,6 +319,7 @@ namespace gbgp
             copyNode->termInstance = other->termInstance;
             copyNode->generatorPR = other->generatorPR;
             copyNode->termValue = other->termValue;
+            copyNode->captureID = other->captureID;
             return copyNode;
         }
 
@@ -386,6 +403,22 @@ namespace gbgp
             auto* newNode = new TreeNode(term, ptermValue);
             this->AddChildNode(newNode);
             return newNode;
+        }
+
+        /// Check if the node has a capture ID.
+        [[nodiscard]]
+        bool HasCaptureID() const
+        {
+            return captureID.has_value();
+        }
+
+        /// Check if both tree nodes have the same capture ID.
+        /// \param other The other node.
+        /// \return Do both nodes have the same capture ID?
+        [[nodiscard]]
+        bool SameCaptureID(const TreeNode& other) const
+        {
+            return captureID == other.captureID;
         }
 
         /// Get node representation as string.

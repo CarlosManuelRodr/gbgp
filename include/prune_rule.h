@@ -3,7 +3,7 @@
 
 namespace gbgp
 {
-    /// Contains a rule and logic for simplifying a SyntaxTree.
+    /// Contains a rule and logic for simplifying leaf nodes on a SyntaxTree.
     class PruneRule
     {
     private:
@@ -24,6 +24,18 @@ namespace gbgp
             return out;
         }
 
+        /// Validate that the traversal contains at least one terminal with a capture ID.
+        /// \param traversal The input traversal.
+        /// \return The result of the validation.
+        static bool ValidateCaptureID(const std::vector<TreeNode*>& traversal)
+        {
+            for (auto* node: traversal)
+                if (node->HasCaptureID())
+                    return true;
+
+            return false;
+        }
+
     public:
         /// Constructor by SyntaxTree.
         /// \param pruneRuleFrom Prune rule from as SyntaxTree.
@@ -32,6 +44,11 @@ namespace gbgp
         {
             _pruneRuleFromTraversal = pruneRuleFrom.GetPostOrderTreeTraversal();
             _pruneRuleToTraversal = pruneRuleTo.GetPostOrderTreeTraversal();
+
+            if (!ValidateCaptureID(_pruneRuleFromTraversal))
+                throw std::runtime_error("pruneRuleFrom must have at least one terminal with a captureID.");
+            if (!ValidateCaptureID(_pruneRuleToTraversal))
+                throw std::runtime_error("pruneRuleTo must have at least one terminal with a captureID.");
         }
 
         /// Does the target tree can be simplified further with this rule?

@@ -444,16 +444,23 @@ namespace gbgp
                 return traversal;
             }
 
+            // Copy capture ID to traversal.
+            for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
+            {
+                if (replaceFrom[i - replaceIndex]->HasCaptureID())
+                    traversal[i]->captureID = replaceFrom[i - replaceIndex]->captureID;
+            }
+
             // Delete and replace.
             copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
             copyNodes.insert(copyNodes.begin() + replaceIndex, replacementNodes.begin(), replacementNodes.end());
 
-            // Transfer values.
+            // Transfer values of nodes with same ID and capture ID..
             for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
             {
                 for (unsigned j = replaceIndex; j < replaceIndex + replaceFromLength; j++)
                 {
-                    if (copyNodes[i]->SameID(*traversal[j]))
+                    if (copyNodes[i]->SameID(*traversal[j]) && copyNodes[i]->SameCaptureID(*traversal[j]))
                     {
                         copyNodes[i]->termValue = traversal[j]->termValue;
                         break;

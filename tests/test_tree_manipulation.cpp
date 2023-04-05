@@ -367,7 +367,7 @@ TEST_CASE("Test single pass pruning")
                                     rule6,
                                     factorNonTerm,
                                     {
-                                        TreeNode(varTerm)
+                                        TreeNode(varTerm, 1)
                                     })
                             })
                     }),
@@ -380,7 +380,7 @@ TEST_CASE("Test single pass pruning")
             rule6,
             factorNonTerm,
             {
-                TreeNode(varTerm)
+                TreeNode(varTerm, 1)
             })
     );
 
@@ -418,7 +418,7 @@ TEST_CASE("Test multiple pass pruning")
                                     rule6,
                                     factorNonTerm,
                                     {
-                                        TreeNode(varTerm)
+                                        TreeNode(varTerm, 1)
                                     })
                             })
                     }),
@@ -431,7 +431,7 @@ TEST_CASE("Test multiple pass pruning")
             rule6,
             factorNonTerm,
             {
-                TreeNode(varTerm)
+                TreeNode(varTerm, 1)
             })
     );
 
