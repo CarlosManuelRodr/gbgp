@@ -269,7 +269,7 @@ namespace gbgp
 
         /// Terminal node constructor.
         /// \param t The terminal.
-        explicit TreeNode(const Terminal& t)
+        explicit TreeNode(const Terminal& t) : Node(t)
         {
             expressionSynthesis = "";
             expressionEvaluation = "";

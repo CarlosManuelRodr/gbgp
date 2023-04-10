@@ -83,7 +83,7 @@ TEST_CASE("Test tree node")
 
     auto ruleNode = Node(rule2, exprNonTerm);
     string nodeAsStr = ruleNode.ToString();
-    CHECK((nodeAsStr == "type=NonTerminal, label=EXPR , generatorPR=EXPR -> TERM"));
+    CHECK((nodeAsStr == "Node(type=NonTerminal, label=EXPR, generatorPR=ProductionRule(EXPR -> TERM))"));
 }
 
 TEST_CASE("Test subtree insertion")

@@ -597,6 +597,25 @@ namespace gbgp
 
         }
 
+        static bool HasSameBaseTree(TreeNode* nodeA, TreeNode* nodeB)
+        {
+            Traversal traversalA = GetBreadthFirstTreeTraversal(nodeA);
+            Traversal traversalB = GetBreadthFirstTreeTraversal(nodeB);
+
+            for (int i = 0; i < traversalB.size(); i++)
+            {
+                if (i < traversalA.size())
+                {
+                    if (*traversalA[i] != *traversalB[i])
+                        return false;
+                }
+                else
+                    return false;
+            }
+
+            return true;
+        }
+
         [[nodiscard]]
         Traversal GetTermsOfType(NodeType type) const
         {
