@@ -12,6 +12,9 @@
 
 namespace gbgp
 {
+    /// Alias for a traversal that consists of a list of traversed nodes.
+    using Traversal = std::vector<TreeNode*>;
+
     /// Contains the expression tree, provides interfaces for manipulating its structure, synthesizing and evaluating
     /// the tree.
     class SyntaxTree
@@ -28,7 +31,7 @@ namespace gbgp
         /// \param elementsToSynthesize Number of nodes left to be synthesized.
         /// \return Position as index. If the search fails, returns nullopt.
         [[nodiscard]]
-        static std::optional<size_t> FindIndexOfNonTerm(const std::vector<TreeNode*>& treeTraversal, int id,
+        static std::optional<size_t> FindIndexOfNonTerm(const Traversal& treeTraversal, int id,
                                                         const std::vector<size_t>& avoid, unsigned currentPosition,
                                                         int elementsToSynthesize)
         {
@@ -49,7 +52,7 @@ namespace gbgp
         /// \param elementsToSynthesize Number of nodes left to be synthesized.
         /// \return Position as index. If the search fails, returns nullopt.
         [[nodiscard]]
-        static std::optional<size_t> FindIndexOfTerm(const std::vector<TreeNode*>& treeTraversal, int id,
+        static std::optional<size_t> FindIndexOfTerm(const Traversal& treeTraversal, int id,
                                                      const std::vector<size_t>& avoid, unsigned currentPosition,
                                                      int elementsToSynthesize)
         {
@@ -96,6 +99,34 @@ namespace gbgp
                 SyntaxTree::PrintNodeAsTree(stream, n, depth);
                 PrintTree(stream, n, depth + 1);
             }
+        }
+
+        /// Internal static method to generate the Depth-First PreOrder traversal.
+        /// \param node The node.
+        /// \param isRoot Is node the root?
+        /// \return The traversal.
+        static Traversal GetPreOrderTreeTraversal(TreeNode* node, bool isRoot)
+        {
+            /*
+              Algorithm Preorder(tree)
+              1. Visit the root.
+              2. Traverse the left subtree, i.e., call Preorder(left-subtree)
+              3. Traverse the right subtree, i.e., call Preorder(right-subtree)
+            */
+            // TODO: Replace recursive implementation with iterative.
+            Traversal output;
+
+            if (isRoot)
+                output.push_back(node);
+
+            for (TreeNode* n : node->children)
+            {
+                output.push_back(n);
+                const Traversal childrenTreeNodes = GetPreOrderTreeTraversal(n, false);
+                output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
+            }
+
+            return output;
         }
 
     public:
@@ -166,7 +197,7 @@ namespace gbgp
         {
             if (_root != nullptr)
             {
-                std::vector<TreeNode*> nodeList = GetPostOrderTreeTraversal(_root);
+                Traversal nodeList = GetPostOrderTreeTraversal(_root);
                 for (TreeNode*& n : nodeList)
                 {
                     if (n != nullptr)
@@ -180,9 +211,9 @@ namespace gbgp
         }
 
         /// Clear the expressionSynthesis and expressionEvaluation of every node.
-        void ClearEvaluation()
+        void ClearEvaluation() const
         {
-            std::vector<TreeNode*> nodeList = this->GetPostOrderTreeTraversal(_root);
+            Traversal nodeList = this->GetPostOrderTreeTraversal();
             for (TreeNode* n : nodeList)
             {
                 if (n->type == NodeType::NonTerminal)
@@ -242,7 +273,7 @@ namespace gbgp
         /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
         void DeleteSubtree(TreeNode* rootOfSubtree)
         {
-            std::vector<TreeNode*> nodeList = this->GetPostOrderTreeTraversal(rootOfSubtree);
+            Traversal nodeList = SyntaxTree::GetPostOrderTreeTraversal(rootOfSubtree);
             nodeList.pop_back();
             for (TreeNode*& n : nodeList)
             {
@@ -357,7 +388,7 @@ namespace gbgp
             std::vector<std::pair<int, int>> edges;
 
             // Get nodes.
-            std::vector<TreeNode*> treeNodes = GetPreOrderTreeTraversal();
+            Traversal treeNodes = GetPreOrderTreeTraversal();
             nodes.reserve(treeNodes.size());
             for (TreeNode* node : treeNodes)
             {
@@ -393,16 +424,16 @@ namespace gbgp
         /// Performs a shallow copy of each node.
         /// \param other The traversal of the tree to copy.
         /// \return The traversal of the copied tree.
-        static std::vector<TreeNode*> CopyTreeTraversal(const std::vector<TreeNode*>& other)
+        static Traversal CopyTreeTraversal(const Traversal& other)
         {
-            std::vector<TreeNode*> copyNodes;
+            Traversal copyNodes;
             copyNodes.reserve(other.size());
             for (auto node : other)
                 copyNodes.push_back(TreeNode::ShallowCopy(node));
             return copyNodes;
         }
 
-        static void DeleteTreeTraversal(const std::vector<TreeNode*>& traversal)
+        static void DeleteTreeTraversal(const Traversal& traversal)
         {
             for (auto node : traversal)
                 delete node;
@@ -412,8 +443,8 @@ namespace gbgp
         /// \param traversal The traversal to perform the search on.
         /// \param subsequence The traversal subsequence to find.
         /// \return The distance to the subsequence if found, else the last index of traversal.
-        static unsigned FindIndexOfTraversalSubsequence(const std::vector<TreeNode*>& traversal,
-                                                        const std::vector<TreeNode*>& subsequence)
+        static unsigned FindIndexOfTraversalSubsequence(const Traversal& traversal,
+                                                        const Traversal& subsequence)
         {
             auto it =  std::search(traversal.begin(), traversal.end(),
                                    subsequence.begin(), subsequence.end(),
@@ -427,12 +458,11 @@ namespace gbgp
         /// \param replaceFrom The source replacement sequence.
         /// \param replaceTo The target replacement sequence.
         /// \return A new traversal with the replaced sequence.
-        static std::vector<TreeNode*> ReplaceTraversalSubsequence(const std::vector<TreeNode*>& traversal,
-                                                                  const std::vector<TreeNode*>& replaceFrom,
-                                                                  const std::vector<TreeNode*>& replaceTo)
+        static Traversal ReplaceTraversalSubsequence(const Traversal& traversal, const Traversal& replaceFrom,
+                                                     const Traversal& replaceTo)
         {
-            std::vector<TreeNode*> copyNodes = SyntaxTree::CopyTreeTraversal(traversal);
-            std::vector<TreeNode*> replacementNodes = SyntaxTree::CopyTreeTraversal(replaceTo);
+            Traversal copyNodes = SyntaxTree::CopyTreeTraversal(traversal);
+            Traversal replacementNodes = SyntaxTree::CopyTreeTraversal(replaceTo);
 
             const unsigned replaceFromLength = replaceFrom.size();
             const unsigned replaceToLength = replaceTo.size();
@@ -474,37 +504,32 @@ namespace gbgp
         /// Traverses the tree in a depth first pre-order.
         /// \param node Start node. The default value is the root of the tree.
         /// \return List of references of the traversed nodes.
-        std::vector<TreeNode*> GetPreOrderTreeTraversal(TreeNode* node = nullptr) const
+        [[nodiscard]]
+        Traversal GetPreOrderTreeTraversal() const
         {
-            /*
-              Algorithm Preorder(tree)
-              1. Visit the root.
-              2. Traverse the left subtree, i.e., call Preorder(left-subtree)
-              3. Traverse the right subtree, i.e., call Preorder(right-subtree)
-            */
-            // TODO: Replace recursive implementation with iterative.
-            std::vector<TreeNode*> output;
+            return GetPreOrderTreeTraversal(_root);
+        }
 
-            if (node == nullptr)
-            {
-                node = _root;
-                output.push_back(node);
-            }
+        /// Traverses the tree in a depth first pre-order.
+        /// \param node Start node. The default value is the root of the tree.
+        /// \return List of references of the traversed nodes.
+        static Traversal GetPreOrderTreeTraversal(TreeNode* node)
+        {
+            return GetPreOrderTreeTraversal(node, true);
+        }
 
-            for (TreeNode* n : node->children)
-            {
-                output.push_back(n);
-                const std::vector<TreeNode*> childrenTreeNodes = GetPreOrderTreeTraversal(n);
-                output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
-            }
-
-            return output;
+        /// Traverses the tree in a depth first pre-order.
+        /// \return List of references of the traversed nodes.
+        [[nodiscard]]
+        Traversal GetPostOrderTreeTraversal() const
+        {
+            return GetPostOrderTreeTraversal(_root);
         }
 
         /// Traverses the tree in a depth first post-order.
         /// \param node Start node. The default value is the root of the tree.
         /// \return List of references of the traversed nodes.
-        std::vector<TreeNode*> GetPostOrderTreeTraversal(TreeNode* node = nullptr) const
+        static Traversal GetPostOrderTreeTraversal(TreeNode* node)
         {
             /*
               Algorithm Postorder(tree)
@@ -513,10 +538,7 @@ namespace gbgp
               3. Visit the root.
             */
             // TODO: Replace recursive implementation with iterative.
-            std::vector<TreeNode*> output;
-
-            if (node == nullptr)
-                node = _root;
+            Traversal output;
 
             if (node->children.empty())
             {
@@ -526,7 +548,7 @@ namespace gbgp
 
             for (TreeNode* n : node->children)
             {
-                const std::vector<TreeNode*> childrenTreeNodes = GetPostOrderTreeTraversal(n);
+                const Traversal childrenTreeNodes = GetPostOrderTreeTraversal(n);
                 output.insert(output.end(), childrenTreeNodes.begin(), childrenTreeNodes.end());
             }
             output.push_back(node);
@@ -534,10 +556,51 @@ namespace gbgp
             return output;
         }
 
+        /// Traverses the tree in a breadth first order.
+        /// \return List of references of the traversed nodes.
         [[nodiscard]]
-        std::vector<TreeNode*> GetTermsOfType(NodeType type) const
+        Traversal GetBreadthFirstTreeTraversal() const
         {
-            std::vector<TreeNode*> traversal = GetPostOrderTreeTraversal();
+            return GetBreadthFirstTreeTraversal(_root);
+        }
+
+        /// Traverses the tree in a breadth first order.
+        /// \param node The root node.
+        /// \return List of references of the traversed nodes.
+        static Traversal GetBreadthFirstTreeTraversal(TreeNode* node)
+        {
+            /*
+                Algorithm BFS(tree)
+                1) Create an empty queue q
+                2) temp_node = root
+                3) Loop while temp_node is not NULL
+                    a) print temp_node->data.
+                    b) Enqueue temp_nodes children (first left then right children) to q
+                    c) Dequeue a node from q.
+            */
+
+            Traversal output;
+            std::queue<TreeNode*> q;
+            q.push(node);
+
+            while (!q.empty())
+            {
+                TreeNode* current = q.front();
+                output.push_back(current);
+                q.pop();
+
+                for (TreeNode* n : current->children)
+                    q.push(n);
+            }
+
+            return output;
+
+        }
+
+        [[nodiscard]]
+        Traversal GetTermsOfType(NodeType type) const
+        {
+            Traversal traversal = GetPostOrderTreeTraversal();
             std::vector<size_t> terminalIndexes = find_indexes_if(traversal, [type](TreeNode* node) { return node->type == type; });
 
             return extract_elements_at_indexes(traversal, terminalIndexes);
@@ -547,7 +610,7 @@ namespace gbgp
         /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
         /// \return The index if the first non-synthesized non-terminal.
         [[nodiscard]]
-        static unsigned NextToBuild(std::vector<TreeNode*>& treeTraversal)
+        static unsigned NextToBuild(Traversal& treeTraversal)
         {
             for (unsigned i = 0; i < treeTraversal.size(); i++)
                 if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->HasChildren())
@@ -558,7 +621,7 @@ namespace gbgp
 
         /// Builds the first non-terminal node with no children.
         /// \param treeTraversal The tree traversal.
-        static void BuildFirst(std::vector<TreeNode*>& treeTraversal)
+        static void BuildFirst(Traversal& treeTraversal)
         {
             unsigned nextIndex = NextToBuild(treeTraversal);
             if (nextIndex == treeTraversal.size())
@@ -598,7 +661,7 @@ namespace gbgp
         /// Builds a SyntaxTree from a depth first post order traversal.
         /// \param treeTraversal The traversal.
         /// \return The tree built from the traversal.
-        static void BuildFromTraversal(SyntaxTree& targetTree, std::vector<TreeNode*>& treeTraversal)
+        static void BuildFromTraversal(SyntaxTree& targetTree, Traversal& treeTraversal)
         {
             while (treeTraversal.size() > 1)
                 BuildFirst(treeTraversal);
@@ -614,7 +677,7 @@ namespace gbgp
         /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
         /// \return The index if the first non-synthesized non-terminal.
         [[nodiscard]]
-        static unsigned NextToSynthesize(std::vector<TreeNode*>& treeTraversal)
+        static unsigned NextToSynthesize(Traversal& treeTraversal)
         {
             for (unsigned i = 0; i < treeTraversal.size(); i++)
                 if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->IsSynthesized())
@@ -625,7 +688,7 @@ namespace gbgp
 
         /// Synthesize the first non-synthesized node and deletes the consumed nodes.
         /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
-        static void SynthesizeFirst(std::vector<TreeNode*>& treeTraversal)
+        static void SynthesizeFirst(Traversal& treeTraversal)
         {
             // Get the rule of the element to be evaluated.
             unsigned nextIndex = NextToSynthesize(treeTraversal);
@@ -679,7 +742,7 @@ namespace gbgp
         [[nodiscard]]
         std::string SynthesizeExpression() const
         {
-            std::vector<TreeNode*> treeTraversal = this->GetPostOrderTreeTraversal();
+            Traversal treeTraversal = this->GetPostOrderTreeTraversal();
             for (auto node : treeTraversal) node->ClearSynthesis();
 
             while (treeTraversal.size() > 1)
@@ -692,7 +755,7 @@ namespace gbgp
         /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
         /// \return The index if the first non-evaluated non-terminal.
         [[nodiscard]]
-        static unsigned NextToEvaluate(std::vector<TreeNode*>& treeTraversal)
+        static unsigned NextToEvaluate(Traversal& treeTraversal)
         {
             for (unsigned i = 0; i < treeTraversal.size(); i++)
                 if (treeTraversal[i]->type == NodeType::NonTerminal && !treeTraversal[i]->IsEvaluated())
@@ -703,7 +766,7 @@ namespace gbgp
         /// ExternalEvaluate the first non-evaluate node and deletes the consumed nodes.
         /// \param treeTraversal List of nodes traversed in DepthFirst PostOrder.
         /// \param evaluationContext reference to the evaluation context.
-        static void EvaluateFirst(std::vector<TreeNode*>& treeTraversal, EvaluationContext& evaluationContext)
+        static void EvaluateFirst(Traversal& treeTraversal, EvaluationContext& evaluationContext)
         {
             // Get the rule of the element to be evaluated.
             unsigned nextIndex = NextToEvaluate(treeTraversal);
@@ -765,7 +828,7 @@ namespace gbgp
         /// \return true if expression was evaluated correctly, false if not.
         void Evaluate(EvaluationContext& ctx) const
         {
-            std::vector<TreeNode*> treeTraversal = this->GetPostOrderTreeTraversal();
+            Traversal treeTraversal = this->GetPostOrderTreeTraversal();
             for (auto node : treeTraversal) node->ClearEvaluation();
 
             while (treeTraversal.size() > 1)

@@ -7,10 +7,10 @@ namespace gbgp
     class PruneRule
     {
     private:
-        std::vector<TreeNode*> _pruneRuleFromTraversal;
-        std::vector<TreeNode*> _pruneRuleToTraversal;
+        Traversal _pruneRuleFromTraversal;
+        Traversal _pruneRuleToTraversal;
 
-        static std::string TraversalToString(std::vector<TreeNode*> traversal)
+        static std::string TraversalToString(Traversal traversal)
         {
             std::string out = "[";
             for (auto& node : traversal)
@@ -27,7 +27,7 @@ namespace gbgp
         /// Validate that the traversal contains at least one terminal with a capture ID.
         /// \param traversal The input traversal.
         /// \return The result of the validation.
-        static bool ValidateCaptureID(const std::vector<TreeNode*>& traversal)
+        static bool ValidateCaptureID(const Traversal& traversal)
         {
             for (auto* node: traversal)
                 if (node->HasCaptureID())
@@ -54,7 +54,7 @@ namespace gbgp
         /// Does the target tree can be simplified further with this rule?
         bool CanBeApplied(const SyntaxTree& target)
         {
-            std::vector<TreeNode*> treeTraversal = target.GetPostOrderTreeTraversal();
+            Traversal treeTraversal = target.GetPostOrderTreeTraversal();
             unsigned index = SyntaxTree::FindIndexOfTraversalSubsequence(treeTraversal, _pruneRuleFromTraversal);
             return index != treeTraversal.size();
         }
@@ -64,10 +64,10 @@ namespace gbgp
         /// \return The pruned SyntaxTree.
         void Apply(SyntaxTree& target)
         {
-            std::vector<TreeNode*> treeTraversal = target.GetPostOrderTreeTraversal();
-            std::vector<TreeNode*> replacedTraversal = SyntaxTree::ReplaceTraversalSubsequence(treeTraversal,
-                                                                                               _pruneRuleFromTraversal,
-                                                                                               _pruneRuleToTraversal);
+            Traversal treeTraversal = target.GetPostOrderTreeTraversal();
+            Traversal replacedTraversal = SyntaxTree::ReplaceTraversalSubsequence(treeTraversal,
+                                                                                  _pruneRuleFromTraversal,
+                                                                                  _pruneRuleToTraversal);
             SyntaxTree::BuildFromTraversal(target, replacedTraversal);
         }
 
