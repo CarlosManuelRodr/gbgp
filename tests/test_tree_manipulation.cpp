@@ -464,3 +464,67 @@ TEST_CASE("Test multiple pass pruning")
         cout << endl;
     }
 }
+
+TEST_CASE("Test base tree equality checker")
+{
+    SyntaxTree treeA(
+            TreeNode(
+                    factorNonTerm,
+                    {
+                            TreeNode(leftParenthesisTerm, "("),
+                            TreeNode(
+                                    exprNonTerm,
+                                    {
+                                            TreeNode(
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(
+                                                                                    termNonTerm,
+                                                                                     {
+                                                                                             TreeNode(varTerm, "a"),
+                                                                                             TreeNode(varTerm, "b")
+                                                                                     }
+                                                                            )
+                                                                    })
+                                                    })
+                                    }),
+                            TreeNode(rightParenthesisTerm, ")")
+                    })
+    );
+
+    SyntaxTree treeB(
+            TreeNode(
+                    factorNonTerm,
+                    {
+                            TreeNode(leftParenthesisTerm, "("),
+                            TreeNode(
+                                    exprNonTerm,
+                                    {
+                                            TreeNode(
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(termNonTerm)
+                                                                    })
+                                                    })
+                                    }),
+                            TreeNode(rightParenthesisTerm, ")")
+                    })
+    );
+
+    SyntaxTree treeC(
+            TreeNode(
+                    factorNonTerm,
+                    {
+                            TreeNode(varTerm, 1)
+                    })
+    );
+
+    CHECK(SyntaxTree::HasSameBaseTree(treeA.Root(), treeB.Root()));
+    CHECK(!(SyntaxTree::HasSameBaseTree(treeA.Root(), treeC.Root())));
+}

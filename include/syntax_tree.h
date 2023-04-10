@@ -597,6 +597,25 @@ namespace gbgp
 
         }
 
+        /// Get the string representation of a traversal.
+        /// \param traversal The traversal.
+        /// \return The string representation of the traversal.
+        static std::string TraversalToString(const Traversal& traversal)
+        {
+            std::string output;
+            for (int i = 0; i < traversal.size(); i++)
+            {
+                output += traversal[i]->GetLabel();
+                if (i < traversal.size() - 1)
+                    output += ", ";
+            }
+            return "[" + output + "]";
+        }
+
+        /// Check if the tree with root nodeB exists as a base tree of the tree given by nodeA.
+        /// \param nodeA The root node of treeA.
+        /// \param nodeB The root node of treeB.
+        /// \return True if the base trees are equal.
         static bool HasSameBaseTree(TreeNode* nodeA, TreeNode* nodeB)
         {
             Traversal traversalA = GetBreadthFirstTreeTraversal(nodeA);
@@ -606,7 +625,7 @@ namespace gbgp
             {
                 if (i < traversalA.size())
                 {
-                    if (*traversalA[i] != *traversalB[i])
+                    if (!traversalA[i]->SameID(*traversalB[i]))
                         return false;
                 }
                 else
