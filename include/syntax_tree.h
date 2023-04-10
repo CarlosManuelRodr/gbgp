@@ -271,7 +271,7 @@ namespace gbgp
 
         /// Removes the subtree starting from rootOfSubtree.
         /// \param rootOfSubtree Pointer to the root of the subtree to be deleted.
-        void DeleteSubtree(TreeNode* rootOfSubtree)
+        void DeleteSubtree(TreeNode* rootOfSubtree) const
         {
             Traversal nodeList = SyntaxTree::GetPostOrderTreeTraversal(rootOfSubtree);
             nodeList.pop_back();
@@ -301,7 +301,7 @@ namespace gbgp
         /// Insert a copy of the subtree into the position at insertNode.
         /// \param insertNode Node where the subtree will be inserted.
         /// \param subtreeStartNode Pointer to the subtree to copy and insert.
-        void InsertSubtree(TreeNode* insertNode, TreeNode* subtreeStartNode)
+        void InsertSubtree(TreeNode* insertNode, TreeNode* subtreeStartNode) const
         {
             // Check that both nodes are NonTerminals
             if (insertNode->type == NodeType::NonTerminal && subtreeStartNode->type == NodeType::NonTerminal)
