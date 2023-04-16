@@ -436,5 +436,23 @@ namespace gbgp
             output += ")";
             return output;
         }
+
+        [[nodiscard]]
+        std::string ToStringDeep() const
+        {
+            std::string output = "TreeNode(";
+
+            output += GetLabel();
+
+            if (!children.empty())
+            {
+                output += " -> ";
+                for (auto child: children)
+                    output += child->ToStringDeep();
+            }
+
+            output += ")";
+            return output;
+        }
     };
 }

@@ -348,7 +348,7 @@ namespace gbgp
         /// Insert a copy of the subtree into the position at insertNode.
         /// \param insertNode Node where the subtree will be inserted.
         /// \param subtree Reference to the subtree to copy and insert.
-        void InsertSubtree(TreeNode* insertNode, const SyntaxTree& subtree)
+        void InsertSubtree(TreeNode* insertNode, const SyntaxTree& subtree) const
         {
             InsertSubtree(insertNode, subtree.Root());
         }
@@ -610,6 +610,41 @@ namespace gbgp
                     output += ", ";
             }
             return "[" + output + "]";
+        }
+
+        /// Check if this tree contains search as subtree and return the starting node of the subtree.
+        /// \param search The tree to search.
+        /// \return The root shared node if root contains search. Null otherwise.
+        [[nodiscard]]
+        TreeNode* FindSubtree(const SyntaxTree& search) const
+        {
+            return FindSubtree(Root(), search.Root());
+        }
+
+        /// Check if the tree contains search as subtree and return the starting node of the subtree.
+        /// \param tree The tree where the search will be applied.
+        /// \param search The tree to search.
+        /// \return The root shared node if root contains search. Null otherwise.
+        static TreeNode* FindSubtree(const SyntaxTree& tree, const SyntaxTree& search)
+        {
+            return FindSubtree(tree.Root(), search.Root());
+        }
+
+        /// Check if the tree given by root contains a subtree given by search and return the starting node
+        /// of the subtree.
+        /// \param root The root of the tree where the search will be applied.
+        /// \param search The tree to search.
+        /// \return The root shared node if root contains search. Null otherwise.
+        static TreeNode* FindSubtree(TreeNode* root, TreeNode* search)
+        {
+            Traversal traversal = GetBreadthFirstTreeTraversal(root);
+            for (auto node : traversal)
+            {
+                if (HasSameBaseTree(node, search))
+                    return node;
+            }
+
+            return nullptr;
         }
 
         /// Check if the tree with root nodeB exists as a base tree of the tree given by nodeA.

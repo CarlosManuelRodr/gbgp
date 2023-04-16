@@ -528,3 +528,84 @@ TEST_CASE("Test base tree equality checker")
     CHECK(SyntaxTree::HasSameBaseTree(treeA.Root(), treeB.Root()));
     CHECK(!(SyntaxTree::HasSameBaseTree(treeA.Root(), treeC.Root())));
 }
+
+TEST_CASE("Test find subtree")
+{
+    TreeNode sharedBranch = TreeNode(
+            rule4,
+            termNonTerm,
+            {
+                    TreeNode(
+                            rule6,
+                            factorNonTerm,
+                            {
+                                    TreeNode(varTerm, "b")
+                            })
+            });
+
+
+
+    SyntaxTree tree(
+            TreeNode(
+                    rule2,
+                    exprNonTerm,
+                    {
+                            TreeNode(
+                                    rule3,
+                                    termNonTerm,
+                                    {
+                                            TreeNode(
+                                                    rule4,
+                                                    termNonTerm,
+                                                    {
+                                                            TreeNode(
+                                                                    rule5,
+                                                                    factorNonTerm,
+                                                                    {
+                                                                            TreeNode(leftParenthesisTerm, "("),
+                                                                            TreeNode(
+                                                                                    rule2,
+                                                                                    exprNonTerm,
+                                                                                    {
+                                                                                            TreeNode(
+                                                                                                    rule4,
+                                                                                                    termNonTerm,
+                                                                                                    {
+                                                                                                            TreeNode(
+                                                                                                                    rule6,
+                                                                                                                    factorNonTerm,
+                                                                                                                    {
+                                                                                                                            TreeNode(varTerm, "a")
+                                                                                                                    })
+                                                                                                    })
+                                                                                    }),
+                                                                            TreeNode(rightParenthesisTerm, ")")
+                                                                    })
+                                                    }),
+                                            TreeNode(timesTerm, "*"),
+                                            TreeNode(
+                                                    rule5,
+                                                    factorNonTerm,
+                                                    {
+                                                            TreeNode(leftParenthesisTerm, "("),
+                                                            TreeNode(
+                                                                    rule2,
+                                                                    exprNonTerm,
+                                                                    {sharedBranch }),
+                                                            TreeNode(rightParenthesisTerm, ")")
+                                                    })
+                                    })
+                    })
+    );
+
+    cout << "Tree expression:" << endl;
+    cout << tree.SynthesizeExpression() << endl;
+
+    cout << "Subtree start node is:" << endl;
+    SyntaxTree subtree = SyntaxTree(sharedBranch);
+    TreeNode* shared = SyntaxTree::FindSubtree(tree, subtree);
+    cout << shared->ToStringDeep() << endl;
+
+    CHECK((shared != nullptr));
+
+}
