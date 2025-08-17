@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <numeric>
 #include <map>
 #include "tree_node.h"
 

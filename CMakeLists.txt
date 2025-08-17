@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.22)
 project(gbgp)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if (MSVC)
+    add_compile_options(/Zc:__cplusplus)
+endif()
 
 if(NOT DEFINED BUILD_TYPE)
     set(BUILD_TYPE "Tests")
