@@ -1,6 +1,9 @@
 # gbgp
 Simple header-only C++ library to perform grammar-based genetic programming optimization that includes Python bindings.
 
+For installation, usage, and development build instructions, see
+[Build.md](Build.md).
+
 ## A gentle introduction
 ### What is grammar-based genetic programming optimization?
 Is like genetic optimization but with trees that represent programs as genome.
@@ -157,7 +160,6 @@ const ProductionRule rule1(
         }
 );
 ```
-
 This rule says that a `exprNonTerm` may have the sequence `exprNonTerm`, `plusTerm` and `termNonTerm` as children. Notice the apparent duplication of the argument list with one being of the ProductionElement type and another a SemanticElement. The difference between each is subtle: The list of `ProductionElement` are the rules for internally constructing the expression and the list of `SemanticElement` are the rules for visualizing the expression and decorating it.
 
 #### Semantic actions
