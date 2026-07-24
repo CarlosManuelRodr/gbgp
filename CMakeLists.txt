@@ -57,7 +57,14 @@ if (BUILD_TYPE MATCHES Tests)
 
 elseif(BUILD_TYPE MATCHES Python)
     message("Compiling Python bindings" )
-    add_subdirectory(third-party/pybind11)
+
+    # scikit-build-core provides the Python selected by the invoking environment
+    # and makes the pybind11 build dependency discoverable by CMake.
+    set(PYBIND11_FINDPYTHON ON)
+    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+    find_package(pybind11 CONFIG REQUIRED)
+
+    message(STATUS "Python extension interpreter: ${Python_EXECUTABLE}")
 
     pybind11_add_module(gbgp
             include/thread_pool.h
@@ -79,10 +86,12 @@ elseif(BUILD_TYPE MATCHES Python)
             python/bindings.cpp
             )
 
-    add_custom_command(TARGET gbgp POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E copy
-            "$<TARGET_FILE:gbgp>"
-            "${CMAKE_CURRENT_SOURCE_DIR}/python/tests/$<TARGET_FILE_NAME:gbgp>"
-            COMMENT "Copying to output directory")
+    target_include_directories(gbgp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+    # scikit-build-core collects CMake's install tree for wheels and editable
+    # installs. A top-level destination preserves the public `import gbgp`.
+    install(TARGETS gbgp
+            LIBRARY DESTINATION .
+            RUNTIME DESTINATION .)
 endif()
 

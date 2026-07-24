@@ -1,0 +1,34 @@
+[build-system]
+requires = [
+    "scikit-build-core>=1.0.3,<2",
+    "pybind11>=3.0.1,<4",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "gbgp"
+version = "0.1.0"
+description = "Header-only C++17 grammar-based genetic programming library with Python bindings"
+readme = "Readme.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Carlos Manuel Rodriguez Martinez", email = "fis.carlosmanuel@gmail.com" },
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/CarlosManuelRodr/gbgp"
+Repository = "https://github.com/CarlosManuelRodr/gbgp"
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[tool.scikit-build]
+minimum-version = "1.0"
+build-dir = "build/{wheel_tag}/native"
+cmake.build-type = "Release"
+wheel.packages = []
+
+[tool.scikit-build.cmake.define]
+BUILD_TYPE = "Python"

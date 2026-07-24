@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/functional.h>
 #include <utility>
-#include "../include/gbgp.h"
+#include <gbgp.h>
 namespace py = pybind11;
 using namespace std;
 using namespace gbgp;
@@ -322,14 +322,14 @@ PYBIND11_MODULE(gbgp, m) {
             .def("SetRoot", &SyntaxTree::SetRoot, "Set the root node.", py::arg("rootNode"))
             .def("GetRoot", &SyntaxTree::GetRoot, "Get the root node instance.")
             .def("DeleteSubtree", &SyntaxTree::DeleteSubtree, "Removes the subtree starting from rootOfSubtree.", py::arg("rootOfSubtree"))
-            .def("InsertSubtree", py::overload_cast<TreeNode*, TreeNode*>(&SyntaxTree::InsertSubtree), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtreeStartNode"))
-            .def("InsertSubtree", py::overload_cast<TreeNode*, const SyntaxTree&>(&SyntaxTree::InsertSubtree), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtree"))
+            .def("InsertSubtree", py::overload_cast<TreeNode*, TreeNode*>(&SyntaxTree::InsertSubtree, py::const_), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtreeStartNode"))
+            .def("InsertSubtree", py::overload_cast<TreeNode*, const SyntaxTree&>(&SyntaxTree::InsertSubtree, py::const_), "Insert a copy of the subtree into the position at insertNode.", py::arg("insertNode"), py::arg("subtree"))
             .def("IsEmpty", &SyntaxTree::IsEmpty, "Check if the tree is empty.")
             .def("SetRootRule", &SyntaxTree::SetRootRule, "Set the production rule of the root node.", py::arg("startRule"))
             .def("ToString", &SyntaxTree::ToString, "Get string representation.")
             .def("ToGraph", &SyntaxTree::ToGraph, "Export the tree into a graph.")
             .def("FromGraph", &SyntaxTree::FromGraph, "Build syntax tree from a graph.")
-            .def("GetPostOrderTreeTraversal", &SyntaxTree::GetPostOrderTreeTraversal, "Traverses the tree in a depth first post-order.")
+            .def("GetPostOrderTreeTraversal", py::overload_cast<>(&SyntaxTree::GetPostOrderTreeTraversal, py::const_), "Traverses the tree in a depth first post-order.")
             .def("SynthesizeExpression", &SyntaxTree::SynthesizeExpression, "Synthesizes the tree into an expression using the production rules of the grammar.")
             .def("Evaluate", &SyntaxTree::Evaluate, "Evaluates the tree using the semantic actions of the grammar.", py::arg("ctx"))
             .def("ExternalEvaluate", &SyntaxTree::ExternalEvaluate<string>, "Evaluates the tree using an external evaluator.", py::arg("evaluator"))

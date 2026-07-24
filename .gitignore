@@ -30,9 +30,9 @@
 
 # Python packages
 *.whl
-python/gbgp.egg-info
-python/build
-python/dist
+*.egg-info/
+build/
+dist/
 python/__pycache__
 python/venv
 
