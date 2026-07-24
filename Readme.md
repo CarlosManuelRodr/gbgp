@@ -4,6 +4,58 @@ Simple header-only C++ library to perform grammar-based genetic programming opti
 For installation, usage, and development build instructions, see
 [Build.md](Build.md).
 
+## Quick start
+
+gbgp searches for solutions expressed as syntax trees. A typical optimization
+has four parts:
+
+1. Define the terminal and non-terminal terms of the problem's language.
+2. Combine those terms into production rules and create a `Grammar`.
+3. Write a fitness function that scores each generated `SyntaxTree`.
+4. Create an `Environment` and call `Optimize()` to evolve the population.
+
+The library is header-only and requires C++17. For a quick C++ project, keep
+gbgp in your source tree (for example as `third-party/gbgp`), include
+`<gbgp.h>`, and expose its `include` directory to your target:
+
+```console
+git submodule add https://github.com/CarlosManuelRodr/gbgp.git third-party/gbgp
+```
+
+```cmake
+find_package(Threads REQUIRED)
+
+add_executable(my_optimizer main.cpp)
+target_compile_features(my_optimizer PRIVATE cxx_std_17)
+target_include_directories(
+    my_optimizer
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third-party/gbgp/include"
+)
+target_link_libraries(my_optimizer PRIVATE Threads::Threads)
+```
+
+The fastest way to learn the API is through the tests. Start with
+[`tests/test_optimization.cpp`](tests/test_optimization.cpp) for a complete C++
+grammar, fitness function, and optimization loop. Smaller examples are
+available throughout [`tests`](tests), including grammar construction,
+evaluation, genetic operators, serialization, and tree manipulation.
+
+To use the Python bindings from a checkout, create and activate a virtual
+environment, then install the project in editable mode:
+
+```console
+python -m venv .venv
+# Activate .venv as described in Build.md, then:
+python -m pip install -e ".[test]"
+```
+
+The equivalent end-to-end Python example is
+[`python/tests/test_optimization.py`](python/tests/test_optimization.py), with
+more focused examples under [`python/tests`](python/tests).
+
+See [Build.md](Build.md) for cloning, virtual-environment activation, building
+the C++ tests, compiling the Python bindings, and running both test suites.
+
 ## A gentle introduction
 ### What is grammar-based genetic programming optimization?
 Is like genetic optimization but with trees that represent programs as genome.

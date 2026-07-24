@@ -20,6 +20,29 @@ dependencies before building the C++ tests:
 git submodule update --init --recursive
 ```
 
+### Update the submodules
+
+After pulling changes to gbgp, synchronize the working copies of all
+submodules with the revisions recorded by the repository:
+
+```console
+git pull
+git submodule update --init --recursive
+```
+
+To deliberately fetch newer upstream revisions for every submodule, run:
+
+```console
+git submodule update --remote --recursive
+```
+
+This changes the submodule revisions recorded by gbgp. Review those changes
+before committing them:
+
+```console
+git diff --submodule
+```
+
 ## Use the C++ library
 
 gbgp does not need to be compiled before use. Add the repository's `include`
@@ -32,12 +55,15 @@ directory to a C++17 target and include the umbrella header:
 For example, from a CMake project that keeps gbgp under `third-party/gbgp`:
 
 ```cmake
+find_package(Threads REQUIRED)
+
 add_executable(my_program main.cpp)
 target_compile_features(my_program PRIVATE cxx_std_17)
 target_include_directories(
     my_program
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third-party/gbgp/include"
 )
+target_link_libraries(my_program PRIVATE Threads::Threads)
 ```
 
 The complete grammar and optimization example in [Readme.md](Readme.md)
