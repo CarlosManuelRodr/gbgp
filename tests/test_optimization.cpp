@@ -154,7 +154,7 @@ TEST_CASE("Test population optimization")
                                                                     rule6,
                                                                     factorNonTerm,
                                                                     {
-                                                                            TreeNode(varTerm)
+                                                                            TreeNode(varTerm, 1)
                                                                     })
                                                     })
                                     }),
@@ -167,7 +167,7 @@ TEST_CASE("Test population optimization")
                     rule6,
                     factorNonTerm,
                     {
-                            TreeNode(varTerm)
+                            TreeNode(varTerm, 1)
                     })
     );
 

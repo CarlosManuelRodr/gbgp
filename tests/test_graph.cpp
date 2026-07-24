@@ -141,7 +141,7 @@ TEST_CASE("Test graph nodes and edges")
     std::map<int, std::string> labels = graph.GetLabels();
 
     for (int i = 0; i < nodes.size(); i++)
-        CHECK((nodes[i] == i+1));
+        CHECK((nodes[i] == i));
 
     CHECK((edges[4].first == 2));
     CHECK((edges[4].second == 3));

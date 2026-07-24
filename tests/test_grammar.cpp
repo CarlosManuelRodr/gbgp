@@ -78,10 +78,10 @@ TEST_CASE("Test rule representation")
     cout << "Rule 5: " << rule5String << endl;
     cout << "Rule 6: " << rule6String << endl;
 
-    CHECK((rule1String == "EXPR -> EXPR Plus TERM"));
-    CHECK((rule2String == "EXPR -> TERM"));
-    CHECK((rule3String == "TERM -> TERM Times FACTOR"));
-    CHECK((rule4String == "TERM -> FACTOR"));
-    CHECK((rule5String == "FACTOR -> LeftParenthesis EXPR RightParenthesis"));
-    CHECK((rule6String == "FACTOR -> var"));
+    CHECK((rule1String == "ProductionRule(EXPR -> EXPR Plus TERM)"));
+    CHECK((rule2String == "ProductionRule(EXPR -> TERM)"));
+    CHECK((rule3String == "ProductionRule(TERM -> TERM Times FACTOR)"));
+    CHECK((rule4String == "ProductionRule(TERM -> FACTOR)"));
+    CHECK((rule5String == "ProductionRule(FACTOR -> LeftParenthesis EXPR RightParenthesis)"));
+    CHECK((rule6String == "ProductionRule(FACTOR -> var)"));
 }

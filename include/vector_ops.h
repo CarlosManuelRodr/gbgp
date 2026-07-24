@@ -7,6 +7,17 @@
 
 namespace gbgp {
 
+    /// Seed used by every random operation in the library.
+    /// Change this value to reproduce a different deterministic optimization run.
+    inline constexpr std::mt19937::result_type RANDOM_SEED = 5489u;
+
+    /// Shared deterministic random number generator.
+    inline std::mt19937& random_generator()
+    {
+        static std::mt19937 generator(RANDOM_SEED);
+        return generator;
+    }
+
     /****************************
     *   Vector initialization   *
     ****************************/
@@ -56,17 +67,13 @@ namespace gbgp {
     template<typename Iter>
     Iter random_choice(Iter start, Iter end)
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        return random_choice(start, end, gen);
+        return random_choice(start, end, random_generator());
     }
 
     template<typename T>
     void shuffle(std::vector<T> &data)
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::shuffle(std::begin(data), std::end(data), gen);
+        std::shuffle(std::begin(data), std::end(data), random_generator());
     }
 
     // Source: https://stackoverflow.com/a/57616877
@@ -131,9 +138,7 @@ namespace gbgp {
 
     inline std::vector<size_t> random_weighted_sample_indexes(const std::vector<int> &weights, int ntake)
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        return random_weighted_sample_indexes(weights, ntake, gen);
+        return random_weighted_sample_indexes(weights, ntake, random_generator());
     }
 
     template<typename T>

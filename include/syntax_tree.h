@@ -4,6 +4,7 @@
 #include <sstream>
 #include <queue>
 #include <functional>
+#include <map>
 #include <string>
 #include <exception>
 #include <utility>
@@ -446,11 +447,44 @@ namespace gbgp
         static unsigned FindIndexOfTraversalSubsequence(const Traversal& traversal,
                                                         const Traversal& subsequence)
         {
-            auto it =  std::search(traversal.begin(), traversal.end(),
-                                   subsequence.begin(), subsequence.end(),
-                                   [](TreeNode* n1, TreeNode* n2) { return n1->SameID(*n2); });
+            if (subsequence.empty() || subsequence.size() > traversal.size())
+                return static_cast<unsigned>(traversal.size());
 
-            return std::distance(traversal.begin(), it);
+            for (size_t start = 0; start <= traversal.size() - subsequence.size(); start++)
+            {
+                bool matches = true;
+                std::map<int, std::string> capturedValues;
+
+                for (size_t offset = 0; offset < subsequence.size(); offset++)
+                {
+                    TreeNode* actual = traversal[start + offset];
+                    TreeNode* pattern = subsequence[offset];
+
+                    if (!actual->SameID(*pattern))
+                    {
+                        matches = false;
+                        break;
+                    }
+
+                    if (pattern->HasCaptureID())
+                    {
+                        const int captureID = pattern->captureID.value();
+                        const auto captured = capturedValues.find(captureID);
+                        if (captured == capturedValues.end())
+                            capturedValues[captureID] = actual->termValue;
+                        else if (captured->second != actual->termValue)
+                        {
+                            matches = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (matches)
+                    return static_cast<unsigned>(start);
+            }
+
+            return static_cast<unsigned>(traversal.size());
         }
 
         /// Replaces a traversal subsequence. Used for pruning the tree.
@@ -465,38 +499,39 @@ namespace gbgp
             Traversal replacementNodes = SyntaxTree::CopyTreeTraversal(replaceTo);
 
             const unsigned replaceFromLength = replaceFrom.size();
-            const unsigned replaceToLength = replaceTo.size();
             const unsigned replaceIndex = SyntaxTree::FindIndexOfTraversalSubsequence(copyNodes, replaceFrom);
 
             if (replaceIndex == copyNodes.size()) // No subsequence to replace. Return source traversal.
             {
                 DeleteTreeTraversal(copyNodes);
+                DeleteTreeTraversal(replacementNodes);
                 return traversal;
             }
 
-            // Copy capture ID to traversal.
-            for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
+            // Capture terminal values from the matched source pattern.
+            std::map<int, std::string> capturedValues;
+            for (unsigned i = 0; i < replaceFromLength; i++)
             {
-                if (replaceFrom[i - replaceIndex]->HasCaptureID())
-                    traversal[i]->captureID = replaceFrom[i - replaceIndex]->captureID;
+                if (replaceFrom[i]->HasCaptureID())
+                    capturedValues[replaceFrom[i]->captureID.value()] = traversal[replaceIndex + i]->termValue;
+            }
+
+            // Transfer captured values to the replacement pattern.
+            for (TreeNode* replacementNode : replacementNodes)
+            {
+                if (replacementNode->HasCaptureID())
+                {
+                    const auto captured = capturedValues.find(replacementNode->captureID.value());
+                    if (captured != capturedValues.end())
+                        replacementNode->termValue = captured->second;
+                }
             }
 
             // Delete and replace.
+            for (unsigned i = replaceIndex; i < replaceIndex + replaceFromLength; i++)
+                delete copyNodes[i];
             copyNodes.erase(copyNodes.begin() + replaceIndex, copyNodes.begin() + replaceIndex + replaceFromLength);
             copyNodes.insert(copyNodes.begin() + replaceIndex, replacementNodes.begin(), replacementNodes.end());
-
-            // Transfer values of nodes with same ID and capture ID..
-            for (unsigned i = replaceIndex; i < replaceIndex + replaceToLength; i++)
-            {
-                for (unsigned j = replaceIndex; j < replaceIndex + replaceFromLength; j++)
-                {
-                    if (copyNodes[i]->SameID(*traversal[j]) && copyNodes[i]->SameCaptureID(*traversal[j]))
-                    {
-                        copyNodes[i]->termValue = traversal[j]->termValue;
-                        break;
-                    }
-                }
-            }
 
             return copyNodes;
         }

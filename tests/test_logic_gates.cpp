@@ -147,19 +147,33 @@ TEST_CASE("Test half adder optimization")
             rule3,
             logExprNonTerm,
             {
-                TreeNode(notOpTerm),
+                TreeNode(notOpTerm, "Not"),
+                TreeNode(rule3.to[1].term, "("),
                 TreeNode(
                         rule3,
                         logExprNonTerm,
                         {
-                            TreeNode(notOpTerm),
-                            TreeNode(logExprNonTerm)
-                        })
+                            TreeNode(notOpTerm, "Not"),
+                            TreeNode(rule3.to[1].term, "("),
+                            TreeNode(
+                                    rule4,
+                                    logExprNonTerm,
+                                    {
+                                            TreeNode(varTerm, 1)
+                                    }),
+                            TreeNode(rule3.to[3].term, ")")
+                        }),
+                TreeNode(rule3.to[3].term, ")")
             })
     );
 
     SyntaxTree doubleNotExprTo(
-            (TreeNode(logExprNonTerm))
+            TreeNode(
+                    rule4,
+                    logExprNonTerm,
+                    {
+                            TreeNode(varTerm, 1)
+                    })
             );
 
     SyntaxTree sameArgAndFrom(
@@ -168,13 +182,31 @@ TEST_CASE("Test half adder optimization")
                     logExprNonTerm,
                     {
                             TreeNode(logOpTerm, "And"),
-                            TreeNode(varTerm),
-                            TreeNode(varTerm)
+                            TreeNode(rule2.to[1].term, "("),
+                            TreeNode(
+                                    rule4,
+                                    logExprNonTerm,
+                                    {
+                                            TreeNode(varTerm, 1)
+                                    }),
+                            TreeNode(rule2.to[3].term, ","),
+                            TreeNode(
+                                    rule4,
+                                    logExprNonTerm,
+                                    {
+                                            TreeNode(varTerm, 1)
+                                    }),
+                            TreeNode(rule2.to[5].term, ")")
                     })
     );
 
     SyntaxTree sameArgAndTo(
-            (TreeNode(varTerm))
+            TreeNode(
+                    rule4,
+                    logExprNonTerm,
+                    {
+                            TreeNode(varTerm, 1)
+                    })
     );
 
     SyntaxTree sameArgOrFrom(
@@ -183,18 +215,72 @@ TEST_CASE("Test half adder optimization")
                     logExprNonTerm,
                     {
                             TreeNode(logOpTerm, "Or"),
-                            TreeNode(varTerm),
-                            TreeNode(varTerm)
+                            TreeNode(rule2.to[1].term, "("),
+                            TreeNode(
+                                    rule4,
+                                    logExprNonTerm,
+                                    {
+                                            TreeNode(varTerm, 1)
+                                    }),
+                            TreeNode(rule2.to[3].term, ","),
+                            TreeNode(
+                                    rule4,
+                                    logExprNonTerm,
+                                    {
+                                            TreeNode(varTerm, 1)
+                                    }),
+                            TreeNode(rule2.to[5].term, ")")
                     })
     );
 
     SyntaxTree sameArgOrTo(
-            (TreeNode(varTerm))
+            TreeNode(
+                    rule4,
+                    logExprNonTerm,
+                    {
+                            TreeNode(varTerm, 1)
+                    })
     );
 
     PruneRule doubleNegationExpr(doubleNotExprFrom, doubleNotExprTo);
     PruneRule sameArgAnd(sameArgAndFrom, sameArgAndTo);
     PruneRule sameArgOr(sameArgOrFrom, sameArgOrTo);
+    std::vector<TreeNode*> sameArgPatternVariables = sameArgAndFrom.GetTermsOfType(NodeType::Terminal);
+    CHECK(sameArgPatternVariables[2]->HasCaptureID());
+    CHECK(sameArgPatternVariables[4]->HasCaptureID());
+    CHECK((sameArgPatternVariables[2]->captureID == sameArgPatternVariables[4]->captureID));
+
+    SyntaxTree doubleNotX1(doubleNotExprFrom);
+    std::vector<TreeNode*> doubleNotVariables = doubleNotX1.GetTermsOfType(NodeType::Terminal);
+    for (TreeNode* node : doubleNotVariables)
+        if (node->termInstance == varTerm)
+            node->termValue = "x1";
+    CHECK(doubleNegationExpr.CanBeApplied(doubleNotX1));
+    doubleNegationExpr.Apply(doubleNotX1);
+    CHECK((doubleNotX1.SynthesizeExpression() == "x1"));
+
+    SyntaxTree sameX0And(sameArgAndFrom);
+    std::vector<TreeNode*> sameX0Variables = sameX0And.GetTermsOfType(NodeType::Terminal);
+    for (TreeNode* node : sameX0Variables)
+        if (node->termInstance == varTerm)
+            node->termValue = "x0";
+    CHECK(sameArgAnd.CanBeApplied(sameX0And));
+    sameArgAnd.Apply(sameX0And);
+    CHECK((sameX0And.SynthesizeExpression() == "x0"));
+
+    SyntaxTree differentArgAnd(sameArgAndFrom);
+    std::vector<TreeNode*> differentVariables = differentArgAnd.GetTermsOfType(NodeType::Terminal);
+    int variableIndex = 0;
+    for (TreeNode* node : differentVariables)
+    {
+        if (node->termInstance == varTerm)
+            node->termValue = variableIndex++ == 0 ? "x0" : "x1";
+    }
+    CHECK((variableIndex == 2));
+    CHECK((differentVariables[2]->termValue == "x0"));
+    CHECK((differentVariables[4]->termValue == "x1"));
+    CHECK_FALSE(sameArgAnd.CanBeApplied(differentArgAnd));
+
     Grammar grammar ({ rule1, rule2, rule3, rule4 }, { doubleNegationExpr, sameArgAnd, sameArgOr });
     Environment env(grammar, logic_fitness_function, 200, 100, 5, 5, 0.4);
 

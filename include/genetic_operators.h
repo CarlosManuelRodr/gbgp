@@ -13,10 +13,8 @@ namespace gbgp
         /// \return The random bool.
         static bool RandomBool(const double p = 0.5)
         {
-            static auto dev = std::random_device();
-            static auto gen = std::mt19937{dev()};
             static auto dist = std::uniform_real_distribution<double>(0,1);
-            return (dist(gen) < p);
+            return (dist(random_generator()) < p);
         }
 
         /// Get a list of the mutable terminal nodes. For a terminal node to be mutable it needs to have more than one

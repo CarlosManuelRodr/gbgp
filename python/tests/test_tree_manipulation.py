@@ -176,7 +176,7 @@ class TestTreeManipulation(unittest.TestCase):
                                         rule6,
                                         factorNonTerm,
                                         [
-                                            TreeNode(varTerm)
+                                            TreeNode(varTerm, 1)
                                         ])
                                 ])
                         ]),
@@ -189,7 +189,7 @@ class TestTreeManipulation(unittest.TestCase):
                 rule6,
                 factorNonTerm,
                 [
-                    TreeNode(varTerm)
+                    TreeNode(varTerm, 1)
                 ])
         )
 
