@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (MSVC)
-    add_compile_options(/Zc:__cplusplus)
+    add_compile_options(
+            /Zc:__cplusplus
+            /utf-8)
 endif()
 
 if(NOT DEFINED BUILD_TYPE)
@@ -54,6 +56,9 @@ if (BUILD_TYPE MATCHES Tests)
 
             util/arithmetic_parser.h
             util/arithmetic_parser.cpp)
+
+    target_compile_definitions(gbgp PRIVATE
+            DOCTEST_CONFIG_USE_STD_HEADERS)
 
 elseif(BUILD_TYPE MATCHES Python)
     message("Compiling Python bindings" )
