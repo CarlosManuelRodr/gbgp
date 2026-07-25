@@ -43,12 +43,12 @@ class TestGrammar(unittest.TestCase):
         rule5_string = rule5.ToString()
         rule6_string = rule6.ToString()
 
-        self.assertEqual("EXPR -> EXPR Plus TERM", rule1_string)
-        self.assertEqual("EXPR -> TERM", rule2_string)
-        self.assertEqual("TERM -> TERM Times FACTOR", rule3_string)
-        self.assertEqual("TERM -> FACTOR", rule4_string)
-        self.assertEqual("FACTOR -> LeftParenthesis EXPR RightParenthesis", rule5_string)
-        self.assertEqual("FACTOR -> var", rule6_string)
+        self.assertEqual("ProductionRule(EXPR -> EXPR Plus TERM)", rule1_string)
+        self.assertEqual("ProductionRule(EXPR -> TERM)", rule2_string)
+        self.assertEqual("ProductionRule(TERM -> TERM Times FACTOR)", rule3_string)
+        self.assertEqual("ProductionRule(TERM -> FACTOR)", rule4_string)
+        self.assertEqual("ProductionRule(FACTOR -> LeftParenthesis EXPR RightParenthesis)", rule5_string)
+        self.assertEqual("ProductionRule(FACTOR -> var)", rule6_string)
 
 
 if __name__ == '__main__':

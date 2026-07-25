@@ -68,6 +68,8 @@ ProductionRule productionRuleAlias2Args(const NonTerminal& from, const py::list&
 
 PYBIND11_MODULE(gbgp, m) {
     m.doc() = "gbgp python bindings"; // optional module docstring
+    m.def("SetRandomSeed", &seed_random_generator, py::arg("seed"),
+          "Reset the native random number generator to a deterministic seed.");
 
     py::class_<Terminal>(m, "Terminal")
             .def(py::init<>())

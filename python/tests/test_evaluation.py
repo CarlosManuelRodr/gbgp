@@ -72,7 +72,7 @@ test_x = 5
 test_y = 8
 
 
-def test_external_evaluator(expr: str) -> str:
+def external_evaluator(expr: str) -> str:
     replaced_expr = expr.replace("x", str(test_x)).replace("y", str(test_y))
     return str(eval(replaced_expr))
 
@@ -102,7 +102,7 @@ class TestEvaluation(unittest.TestCase):
         synthesis = tree.SynthesizeExpression()
         print(synthesis)
 
-        eval_result = int(tree.ExternalEvaluate(test_external_evaluator))
+        eval_result = int(tree.ExternalEvaluate(external_evaluator))
         print("Evaluation result: ", eval_result)
 
         replaced_synth = synthesis.replace("x", str(test_x)).replace("y", str(test_y))

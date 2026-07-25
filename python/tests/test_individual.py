@@ -65,7 +65,58 @@ grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
 
 class TestIndividual(unittest.TestCase):
     def test_evaluation(self):
-        self.assertEqual(True, False)
+        tree = SyntaxTree(
+            TreeNode(
+                rule1,
+                exprNonTerm,
+                [
+                    TreeNode(
+                        rule2,
+                        exprNonTerm,
+                        [
+                            TreeNode(
+                                rule4,
+                                termNonTerm,
+                                [
+                                    TreeNode(
+                                        rule6,
+                                        factorNonTerm,
+                                        [TreeNode(varTerm, "1")]
+                                    )
+                                ]
+                            )
+                        ]
+                    ),
+                    TreeNode(plusTerm, "+"),
+                    TreeNode(
+                        rule4,
+                        termNonTerm,
+                        [
+                            TreeNode(
+                                rule6,
+                                factorNonTerm,
+                                [TreeNode(varTerm, "2")]
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
+
+        def fitness_function(candidate: SyntaxTree) -> float:
+            context = EvaluationContext()
+            candidate.Evaluate(context)
+            return float(context.GetResult())
+
+        individual = Individual(fitness_function, tree)
+
+        self.assertFalse(individual.IsEvaluated())
+        self.assertEqual("1+2", individual.GetExpression())
+
+        individual.Evaluate()
+
+        self.assertTrue(individual.IsEvaluated())
+        self.assertEqual(3.0, individual.GetFitness())
 
 
 if __name__ == '__main__':

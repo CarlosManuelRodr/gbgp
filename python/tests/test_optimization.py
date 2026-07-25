@@ -66,6 +66,7 @@ rule4 = ProductionRule(termNonTerm, [factorNonTerm])
 rule5 = ProductionRule(factorNonTerm, [leftParenthesisTerm, exprNonTerm, rightParenthesisTerm], 1)
 rule6 = ProductionRule(factorNonTerm, [varTerm], semantic_action6)
 grammar = Grammar([rule1, rule2, rule3, rule4, rule5, rule6])
+OPTIMIZATION_SEED = 11
 
 
 def target_function(x: int, y: int) -> int:
@@ -89,6 +90,7 @@ def fitness_function(solution: SyntaxTree) -> float:
 
 class TestOptimization(unittest.TestCase):
     def test_population_optimization(self):
+        SetRandomSeed(OPTIMIZATION_SEED)
         env = Environment(grammar, fitness_function, 200, 100, 5, 5, 0.4)
         last_generation = env.GetPopulation()
         fittest = last_generation.GetFittestByRank(0)

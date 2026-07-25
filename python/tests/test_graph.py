@@ -85,7 +85,14 @@ class TestGraph(unittest.TestCase):
         )
 
         graph = tree.ToGraph()
-        self.assertEqual(True, False)  # add assertion here
+        nodes = graph.GetNodeIndexes()
+        edges = graph.GetEdges()
+        labels = graph.GetLabels()
+
+        self.assertEqual(list(range(len(nodes))), nodes)
+        self.assertEqual((2, 3), edges[4])
+        self.assertEqual("Times [*]", labels[5])
+        self.assertEqual("FACTOR", labels[6])
 
 
 if __name__ == '__main__':

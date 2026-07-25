@@ -18,6 +18,12 @@ namespace gbgp {
         return generator;
     }
 
+    /// Reset the shared random number generator to a known state.
+    inline void seed_random_generator(const std::mt19937::result_type seed)
+    {
+        random_generator().seed(seed);
+    }
+
     /****************************
     *   Vector initialization   *
     ****************************/

@@ -56,7 +56,7 @@ class TestTreeManipulation(unittest.TestCase):
 
         rule_node = Node(rule2, exprNonTerm)
         node_as_str = rule_node.ToString()
-        self.assertEqual("type=NonTerminal, label=EXPR , generatorPR=EXPR -> TERM", node_as_str)
+        self.assertEqual("Node(type=NonTerminal, label=EXPR, generatorPR=ProductionRule(EXPR -> TERM))", node_as_str)
 
     def test_subtree_insertion(self):
         tree = SyntaxTree(
